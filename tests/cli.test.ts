@@ -22,8 +22,17 @@ describe('cli program', () => {
     }
   });
 
-  it('keeps only promote as a stub (recall wired in Phase 2)', () => {
+  it('has no remaining stubs — recall (Phase 2) and promote (Phase 4) are wired', () => {
     const stubs = COMMANDS.filter((c) => !c.register).map((c) => c.name);
-    expect(stubs).toEqual(['promote']);
+    expect(stubs).toEqual([]);
+  });
+
+  it('registers promote with a real handler and its options', () => {
+    const promote = buildProgram().commands.find((c) => c.name() === 'promote');
+    expect(promote).toBeDefined();
+    const flags = (promote?.options ?? []).map((o) => o.long);
+    expect(flags).toEqual(
+      expect.arrayContaining(['--type', '--tags', '--description', '--to', '--dry-run']),
+    );
   });
 });
