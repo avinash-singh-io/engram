@@ -129,6 +129,9 @@ a repo. engram never *depends* on an editor — it only configures one it detect
 --agent <id>       adapter to scaffold: claude | codex | antigravity | all   (default: claude)
 --no-editor-setup  don't configure a detected editor
 --no-git           don't run `git init`
+--refresh          re-render tool-owned templates (AGENTS.md/CLAUDE.md, adapter
+                   commands) over existing ones — e.g. after upgrading engram.
+                   Never touches your content (log.md, config, concepts).
 ```
 Creates: `index.md`, `AGENTS.md` + `CLAUDE.md` (each carries the **full**
 traversal contract, so every agent loads it from its own native file), `log.md`,

@@ -18,11 +18,16 @@ export interface InitOptions {
   editorSetup?: boolean;
   /** Run `git init` if the vault is not a repo (default true). */
   git?: boolean;
+  /** Re-render tool-owned template files (contract, adapter commands, templates)
+   * over existing ones, without touching user content (log/config/concepts). */
+  refresh?: boolean;
 }
 
 export interface InitResult {
   root: string;
   created: string[];
+  /** Existing tool-owned templates re-rendered by `--refresh`. */
+  refreshed: string[];
   skipped: string[];
   editors: EditorSetupResult[];
   gitInitialized: boolean;
@@ -64,11 +69,19 @@ export function deepMergeJson(existing: unknown, incoming: unknown): unknown {
 export function runInit(opts: InitOptions = {}): InitResult {
   const root = resolve(opts.dir ?? '.');
   const created: string[] = [];
+  const refreshed: string[] = [];
   const skipped: string[] = [];
 
-  const put = (dest: string, content: string, mode: 'skip' | 'merge-json' = 'skip'): void => {
+  // `managed` = tool-owned template (refreshable); `seed` = written once then
+  // owned by the user (never overwritten except --force); `merge-json` = merged.
+  const put = (
+    dest: string,
+    content: string,
+    kind: 'managed' | 'seed' | 'merge-json' = 'seed',
+  ): void => {
     const abs = join(root, dest);
-    if (mode === 'merge-json' && existsSync(abs) && !opts.force) {
+    const exists = existsSync(abs);
+    if (kind === 'merge-json' && exists && !opts.force) {
       const merged = deepMergeJson(
         JSON.parse(readFileSync(abs, 'utf8')) as unknown,
         JSON.parse(content) as unknown,
@@ -77,17 +90,23 @@ export function runInit(opts: InitOptions = {}): InitResult {
       created.push(`${dest} (merged)`);
       return;
     }
-    (writeFileSafe(abs, content, { force: opts.force }) ? created : skipped).push(dest);
+    const force = opts.force === true || (kind === 'managed' && opts.refresh === true);
+    if (!writeFileSafe(abs, content, { force })) {
+      skipped.push(dest);
+      return;
+    }
+    (exists ? refreshed : created).push(dest);
   };
 
-  // Static vault files.
-  put('AGENTS.md', readAsset('vault', 'AGENTS.md'));
-  put('log.md', readAsset('vault', 'log.md'));
-  put('.gitignore', readAsset('vault', 'gitignore'));
-  put('.engram/concept.template.md', readAsset('vault', 'concept.template.md'));
+  // Static vault files. AGENTS.md + templates are managed (refreshable); log.md
+  // and .gitignore are seeds the user then owns.
+  put('AGENTS.md', readAsset('vault', 'AGENTS.md'), 'managed');
+  put('log.md', readAsset('vault', 'log.md'), 'seed');
+  put('.gitignore', readAsset('vault', 'gitignore'), 'seed');
+  put('.engram/concept.template.md', readAsset('vault', 'concept.template.md'), 'managed');
   // Setup doc lives under .engram/ so it is not enumerated as a concept.
-  put('.engram/obsidian-setup.md', readAsset('obsidian', 'obsidian-setup.md'));
-  put('inbox/.gitkeep', '');
+  put('.engram/obsidian-setup.md', readAsset('obsidian', 'obsidian-setup.md'), 'managed');
+  put('inbox/.gitkeep', '', 'seed');
 
   // Tooling config.
   const cfgAbs = join(root, '.engram', 'config.json');
@@ -104,7 +123,7 @@ export function runInit(opts: InitOptions = {}): InitResult {
   for (const adapter of adapters) {
     for (const f of adapter.files(assetsRoot())) {
       const content = f.content ?? readFileSync(f.src as string, 'utf8');
-      put(f.dest, content, f.mode === 'merge-json' ? 'merge-json' : 'skip');
+      put(f.dest, content, f.mode === 'merge-json' ? 'merge-json' : 'managed');
     }
   }
 
@@ -116,7 +135,7 @@ export function runInit(opts: InitOptions = {}): InitResult {
   const contractWritten = new Set<string>(['AGENTS.md']);
   for (const adapter of adapters) {
     if (!contractWritten.has(adapter.contractFile)) {
-      put(adapter.contractFile, contract);
+      put(adapter.contractFile, contract, 'managed');
       contractWritten.add(adapter.contractFile);
     }
   }
@@ -139,7 +158,7 @@ export function runInit(opts: InitOptions = {}): InitResult {
     }
   }
 
-  return { root, created, skipped, editors, gitInitialized };
+  return { root, created, refreshed, skipped, editors, gitInitialized };
 }
 
 export function registerInit(program: Command): void {
@@ -154,10 +173,20 @@ export function registerInit(program: Command): void {
     )
     .option('--no-editor-setup', 'skip configuring a detected editor (e.g. Obsidian)')
     .option('--no-git', 'skip `git init` when the vault is not a repo')
+    .option(
+      '--refresh',
+      're-render tool-owned templates (contract, adapter commands) over existing ones',
+    )
     .action(
       (
         dir: string | undefined,
-        opts: { force?: boolean; agent?: string; editorSetup?: boolean; git?: boolean },
+        opts: {
+          force?: boolean;
+          agent?: string;
+          editorSetup?: boolean;
+          git?: boolean;
+          refresh?: boolean;
+        },
       ) =>
         runCommand(() => {
           const res = runInit({
@@ -166,9 +195,11 @@ export function registerInit(program: Command): void {
             agent: opts.agent,
             editorSetup: opts.editorSetup,
             git: opts.git,
+            refresh: opts.refresh,
           });
           process.stdout.write(`engram: initialized vault at ${res.root}\n`);
           for (const f of res.created) process.stdout.write(`  + ${f}\n`);
+          for (const f of res.refreshed) process.stdout.write(`  ↻ ${f} (refreshed)\n`);
           for (const f of res.skipped) process.stdout.write(`  · ${f} (exists, skipped)\n`);
           for (const e of res.editors) {
             const detail = e.changes.length ? e.changes.join(', ') : 'already configured';

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -52,5 +52,18 @@ describe('init auto-setup', () => {
     const agents = readFileSync(join(root, 'AGENTS.md'), 'utf8');
     expect(claude).toContain('NEVER read the whole vault'); // full contract, not a "see AGENTS.md" pointer
     expect(claude).toBe(agents); // same source, rendered per agent
+  });
+
+  it('--refresh re-renders managed templates but preserves seed content (log.md)', () => {
+    const root = tmp();
+    runInit({ dir: root, git: false });
+    writeFileSync(join(root, 'AGENTS.md'), 'STALE'); // managed template — should be restored
+    writeFileSync(join(root, 'log.md'), '# Log\n\n## 2026-07-03\n- user entry\n'); // seed — must survive
+
+    const res = runInit({ dir: root, git: false, refresh: true });
+
+    expect(readFileSync(join(root, 'AGENTS.md'), 'utf8')).toContain('NEVER read the whole vault');
+    expect(res.refreshed).toContain('AGENTS.md');
+    expect(readFileSync(join(root, 'log.md'), 'utf8')).toContain('user entry'); // preserved
   });
 });
