@@ -5,3 +5,4 @@
  * Vault scaffolding, indexing, and retrieval arrive in later phases.
  */
 export { VERSION } from './version';
+export * from './format';

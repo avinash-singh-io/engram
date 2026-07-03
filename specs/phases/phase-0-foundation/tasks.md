@@ -16,13 +16,13 @@
 - [x] Write internal OKF v0.1 conformance spec (`docs/okf-conformance.md`) — required fields, body, links, index/log rules, concept-ID, validator contract + locked error/warning codes
 
 ## Group 2 — Format Core Library
-- [ ] Frontmatter parser (YAML)
-- [ ] Validator: required fields (type/title/description/tags/timestamp)
-- [ ] Validator: one-sentence `description` check
-- [ ] Validator: standard-link form check
-- [ ] Concept-ID / path resolver (ID ↔ path)
-- [ ] Locked validation fixtures corpus `v1` under `tests/fixtures/` (valid + malformed)
-- [ ] Unit tests over the corpus
+- [x] Frontmatter parser (YAML) — `src/format/frontmatter.ts` (BOM/CRLF tolerant)
+- [x] Validator: required fields (type/title/description/tags/timestamp) — `src/format/validate.ts`
+- [x] Validator: one-sentence `description` + length check
+- [x] Validator: link-form checks (wikilink, non-absolute) — WARNING per NFR-5
+- [x] Concept-ID / path resolver (ID ↔ path) — `src/format/concept-id.ts`
+- [x] Locked validation fixtures corpus `v1` under `tests/fixtures/` (16 cases + `expected.json`)
+- [x] Unit tests over the corpus — 27 tests green (17 fixture cases)
 
 ## Group 3 — CLI Skeleton
 - [ ] CLI entry with `commander`: `--version`, `--help`

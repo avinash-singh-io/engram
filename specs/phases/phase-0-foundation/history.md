@@ -71,3 +71,16 @@ WARNING-only to honor broken-link tolerance (NFR-5). The error/warning code list
 is locked v1 alongside the fixtures corpus (Rule 11); changes go to a v2 spec.
 
 ---
+
+### [NOTE] 2026-07-03 — Group 2 complete: format core library green
+Topics: okf-format, tooling
+Affects-phases: phase-0-foundation
+Affects-specs: none
+Detail: Implemented the format core in `src/format/` — frontmatter parser
+(BOM/CRLF tolerant), the OKF validator (error/warning codes per the spec),
+link extraction/classification, and the concept-ID/path resolver. Locked a v1
+fixtures corpus (16 files + `expected.json`) driving a data-driven test. Verified
+fresh: 27/27 tests, typecheck, lint, format:check, and build all green; dist
+exports the full format API.
+
+---
