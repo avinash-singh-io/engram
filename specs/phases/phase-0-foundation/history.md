@@ -59,3 +59,15 @@ touched). Tracked as TD-002 — must be re-verified after `momentum upgrade`,
 which could add new `.js` hooks or remove the scope file.
 
 ---
+
+### [DECISION] 2026-07-03 — OKF conformance spec: locked validator contract
+Topics: okf-format
+Affects-phases: phase-0-foundation
+Affects-specs: docs/okf-conformance.md
+Detail: Wrote the Engram OKF v0.1 conformance profile as the validator contract.
+Split rules into ERROR (reject: missing/invalid required fields) vs WARNING
+(allow: one-sentence/length heuristics, empty tags, link-form). Link checks are
+WARNING-only to honor broken-link tolerance (NFR-5). The error/warning code list
+is locked v1 alongside the fixtures corpus (Rule 11); changes go to a v2 spec.
+
+---

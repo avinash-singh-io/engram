@@ -13,7 +13,7 @@
 - [x] Add `.gitignore` (`files: ["dist"]` in package.json replaces `.npmignore`)
 
 ## Group 1 — OKF Format Spec
-- [ ] Write internal OKF v0.1 conformance spec (required fields, body, links, index/log rules, concept-ID)
+- [x] Write internal OKF v0.1 conformance spec (`docs/okf-conformance.md`) — required fields, body, links, index/log rules, concept-ID, validator contract + locked error/warning codes
 
 ## Group 2 — Format Core Library
 - [ ] Frontmatter parser (YAML)
