@@ -2,13 +2,13 @@
 
 > `[ ]` todo · `[/]` in-progress · `[x]` done (only after fresh passing verification — Rule 12).
 
-## G0 — Vault core + frontmatter serializer
-- [ ] `src/format/serialize.ts` (inverse of parseFrontmatter; flow-style tags) + round-trip test
-- [ ] Additive export from `src/format/index.ts`
-- [ ] `src/vault/paths.ts` (root discovery, link↔fs, ignore globs)
-- [ ] `src/vault/config.ts` (`.engram/config.json` load/write)
-- [ ] `src/vault/read.ts` (canonical walker → `VaultModel`)
-- [ ] `src/vault/write.ts` (non-destructive atomic write)
+## G0 — Vault core + frontmatter serializer ✅
+- [x] `src/format/serialize.ts` (inverse of parseFrontmatter; flow-style tags) + round-trip test
+- [x] Additive export from `src/format/index.ts` (+ `src/index.ts` exports vault)
+- [x] `src/vault/paths.ts` (root discovery, link↔fs, ignore globs)
+- [x] `src/vault/config.ts` (`.engram/config.json` load/write)
+- [x] `src/vault/read.ts` (canonical walker → `VaultModel`)
+- [x] `src/vault/write.ts` (non-destructive atomic write) + `tests/{serialize,vault-read}.test.ts` (6 tests)
 
 ## G1 — Deterministic index generator
 - [ ] `src/indexer/generate.ts` (pure; nested child-index links; root okf_version)

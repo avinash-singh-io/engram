@@ -15,4 +15,5 @@ export {
   type MarkdownLink,
 } from './links';
 export { parseFrontmatter } from './frontmatter';
+export { serializeConcept, serializeFrontmatter } from './serialize';
 export { validateConcept } from './validate';
