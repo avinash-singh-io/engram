@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "description": "Maps each phase to topic keywords. Used by /sync-docs.",
+  "phases": {
+    "phase-0-foundation": {
+      "name": "Foundation",
+      "status": "planned",
+      "directory": "phase-0-foundation",
+      "topics": ["tooling", "okf-format", "engine-primitives"]
+    }
+  }
+}

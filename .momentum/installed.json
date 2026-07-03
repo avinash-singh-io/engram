@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "momentumVersion": "0.25.2",
+  "agent": "claude-code",
+  "installedAt": "2026-07-03",
+  "updatedAt": "2026-07-03",
+  "managedFiles": [
+    {
+      "path": ".agent/engines/subagent-dispatch.md",
+      "sha256": "d22caec3625dbc0f4aa24a37e963d618ac2159f20bf3d75da09837e1cec326eb"
+    },
+    {
+      "path": ".agent/rules/project.md",
+      "sha256": "bd41b8a1369f88ffaaee13f7d441c845b2ab30789695c8460b7a2d1f7acadfd7"
+    },
+    {
+      "path": ".claude/commands/brainstorm-idea.md",
+      "sha256": "9208587d39dd579e28565c0459650bf269130da2b1049ed31065acab054c7787"
+    },
+    {
+      "path": ".claude/commands/brainstorm-phase.md",
+      "sha256": "e97e5525d4edd4276e91e7d80f18a27b16dc5676795e0a1262c936c89f889dbe"
+    },
+    {
+      "path": ".claude/commands/complete-phase.md",
+      "sha256": "e978ee364b7588715982cbd031de1deb8f423daf325f0b068dce21c6118f3c4a"
+    },
+    {
+      "path": ".claude/commands/continue.md",
+      "sha256": "ca2e18b81dce9c1086b14f57fa7798137a86e6956878bee08b822920869f06c2"
+    },
+    {
+      "path": ".claude/commands/dispatch.md",
+      "sha256": "461e6dca4e3bbb45b35862d1434bdc8f888f5151792042c455ae659f9634d673"
+    },
+    {
+      "path": ".claude/commands/ecosystem.md",
+      "sha256": "4ac41640bdec2be5b91850f85611b7c6286f963786c775ff4de18ef3661edcd8"
+    },
+    {
+      "path": ".claude/commands/handoff.md",
+      "sha256": "c4decc3095a5322402ff637e1dd3f7c29badf5eab71fdb7cf452cd24bcba3a7d"
+    },
+    {
+      "path": ".claude/commands/hotfix.md",
+      "sha256": "2699a61bdf5b219f2297a6c1ca95d25e3d63a44e37ed77ffdab88077c4715b12"
+    },
+    {
+      "path": ".claude/commands/initiative.md",
+      "sha256": "1a778bfd0fa3f18f7cd5adcdbc2cc3b08fe165fc48c8277ec24550564458e04f"
+    },
+    {
+      "path": ".claude/commands/lanes.md",
+      "sha256": "2fa6e0abc816d474d744b1bafd1b12523ff8bc4b1dfe215dab20adb682af6463"
+    },
+    {
+      "path": ".claude/commands/log.md",
+      "sha256": "ef5f70ee60e8393615129df13b8eb75b31af31d5b0356b4e7a3f245220d6a608"
+    },
+    {
+      "path": ".claude/commands/migrate.md",
+      "sha256": "bc90f868f34429874ac70456f411eb5b2985835e7d63d385bbf9fd4836fcec0d"
+    },
+    {
+      "path": ".claude/commands/review-code.md",
+      "sha256": "63b331a1849dc468fe6f652ac943f2543798ffacdbf0c7d97f2c4924290f3c20"
+    },
+    {
+      "path": ".claude/commands/review.md",
+      "sha256": "2c732dea693481f1223d81decdaaf7b3c813e164d1b848623911995a7299bbfc"
+    },
+    {
+      "path": ".claude/commands/scout.md",
+      "sha256": "d17142b3c0ba2e2b8bb3a061aa0ac890b5734bbaa7a048eba7564fdead2960df"
+    },
+    {
+      "path": ".claude/commands/session.md",
+      "sha256": "32db25ac76b92a4b1b3c48c230d0fab07167b39c6ff7c1b38df686bd366500f1"
+    },
+    {
+      "path": ".claude/commands/start-phase.md",
+      "sha256": "538b2e2c9e3ef78e7b4ee4e1b92feec75ce26174dc52f56af89977ab0c156138"
+    },
+    {
+      "path": ".claude/commands/start-project.md",
+      "sha256": "9a9144898f31d3be8959ddadcfef553856acb14988adf5cc44d3c9e48e684213"
+    },
+    {
+      "path": ".claude/commands/swarm.md",
+      "sha256": "f1d0d8f394ec9c6e0d013c3364fb6f9c71eefb14b0a7d59f1469c4c63ba0aef7"
+    },
+    {
+      "path": ".claude/commands/sync-docs.md",
+      "sha256": "e0252ddc818266b94999a77f38099bf4788aee58263c365f4c7c3b66c17af696"
+    },
+    {
+      "path": ".claude/commands/systematic-debug.md",
+      "sha256": "e330ef1e0144b7b9bb1cfb6f02024077504c5021e16b879dca33a564aae60cc2"
+    },
+    {
+      "path": ".claude/commands/track.md",
+      "sha256": "03c6b40c67f2f513e22e6099a181fd1f932a5e34445f1746284d13079f5ae750"
+    },
+    {
+      "path": ".claude/commands/validate.md",
+      "sha256": "b721b4567784da44251b4adcf4cb16444b89d08fc9c1595142b8350859881f47"
+    },
+    {
+      "path": ".claude/settings.json",
+      "sha256": "8e547e082fb1c4a3ad4038af974be8471e841823755b3138ceb946177ef3864d"
+    },
+    {
+      "path": ".githooks/commit-msg",
+      "sha256": "5cbabcfc6c27a09af500ac1e50bcd76512050d312aabc9a5d14f4d3bcf5f50c1"
+    },
+    {
+      "path": ".githooks/contract.js",
+      "sha256": "1eaba39ce9c4dac98ef85625371325eee553c70c942927c213d487610ec8ed0c"
+    },
+    {
+      "path": ".githooks/pre-push",
+      "sha256": "efed536f9a16fbe4aa66f4be8e953b7e45dac32e497b3b0c7e73fd65794b8df6"
+    },
+    {
+      "path": ".githooks/run-check.js",
+      "sha256": "b907d86107b7522c3ae7eaf2f275b2a06be1fb14142f70700a9393fee2a123fa"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "e1e40b0cc32901d5564c3a7b9d41be80af770ca18a8e4f5a678e1c2b6feef072"
+    },
+    {
+      "path": "scripts/brainstorm-gate.sh",
+      "sha256": "4651eb89de2cd476516f898be79820964ffe76d4c2d9106c33bca1b0523d8e19"
+    },
+    {
+      "path": "scripts/check-history-reminder.sh",
+      "sha256": "e4e25ad77ffba8e5d334c2d6a08bfbc407e1f2fec4214c384e4a481585663165"
+    },
+    {
+      "path": "scripts/session-append.sh",
+      "sha256": "41474aa11ec45e445463d8362671cde75e36dbefa6d1c4b23d6e5fcebf0e47cc"
+    },
+    {
+      "path": "scripts/sessionstart-handoff.sh",
+      "sha256": "a7a863dec8d94a2d295794665990909b84f5763332ca72c68ee8d9ca8f9a65a6"
+    }
+  ]
+}
