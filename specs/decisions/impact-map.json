@@ -40,6 +40,17 @@
     "tooling": [
       "specs/decisions/0007-typescript-single-package.md",
       "specs/phases/phase-0-foundation/overview.md"
+    ],
+    "adapters": [
+      "specs/decisions/0010-adapters-converge-on-agents-md.md",
+      "docs/adapters.md"
+    ],
+    "promote": [
+      "specs/decisions/0011-promote-one-way-reference-snapshot.md",
+      "docs/promote.md"
+    ],
+    "ecosystem": [
+      "specs/phases/phase-4-ecosystem/overview.md"
     ]
   }
 }
