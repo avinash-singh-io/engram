@@ -1,10 +1,19 @@
 {
-  "name": "engram",
+  "name": "@avinash-singh-io/engram",
   "version": "0.5.0",
   "description": "OKF-native knowledge base that agents and humans read and write together — durable memory, sibling to momentum.",
   "type": "module",
   "license": "MIT",
   "author": "Avinash Kumar Singh",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avinash-singh-io/engram.git"
+  },
+  "homepage": "https://github.com/avinash-singh-io/engram#readme",
+  "bugs": "https://github.com/avinash-singh-io/engram/issues",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "okf",
     "knowledge-base",
@@ -41,7 +50,8 @@
     "lint": "eslint src tests",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build",
+    "prepublishOnly": "npm run check"
   },
   "dependencies": {
     "commander": "^12.1.0",
