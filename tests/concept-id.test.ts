@@ -24,6 +24,7 @@ describe('concept identity', () => {
     expect(isReservedFile('a/b/index.md')).toBe(true);
     expect(isReservedFile('log.md')).toBe(true);
     expect(isReservedFile('AGENTS.md')).toBe(true);
+    expect(isReservedFile('CLAUDE.md')).toBe(true);
     expect(isReservedFile('system-design/x.md')).toBe(false);
   });
 });

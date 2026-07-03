@@ -3,6 +3,7 @@ import { registerCapture } from './capture';
 import { registerDoctor } from './doctor';
 import { registerInit } from './init';
 import { registerLink } from './link';
+import { registerMigrate } from './migrate';
 import { registerPromote } from './promote';
 import { registerRecall } from './recall';
 import { registerRefine } from './refine';
@@ -69,5 +70,11 @@ export const COMMANDS: readonly CommandSpec[] = [
     summary: 'Validate every concept and check sync health (read-only).',
     phase: 'Phase 3',
     register: registerDoctor,
+  },
+  {
+    name: 'migrate',
+    summary: 'Adopt existing Markdown notes as OKF concepts.',
+    phase: 'Phase 6',
+    register: registerMigrate,
   },
 ] as const;

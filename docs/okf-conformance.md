@@ -23,8 +23,9 @@ frontmatter and are validated as concepts.
 | **log.md** | `log.md` (usually vault root) | none | log |
 | **AGENTS.md** | `AGENTS.md` (vault root) | none | reserved / passthrough |
 
-Reserved filenames (case-sensitive): `index.md`, `log.md`, `AGENTS.md`. These
-are **not** concepts and are exempt from concept frontmatter rules.
+Reserved filenames (case-sensitive): `index.md`, `log.md`, `AGENTS.md`,
+`CLAUDE.md`. These are **not** concepts and are exempt from concept frontmatter
+rules (`AGENTS.md` / `CLAUDE.md` are agent-instruction files, not vault knowledge).
 
 ## 2. Concept frontmatter
 
