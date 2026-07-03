@@ -21,7 +21,7 @@
 
 | ID | Title | Priority | Status | Phase | Detail |
 |----|-------|----------|--------|-------|--------|
-| BUG-001 | Emitted markdown link destinations use raw spaces (break CommonMark + engram's own index parse) | P1 | in-progress | ad-hoc | Reported vs 0.6.4. Fix: percent-encode link targets on write, decode on read. See `specs/adhoc/BUG-001/record.md` |
+| BUG-001 | Emitted markdown link destinations use raw spaces (break CommonMark + engram's own index parse) | P1 | resolved | ad-hoc | Fixed in v0.6.5 — percent-encode link targets on write, decode on read. See `specs/adhoc/BUG-001/record.md`. Follow-ups: ENH-002, ENH-003 |
 
 ## Features
 

@@ -4,7 +4,7 @@
 > **Created**: 2026-07-04
 > **Branch**: fix/BUG-001-link-encoding
 > **Backlog**: BUG-001
-> **Status**: in-progress
+> **Status**: shipped (v0.6.5, 2026-07-04)
 
 > **Rule 14 note**: touches ~9 production files and changes engram's on-disk
 > link output — both are escalation triggers. Kept as a quick-task by explicit

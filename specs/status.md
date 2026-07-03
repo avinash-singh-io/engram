@@ -1,8 +1,8 @@
 # Project Status
 
-> **Last Updated**: 2026-07-03
+> **Last Updated**: 2026-07-04
 > **Current Phase**: Phase 6 (Onboarding & OKF Migration) verified — awaiting merge (v0.6.0). Phase 5 (Semantic Layer) still deferred (optional).
-> **Latest Release**: v0.6.0 (Phase 6 — Onboarding & OKF Migration)
+> **Latest Release**: v0.6.5 (BUG-001 — CommonMark-safe link encoding)
 > **Health**: On Track — published on npm (@avinash-singh-io/engram)
 
 ## Summary
@@ -34,7 +34,7 @@ stays free across Mac + Android.
 
 | Version | Date | Type | Summary |
 |---------|------|------|---------|
-| _(none yet)_ | | | |
+| v0.6.5 | 2026-07-04 | quick-task (BUG-001) | Percent-encode markdown link targets (CommonMark §6.3) — fixes broken links on spaced filenames + engram's own dropped index bullets. `specs/adhoc/BUG-001/` |
 
 ## Active Phase
 
