@@ -1,9 +1,9 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Wave 2 complete (Phases 2/3/4 landed). Next: Wave 3 — Phase 5 (Semantic Layer, optional)
+> **Current Phase**: Roadmap wrapped at v0.5.0 — Phases 0–4 complete. Phase 5 (Semantic Layer) **deferred** (optional; open a lane when wanted).
 > **Latest Release**: v0.5.0 (Phase 3 — Sync + Multi-Device)
-> **Health**: On Track
+> **Health**: On Track — core product shipped
 
 ## Summary
 
@@ -65,8 +65,9 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. Open Wave 3 — Phase 5 (Semantic Layer, optional) — needs Phase 2's `RecallResult`.
+1. _(optional)_ Open Wave 3 — Phase 5 (Semantic Layer) when wanted — needs Phase 2's `RecallResult`; design in `specs/planning/parallel-execution-plan.md`.
 2. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
+3. _(optional)_ `npm publish` when ready to distribute (deferred through the core build).
 
 ## Key Decisions Made
 

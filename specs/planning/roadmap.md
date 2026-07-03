@@ -18,7 +18,7 @@ bounded no matter how large the vault gets.
 | v0.3.0 | Phase 2 — Progressive-Disclosure Retrieval | `/recall` structural navigation (index→tags→links→grep); `AGENTS.md` traversal contract; auto-index quality; bounded-read measurement | ✅ Released 2026-07-03 |
 | v0.4.0 | Phase 4 — Ecosystem | Codex + Antigravity adapters (a new agent is a descriptor); `/promote` momentum→OKF bridge | ✅ Released 2026-07-03 |
 | v0.5.0 | Phase 3 — Sync + Multi-Device | git-spine; Remotely Save→S3 & Obsidian Git recipes; `engram doctor`; Mac↔Android round-trip | ✅ Released 2026-07-03 (M5 device evidence pending) |
-| v0.6.0 | Phase 5 (optional) — Semantic Layer | Embeddings index + MCP `recall` tool; hybrid navigate+retrieve; structural path stays default | TBD |
+| v0.6.0 | Phase 5 (optional) — Semantic Layer | Embeddings index + MCP `recall` tool; hybrid navigate+retrieve; structural path stays default | Deferred (optional — roadmap wrapped at v0.5.0) |
 
 ## Phase Dependencies
 
