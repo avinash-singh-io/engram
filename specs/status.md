@@ -1,9 +1,9 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Roadmap wrapped at v0.5.0 — Phases 0–4 complete. Phase 5 (Semantic Layer) **deferred** (optional; open a lane when wanted).
-> **Latest Release**: v0.5.0 (Phase 3 — Sync + Multi-Device)
-> **Health**: On Track — core product shipped
+> **Current Phase**: Phase 6 (Onboarding & OKF Migration) verified — awaiting merge (v0.6.0). Phase 5 (Semantic Layer) still deferred (optional).
+> **Latest Release**: v0.6.0 (Phase 6 — Onboarding & OKF Migration)
+> **Health**: On Track — published on npm (@avinash-singh-io/engram)
 
 ## Summary
 
@@ -24,6 +24,7 @@ stays free across Mac + Android.
 | 2 | Progressive-Disclosure Retrieval | Complete | v0.3.0 |
 | 4 | Ecosystem | Complete | v0.4.0 |
 | 3 | Sync + Multi-Device | Complete | v0.5.0 |
+| 6 | Onboarding & OKF Migration | Complete | v0.6.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -85,6 +86,8 @@ stays free across Mac + Android.
 - ADR-0012 — `/promote` imports momentum artifacts as one-way Reference snapshots
 - ADR-0013 — Canonical free sync path: Obsidian Git + free private GitHub repo
 - ADR-0014 — `engram doctor` + locked round-trip protocol as the M5 verification instrument
+- ADR-0015 — Editor adapters (engram is editor-agnostic; Obsidian first)
+- ADR-0016 — OKF migration (`engram migrate`) — deterministic best-effort adoption
 
 ## Recent Changes
 

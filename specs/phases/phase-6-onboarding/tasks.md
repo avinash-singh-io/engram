@@ -21,7 +21,7 @@
 - [x] Fix: `CLAUDE.md` added to RESERVED_FILENAMES (agent file, not a concept) — caught by e2e
 - [x] e2e verified from built binary (init auto-setup + migrate + doctor)
 
-## G4 — Verify, docs, release
-- [ ] ADR-0015, ADR-0016
-- [ ] README (migrate + init auto-setup); bump 0.6.0
-- [ ] `npm run check` green; retrospective + evidence
+## G4 — Verify, docs, release ✅
+- [x] ADR-0015 (editor adapters), ADR-0016 (migration) + decisions index
+- [x] README (migrate + init auto-setup + CLAUDE.md); bump 0.6.0
+- [x] `npm run check` green (191 tests); retrospective + evidence; tracking

@@ -1,6 +1,6 @@
 # Phase 6 — Onboarding & OKF Migration
 
-> **Status**: in-progress
+> **Status**: verified — awaiting merge (v0.6.0)
 > **Branch**: `phase-6-onboarding`
 > **Target release**: v0.6.0
 
@@ -41,8 +41,8 @@ native instructions pointer so the right agent actually loads the vault contract
 - Agent adapters emit a native instructions pointer to AGENTS.md (extends ADR-0011).
 
 ## Acceptance (Rule 12)
-- [ ] `EditorAdapter` + Obsidian adapter; `init` in a dir with `.obsidian/` writes standard/absolute `app.json`; `init` in a non-repo runs `git init`
-- [ ] Claude adapter scaffolds a `CLAUDE.md` pointing to `AGENTS.md`
-- [ ] `engram migrate --dry-run` reports a plan; `--write` makes non-conformant notes pass `validateConcept`; `[[wikilinks]]` become standard links
-- [ ] `npm run check` exits 0 with fresh output
-- [ ] `engram doctor` on a migrated fixture vault → 0 errors
+- [x] `EditorAdapter` + Obsidian adapter; `init` in a dir with `.obsidian/` writes standard/absolute `app.json`; `init` in a non-repo runs `git init`
+- [x] Claude adapter scaffolds a `CLAUDE.md` pointing to `AGENTS.md`
+- [x] `engram migrate --dry-run` reports a plan; `--write` makes non-conformant notes pass `validateConcept`; `[[wikilinks]]` become standard links
+- [x] `npm run check` exits 0 with fresh output
+- [x] `engram doctor` on a migrated fixture vault → 0 errors
