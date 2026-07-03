@@ -97,3 +97,16 @@ Verified: `--version` → 0.1.0, `--help` lists all commands, unknown command
 errors; 30/30 tests green.
 
 ---
+
+### [NOTE] 2026-07-03 — Group 4 complete: Phase 0 verified
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: specs/phases/phase-0-foundation/overview.md#acceptance-criteria
+Detail: Ran the full pipeline as one authoritative check — `npm run check`
+(typecheck + lint + format:check + test + build) exited 0, 30/30 tests, CLI smoke
+(`--version` → 0.1.0, `--help` exit 0, stub → exit 2). All five acceptance
+criteria met with fresh evidence (Rule 12). Phase 0 is verified and awaiting
+`/complete-phase` (merge + tag v0.1.0). No merge/release performed — that is the
+hard-stop gate for user approval.
+
+---

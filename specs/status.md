@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Phase 0 — Foundation (`in-progress`)
+> **Current Phase**: Phase 0 — Foundation (`verified — awaiting /complete-phase`)
 > **Latest Release**: None
 > **Health**: On Track
 
@@ -39,7 +39,7 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 0 — Foundation | phase-0-foundation | in-progress | 0/17 tasks — started |
+| Phase 0 — Foundation | phase-0-foundation | verified | 22/22 tasks — all groups verified, awaiting /complete-phase |
 
 ## Upcoming Phases
 
@@ -65,7 +65,7 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. Run `/start-phase` to begin Phase 0 — Foundation (creates the `phase-0-foundation` branch).
+1. Run `/complete-phase` to verify and release Phase 0 — Foundation (merge `phase-0-foundation`, tag v0.1.0).
 
 ## Key Decisions Made
 

@@ -1,6 +1,6 @@
 # Phase 0 — Foundation
 
-> **Status**: planned
+> **Status**: verified — awaiting `/complete-phase`
 > **Branch**: `phase-0-foundation`
 > **Target release**: v0.1.0
 
@@ -41,11 +41,11 @@ vault; it lays the foundation the MVP (Phase 1) builds on.
 
 ## Acceptance Criteria (Rule 12 — evidence required)
 
-- [ ] `npm run build` exits 0 (fresh output this session)
-- [ ] `npm test` exits 0 — validator passes all valid fixtures, rejects all malformed
-- [ ] `npm run lint` exits 0
-- [ ] `engram --version` prints the version; `engram --help` lists stub commands
-- [ ] OKF v0.1 conformance spec committed and reviewed
+- [x] `npm run build` exits 0 (fresh output 2026-07-03)
+- [x] `npm test` exits 0 — 30/30; validator passes all valid fixtures, rejects all malformed (17-case locked corpus)
+- [x] `npm run lint` exits 0 (`npm run check` = typecheck + lint + format:check + test + build, exit 0)
+- [x] `engram --version` prints `0.1.0`; `engram --help` lists all seven stub commands
+- [x] OKF v0.1 conformance spec committed (`docs/okf-conformance.md`)
 
 ## Dependencies / Risks
 

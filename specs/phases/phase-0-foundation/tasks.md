@@ -29,8 +29,8 @@
 - [x] Subcommand registry stubs (init/capture/refine/link/reindex/recall/promote) — `src/commands/registry.ts`
 
 ## Group 4 — Verification
-- [ ] `npm test` green (validator passes valid, rejects malformed)
-- [ ] `npm run build` green
-- [ ] `npm run lint` clean
-- [ ] Smoke: `engram --version` and `engram --help`
-- [ ] Capture fresh output as evidence for acceptance criteria
+- [x] `npm test` green (validator passes valid, rejects malformed) — 30/30
+- [x] `npm run build` green
+- [x] `npm run lint` clean (+ typecheck + format:check via `npm run check`, exit 0)
+- [x] Smoke: `engram --version` (0.1.0) and `engram --help` (exit 0); stub → exit 2
+- [x] Capture fresh output as evidence for acceptance criteria (this session)
