@@ -10,6 +10,8 @@ export {
 } from './concept-id';
 export {
   containsWikilink,
+  decodeLinkTarget,
+  encodeLinkTarget,
   extractMarkdownLinks,
   isInternalMarkdownLink,
   type MarkdownLink,

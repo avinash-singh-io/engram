@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import { encodeLinkTarget } from '../format/links';
 import { checkIndexQuality } from '../retrieval/index-quality';
 import { navigate, type NavigateOptions } from '../retrieval/navigate';
 import { writeAgentsContract } from '../retrieval/agents-contract';
@@ -39,7 +40,7 @@ function toNavigateOptions(opts: RecallCliOptions): NavigateOptions {
 
 function renderReference(ref: RecallReference, n: number, explain: boolean): string {
   const lines = [
-    `${n}. [${ref.title}](${ref.link})`,
+    `${n}. [${ref.title}](${encodeLinkTarget(ref.link)})`,
     `   ${ref.description || '(no description)'}`,
   ];
   if (explain) {

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import type { Command } from 'commander';
+import { encodeLinkTarget } from '../format/links';
 import { validateConcept } from '../format/validate';
 import { reindex } from '../indexer/reindex';
 import { appendLog } from '../vault/log';
@@ -39,9 +40,10 @@ export function suggestByTags(model: VaultModel, src: ConceptRecord, limit = 10)
 }
 
 function insertSeeAlso(src: ConceptRecord, target: ConceptRecord): void {
-  const bullet = `- [${titleOf(target)}](/${target.path})`;
+  const dest = encodeLinkTarget(`/${target.path}`);
+  const bullet = `- [${titleOf(target)}](${dest})`;
   let text = readFileSync(src.absPath, 'utf8').replace(/\s+$/, '');
-  if (text.includes(`(/${target.path})`)) return; // already linked
+  if (text.includes(`(${dest})`)) return; // already linked
   if (/^#{1,6}\s+See also\s*$/im.test(text)) {
     text = `${text}\n${bullet}`;
   } else {

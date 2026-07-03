@@ -1,5 +1,7 @@
 /** Pure index.md rendering. See docs/okf-conformance.md §5 + ADR-0006. */
 
+import { encodeLinkTarget } from '../format/links';
+
 export interface IndexConcept {
   title: string;
   /** Absolute-bundle-relative link, e.g. /system-design/x.md */
@@ -49,7 +51,9 @@ export function generateIndex(input: GenerateIndexInput): string {
   if (sortedConcepts.length > 0) {
     lines.push('## Concepts', '');
     for (const c of sortedConcepts) {
-      lines.push(`* [${oneLine(c.title)}](${c.path}) - ${oneLine(c.description)}`);
+      lines.push(
+        `* [${oneLine(c.title)}](${encodeLinkTarget(c.path)}) - ${oneLine(c.description)}`,
+      );
     }
     lines.push('');
   }
@@ -58,7 +62,9 @@ export function generateIndex(input: GenerateIndexInput): string {
   if (sortedChildren.length > 0) {
     lines.push('## Sections', '');
     for (const k of sortedChildren) {
-      lines.push(`* [${k.name}/](${k.link}) - ${k.count} concept${k.count === 1 ? '' : 's'}`);
+      lines.push(
+        `* [${k.name}/](${encodeLinkTarget(k.link)}) - ${k.count} concept${k.count === 1 ? '' : 's'}`,
+      );
     }
     lines.push('');
   }

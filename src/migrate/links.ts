@@ -1,5 +1,7 @@
 /** Convert Obsidian `[[wikilinks]]` to standard, absolute markdown links. */
 
+import { encodeLinkTarget } from '../format/links';
+
 export interface WikilinkConversion {
   from: string;
   to: string;
@@ -32,7 +34,7 @@ export function convertWikilinks(
     const label = (alias ?? target).trim();
     const resolvedPath = resolve(target);
     const link = resolvedPath ?? slugPath(target);
-    const md = `[${label}](${link})`;
+    const md = `[${label}](${encodeLinkTarget(link)})`;
     conversions.push({ from: match, to: md, resolved: resolvedPath !== null });
     return md;
   });

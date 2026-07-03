@@ -1,3 +1,4 @@
+import { encodeLinkTarget } from '../format/links';
 import { serializeConcept } from '../format/serialize';
 import type { MomentumArtifact } from './parse-momentum';
 
@@ -107,7 +108,7 @@ export function rewriteLinks(md: string, targetDir: string): string {
   const wikified = md.replace(
     /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
     (_m, target: string, label?: string) =>
-      `[${(label ?? target).trim()}](/${slug(target.trim())}.md)`,
+      `[${(label ?? target).trim()}](${encodeLinkTarget(`/${slug(target.trim())}.md`)})`,
   );
   return wikified.replace(
     /\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g,
@@ -117,7 +118,7 @@ export function rewriteLinks(md: string, targetDir: string): string {
       if (!pathPart.toLowerCase().endsWith('.md')) return match; // not an internal doc link
       if (pathPart.startsWith('/')) return match; // already absolute bundle-relative
       const base = pathPart.split('/').pop() ?? pathPart;
-      return `[${text}](/${targetDir}/${base}${fragment})`;
+      return `[${text}](${encodeLinkTarget(`/${targetDir}/${base}${fragment}`)})`;
     },
   );
 }
@@ -152,7 +153,7 @@ function sourceBlock(artifact: MomentumArtifact, sourcePath: string): string {
   return [
     '# Source',
     '',
-    `Promoted from momentum ${artifact.sourceRef}${when} — [${base}](${link}).`,
+    `Promoted from momentum ${artifact.sourceRef}${when} — [${base}](${encodeLinkTarget(link)}).`,
     '',
     'One-way, point-in-time snapshot. Engram does not sync changes back to momentum;',
     're-run `engram promote` to refresh from the source.',
