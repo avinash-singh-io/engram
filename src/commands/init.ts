@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { Command } from 'commander';
-import { getAdapter } from '../adapters';
+import { ADAPTERS, adapterIds, getAdapter, type Adapter } from '../adapters';
 import { assetsRoot, readAsset } from '../assets';
 import { reindex } from '../indexer/reindex';
 import { defaultConfig, writeConfig } from '../vault/config';
 import { writeFileSafe } from '../vault/write';
-import { runCommand } from './util';
+import { fail, runCommand } from './util';
 
 export interface InitOptions {
   dir?: string;
@@ -22,6 +22,16 @@ export interface InitResult {
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/** Resolve the `--agent` selector to a list of adapters. `all` = every adapter. */
+export function resolveAdapters(agent = 'claude'): Adapter[] {
+  if (agent === 'all') return adapterIds().map((id) => ADAPTERS[id] as Adapter);
+  const adapter = getAdapter(agent);
+  if (!adapter) {
+    fail(`unknown agent "${agent}" — choose one of: ${[...adapterIds(), 'all'].join(', ')}`);
+  }
+  return [adapter];
 }
 
 /** Deep-merge JSON: objects recurse, arrays append deduped, scalars take incoming. */
@@ -80,11 +90,12 @@ export function runInit(opts: InitOptions = {}): InitResult {
     skipped.push('.engram/config.json');
   }
 
-  // Adapter files (slash-commands + settings hook).
-  const adapter = getAdapter(opts.agent ?? 'claude');
-  if (adapter) {
+  // Adapter files (per-agent command surface + any hooks). A file carries either
+  // inline `content` (rendered from the shared command set) or a bundled `src`.
+  for (const adapter of resolveAdapters(opts.agent)) {
     for (const f of adapter.files(assetsRoot())) {
-      put(f.dest, readFileSync(f.src, 'utf8'), f.mode === 'merge-json' ? 'merge-json' : 'skip');
+      const content = f.content ?? readFileSync(f.src as string, 'utf8');
+      put(f.dest, content, f.mode === 'merge-json' ? 'merge-json' : 'skip');
     }
   }
 
@@ -100,7 +111,7 @@ export function registerInit(program: Command): void {
     .command('init [dir]')
     .description('Scaffold an OKF-conformant vault in [dir] (default: cwd). (Phase 1)')
     .option('--force', 'overwrite existing managed files')
-    .option('--agent <id>', 'agent adapter to scaffold', 'claude')
+    .option('--agent <id>', `agent adapter to scaffold (${[...adapterIds(), 'all'].join('|')})`, 'claude')
     .action((dir: string | undefined, opts: { force?: boolean; agent?: string }) =>
       runCommand(() => {
         const res = runInit({ dir, force: opts.force, agent: opts.agent });
