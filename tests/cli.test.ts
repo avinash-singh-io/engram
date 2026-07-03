@@ -22,8 +22,8 @@ describe('cli program', () => {
     }
   });
 
-  it('keeps recall and promote as stubs (no register handler yet)', () => {
+  it('keeps only promote as a stub (recall wired in Phase 2)', () => {
     const stubs = COMMANDS.filter((c) => !c.register).map((c) => c.name);
-    expect(stubs).toEqual(['recall', 'promote']);
+    expect(stubs).toEqual(['promote']);
   });
 });

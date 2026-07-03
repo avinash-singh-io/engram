@@ -10,3 +10,4 @@ export * from './vault';
 export * from './indexer';
 export * from './hooks';
 export * from './adapters';
+export * from './retrieval';
