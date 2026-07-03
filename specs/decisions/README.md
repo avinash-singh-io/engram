@@ -16,6 +16,7 @@
 | [0007](0007-typescript-single-package.md) | TypeScript single-package MVP; vendor the engine, extract later | accepted | 2026-07-03 |
 | [0008](0008-write-hook-mechanism.md) | Write-hook as a hidden subcommand driven by PostToolUse | accepted | 2026-07-03 |
 | [0009](0009-engram-config-sidecar.md) | `.engram/` tooling sidecar directory | accepted | 2026-07-03 |
+| [0010](0010-bounded-read-metric-and-recall-contract.md) | Bounded-read metric + `/recall` output contract | accepted | 2026-07-03 |
 
 ## Process
 
