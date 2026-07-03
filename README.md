@@ -8,6 +8,10 @@
 
 *(Named for the neuroscience term **engram** — a stored memory trace.)*
 
+[![npm](https://img.shields.io/npm/v/@avinash-singh-io/engram?logo=npm)](https://www.npmjs.com/package/@avinash-singh-io/engram)
+&nbsp;[![node](https://img.shields.io/node/v/@avinash-singh-io/engram)](https://nodejs.org)
+&nbsp;[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 ---
 
 ## What is it?
@@ -40,9 +44,24 @@ context.
 
 ## Install
 
-> **Not yet published to npm** (planned). For now, install from source.
+Published as **[`@avinash-singh-io/engram`](https://www.npmjs.com/package/@avinash-singh-io/engram)**
+(the bare name `engram` was taken). The scoped name is just the package — **the
+CLI command is `engram`**. Requires **Node.js ≥ 20**.
 
-Requires **Node.js ≥ 20**.
+```bash
+npm install -g @avinash-singh-io/engram
+engram --version   # 0.5.1
+engram --help
+```
+
+Or run it without installing:
+
+```bash
+npx @avinash-singh-io/engram --help
+```
+
+<details>
+<summary><b>Build from source</b> (for contributing)</summary>
 
 ```bash
 git clone https://github.com/avinash-singh-io/engram.git
@@ -51,15 +70,7 @@ npm install
 npm run build
 npm link          # puts `engram` on your PATH
 ```
-
-Verify:
-
-```bash
-engram --version   # 0.5.0
-engram --help
-```
-
-*(Prefer not to `npm link`? Run `node /path/to/engram/dist/cli.js <command>` instead.)*
+</details>
 
 ---
 
