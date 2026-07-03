@@ -16,11 +16,11 @@
 - [x] Idempotency (LF, unicode-aware sort, trailing newline) — asserted
 - [x] `tests/indexer.test.ts` (2 tests)
 
-## G2 — Log writer + write-hook engine
-- [ ] `src/vault/log.ts` (append-only, newest-first)
-- [ ] `src/hooks/payload.ts` (parse PostToolUse stdin)
-- [ ] `src/hooks/write-hook.ts` (validate → scoped reindex + log; fail-loud)
-- [ ] `tests/write-hook.test.ts`
+## G2 — Log writer + write-hook engine ✅
+- [x] `src/vault/log.ts` (append-only, newest-first; pure `renderLog`)
+- [x] `src/hooks/payload.ts` (parse PostToolUse stdin; tolerant)
+- [x] `src/hooks/write-hook.ts` (validate → reindex + log Updated; fail-loud/blocked)
+- [x] `tests/write-hook.test.ts` (5 tests)
 
 ## G3 — CLI implementations + dispatch wiring
 - [ ] `registry.ts` register-hook + `cli-program.ts` single dispatch loop + hidden `hook`
