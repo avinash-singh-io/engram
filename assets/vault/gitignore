@@ -1,0 +1,6 @@
+# OS
+.DS_Store
+
+# Obsidian per-user workspace state (safe to ignore; content stays tracked)
+.obsidian/workspace*
+.obsidian/cache

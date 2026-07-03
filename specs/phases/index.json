@@ -7,6 +7,12 @@
       "status": "complete",
       "directory": "phase-0-foundation",
       "topics": ["tooling", "okf-format", "engine-primitives"]
+    },
+    "phase-1-mvp-vault": {
+      "name": "MVP Vault + Claude Code",
+      "status": "complete",
+      "directory": "phase-1-mvp-vault",
+      "topics": ["okf-format", "vault", "indexes", "tooling", "engine-primitives"]
     }
   }
 }

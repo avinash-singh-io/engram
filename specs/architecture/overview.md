@@ -44,6 +44,13 @@ operates on a **local folder** (the vault) and is otherwise sync-agnostic.
 | **Adapters** | Per-agent surface (slash commands / CLI). Claude Code first; Codex/Antigravity later. | Phase 1 / Phase 4 |
 | **Rules + Hooks** | PreToolUse/PostToolUse/SessionStart pattern from momentum — validate on write, reindex, append `log.md`. | Phase 1 |
 
+> **Built as of v0.2.0 (Phase 1):** the vault fs layer (`src/vault/` — canonical
+> walker, config, non-destructive writes, append-only log), the deterministic
+> index generator (`src/indexer/`), the write-hook engine (`src/hooks/`, ADR-0008),
+> the adapter seam (`src/adapters/`), the frontmatter serializer, and the CLI
+> commands `init`/`capture`/`refine`/`link`/`reindex`. `.engram/` is the tooling
+> sidecar (ADR-0009). Retrieval (`/recall`) and additional adapters remain stubs.
+
 ## Primitives (vs momentum)
 
 See [ADR-0001](../decisions/0001-separate-product-shared-engine.md). The engine is

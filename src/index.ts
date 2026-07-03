@@ -6,3 +6,7 @@
  */
 export { VERSION } from './version';
 export * from './format';
+export * from './vault';
+export * from './indexer';
+export * from './hooks';
+export * from './adapters';
