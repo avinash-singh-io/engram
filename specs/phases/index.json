@@ -19,6 +19,12 @@
       "status": "complete",
       "directory": "phase-2-retrieval",
       "topics": ["retrieval", "indexes", "okf-format"]
+    },
+    "phase-4-ecosystem": {
+      "name": "Ecosystem",
+      "status": "complete",
+      "directory": "phase-4-ecosystem",
+      "topics": ["adapters", "promote", "ecosystem", "engine-primitives"]
     }
   }
 }

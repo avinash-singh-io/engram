@@ -11,3 +11,4 @@ export * from './indexer';
 export * from './hooks';
 export * from './adapters';
 export * from './retrieval';
+export * from './promote';

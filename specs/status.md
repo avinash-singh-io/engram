@@ -1,8 +1,8 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Wave 2 landing — Phase 2 lands (v0.3.0); Phases 4 & 3 done, awaiting landing (order 2 → 4 → 3)
-> **Latest Release**: v0.3.0 (Phase 2 — Progressive-Disclosure Retrieval)
+> **Current Phase**: Wave 2 landing — Phase 4 lands (v0.4.0); Phase 3 done, awaiting landing (lands 3rd)
+> **Latest Release**: v0.4.0 (Phase 4 — Ecosystem)
 > **Health**: On Track
 
 ## Summary
@@ -22,6 +22,7 @@ stays free across Mac + Android.
 | 0 | Foundation | Complete | v0.1.0 |
 | 1 | MVP Vault + Claude Code | Complete | v0.2.0 |
 | 2 | Progressive-Disclosure Retrieval | Complete | v0.3.0 |
+| 4 | Ecosystem | Complete | v0.4.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -41,7 +42,6 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 4 — Ecosystem | phase-4-ecosystem | done (awaiting landing) | built, green (94 tests) — lands 2nd |
 | Phase 3 — Sync | phase-3-sync | done (awaiting landing) | built, green (65 tests) — lands 3rd; M5 device evidence pending |
 
 ## Upcoming Phases
@@ -64,8 +64,8 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. Land Phase 4 — Ecosystem (rebase → reconcile registry/ADR numbers → v0.4.0), then Phase 3 — Sync (v0.5.0).
-2. Open Wave 3 — Phase 5 (Semantic Layer) once Phase 2 is on `main`.
+1. Land Phase 3 — Sync (rebase → v0.5.0); M5 device evidence pending (accept automated proof or capture on device).
+2. Open Wave 3 — Phase 5 (Semantic Layer).
 
 ## Key Decisions Made
 
@@ -79,8 +79,11 @@ stays free across Mac + Android.
 - ADR-0008 — Write-hook as a hidden subcommand driven by PostToolUse
 - ADR-0009 — `.engram/` tooling sidecar directory
 - ADR-0010 — Bounded-read metric + `/recall` output contract
+- ADR-0011 — Multi-agent adapters converge on AGENTS.md; a new agent is a descriptor
+- ADR-0012 — `/promote` imports momentum artifacts as one-way Reference snapshots
 
 ## Recent Changes
 
-- 2026-07-03 — Wave 2 built in 3 parallel lanes (worktrees); Phase 2 (Retrieval) landing as v0.3.0.
-- 2026-07-03 — Released v0.2.0 (Phase 1 — MVP Vault); v0.1.0 (Phase 0 — Foundation).
+- 2026-07-03 — Released v0.4.0 (Phase 4 — Ecosystem): Codex + Antigravity adapters, `/promote` bridge. Rebased onto main; ADRs renumbered 0011/0012 (0010 taken by Phase 2).
+- 2026-07-03 — Released v0.3.0 (Phase 2 — Retrieval); Wave 2 built in 3 parallel lanes.
+- 2026-07-03 — Released v0.2.0 (Phase 1); v0.1.0 (Phase 0).

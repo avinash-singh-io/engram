@@ -5,6 +5,7 @@
 | 0 | Foundation | Complete (v0.1.0) | `phase-0-foundation/` |
 | 1 | MVP Vault + Claude Code | Complete (v0.2.0) | `phase-1-mvp-vault/` |
 | 2 | Progressive-Disclosure Retrieval | Complete (v0.3.0) | `phase-2-retrieval/` |
+| 4 | Ecosystem | Complete (v0.4.0) | `phase-4-ecosystem/` |
 
 ## Phase Structure
 

@@ -17,6 +17,8 @@
 | [0008](0008-write-hook-mechanism.md) | Write-hook as a hidden subcommand driven by PostToolUse | accepted | 2026-07-03 |
 | [0009](0009-engram-config-sidecar.md) | `.engram/` tooling sidecar directory | accepted | 2026-07-03 |
 | [0010](0010-bounded-read-metric-and-recall-contract.md) | Bounded-read metric + `/recall` output contract | accepted | 2026-07-03 |
+| [0011](0011-adapters-converge-on-agents-md.md) | Multi-agent adapters converge on AGENTS.md; a new agent is a descriptor | accepted | 2026-07-03 |
+| [0012](0012-promote-one-way-reference-snapshot.md) | /promote imports momentum artifacts as one-way Reference snapshots | accepted | 2026-07-03 |
 
 ## Process
 
