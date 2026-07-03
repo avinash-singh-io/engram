@@ -10,9 +10,19 @@ function humanizeFilename(relPath: string): string {
   return base.replace(/\.md$/i, '').replace(/[-_]+/g, ' ').trim() || base;
 }
 
-function firstHeading(body: string): string | null {
-  const m = body.match(/^#{1,6}\s+(.+?)\s*$/m);
-  return m ? m[1].trim() : null;
+/**
+ * A leading heading is the title. Only the FIRST non-empty content line counts:
+ * a heading buried under prose is a section, not the document title, so we fall
+ * back to the filename in that case (more descriptive + unique).
+ */
+function leadingHeading(body: string): string | null {
+  for (const raw of body.replace(/\r\n/g, '\n').split('\n')) {
+    const line = raw.trim();
+    if (line === '' || line === '---') continue;
+    const m = line.match(/^#{1,6}\s+(.+?)\s*$/);
+    return m ? m[1].trim() : null;
+  }
+  return null;
 }
 
 /** First prose sentence, markdown stripped, capped to a single sentence. */
@@ -66,7 +76,7 @@ export function deriveFrontmatter(
 ): Record<string, unknown> {
   return {
     type: opts.type ?? 'Reference',
-    title: firstHeading(body) ?? humanizeFilename(relPath),
+    title: leadingHeading(body) ?? humanizeFilename(relPath),
     description: firstSentence(body),
     tags: tagsFromPath(relPath),
     timestamp: mtime.toISOString().replace(/\.\d{3}Z$/, 'Z'),

@@ -35,6 +35,15 @@ describe('deriveFrontmatter', () => {
     const fm = deriveFrontmatter('my-note.md', 'plain text.', new Date());
     expect(fm.title).toBe('my note');
   });
+
+  it('uses the filename when the first heading is buried below prose (a section, not the title)', () => {
+    const fm = deriveFrontmatter(
+      'Study Guide/Delivery Orchestrator.md',
+      'Intro prose here.\n\n# TIER 1 — drilled hard\n\nbody',
+      new Date(),
+    );
+    expect(fm.title).toBe('Delivery Orchestrator');
+  });
 });
 
 describe('convertWikilinks', () => {
