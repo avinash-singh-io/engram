@@ -1,6 +1,6 @@
 # Roadmap
 
-> **Last Updated**: 2026-07-03
+> **Last Updated**: 2026-07-03 · Phase 0 released as v0.1.0
 
 ## Vision
 
@@ -13,7 +13,7 @@ bounded no matter how large the vault gets.
 
 | Version | Phase | Key Deliverables | Target |
 |---------|-------|-----------------|--------|
-| v0.1.0 | Phase 0 — Foundation | TS/Node package + toolchain + CI; OKF v0.1 conformance spec; frontmatter validator + concept-ID resolver; CLI skeleton | TBD |
+| v0.1.0 | Phase 0 — Foundation | TS/Node package + toolchain + CI; OKF v0.1 conformance spec; frontmatter validator + concept-ID resolver; CLI skeleton | ✅ Released 2026-07-03 |
 | v0.2.0 | Phase 1 — MVP Vault + Claude Code | `engram init` scaffolds OKF vault; Claude Code adapter (`/capture`, `/refine`, `/link`, `/reindex`); write-hook (validate + reindex + log); Obsidian setup doc | TBD |
 | v0.3.0 | Phase 2 — Progressive-Disclosure Retrieval | `/recall` structural navigation (index→tags→links→grep); `AGENTS.md` traversal contract; auto-index quality; bounded-read measurement | TBD |
 | v0.4.0 | Phase 3 — Sync + Multi-Device | git-spine setup; Remotely Save→S3 recipe; Obsidian Git recipe; verified Mac↔Android round-trip | TBD |

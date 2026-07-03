@@ -1,8 +1,8 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Phase 0 — Foundation (`verified — awaiting /complete-phase`)
-> **Latest Release**: None
+> **Current Phase**: None — Phase 0 released; Phase 1 (MVP Vault + Claude Code) next
+> **Latest Release**: v0.1.0 (Phase 0 — Foundation)
 > **Health**: On Track
 
 ## Summary
@@ -19,7 +19,7 @@ stays free across Mac + Android.
 
 | Phase | Name | Status | Released |
 |-------|------|--------|---------|
-| _(none yet)_ | | | |
+| 0 | Foundation | Complete | v0.1.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -39,7 +39,7 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 0 — Foundation | phase-0-foundation | verified | 22/22 tasks — all groups verified, awaiting /complete-phase |
+| _(none — no active phase)_ | | | |
 
 ## Upcoming Phases
 
