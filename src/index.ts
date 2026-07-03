@@ -13,3 +13,4 @@ export * from './adapters';
 export * from './editors';
 export * from './retrieval';
 export * from './promote';
+export * from './migrate';

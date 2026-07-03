@@ -9,11 +9,11 @@
 - [x] `runInit` runs `setupEditors` + `git init` (opt-out `--no-editor-setup`/`--no-git`)
 - [x] tests (5)
 
-## G2 — Migration core
-- [ ] `src/migrate/derive.ts` (frontmatter derivation)
-- [ ] `src/migrate/links.ts` (wikilink → standard)
-- [ ] `src/migrate/migrate.ts` (vault plan)
-- [ ] tests
+## G2 — Migration core ✅
+- [x] `src/migrate/derive.ts` (frontmatter derivation)
+- [x] `src/migrate/links.ts` (wikilink → standard, resolved/best-guess)
+- [x] `src/migrate/migrate.ts` (plan + apply; preserves existing valid fields)
+- [x] tests (4)
 
 ## G3 — migrate command
 - [ ] `src/commands/migrate.ts` (register; dry-run/write; report)
