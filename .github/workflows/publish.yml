@@ -1,9 +1,18 @@
 # Auto-publish to npm when a version tag (v*) is pushed.
 #
-# One-time setup (repo Settings → Secrets and variables → Actions):
-#   NPM_TOKEN = an npm **Automation** token (or a Granular token with
-#   "Read and write" access to @avinash-singh-io/engram). Automation tokens
-#   bypass 2FA, which CI requires. Create at npmjs.com → Access Tokens.
+# Auth: OIDC "trusted publishing" — NO npm token or GitHub secret. The job
+# mints a short-lived, workflow-scoped credential at run time via the
+# `id-token: write` permission. Nothing to rotate, expire, or leak.
+#
+# One-time setup (npmjs.com → @avinash-singh-io/engram → Settings →
+# "Trusted Publisher" → GitHub Actions):
+#   Organization or user: avinash-singh-io
+#   Repository:           engram
+#   Workflow filename:    publish.yml
+#   Environment:          (leave blank)
+#   Allowed actions:      npm publish
+# Requires npm >= 11.5.1 (upgraded below) and Node >= 22.14; provenance is
+# emitted automatically under trusted publishing (no --provenance flag needed).
 #
 # Release flow:
 #   npm version patch|minor|major   # bumps package.json + creates the tag
@@ -22,7 +31,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # required for npm provenance
+  id-token: write # required for OIDC trusted publishing + provenance
 
 jobs:
   publish:
@@ -32,9 +41,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing needs npm >= 11.5.1; Node's bundled npm is older.
+      - run: npm install -g npm@latest
 
       - run: npm ci
 
@@ -48,8 +60,6 @@ jobs:
             exit 1
           fi
 
-      # `npm publish` runs prepublishOnly (npm run check) first, then publishes.
-      # --provenance emits a signed build-provenance attestation (public repo).
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # OIDC trusted publishing: no NODE_AUTH_TOKEN. `npm publish` runs
+      # prepublishOnly (npm run check) first; provenance is automatic.
+      - run: npm publish --access public
