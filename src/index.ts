@@ -7,3 +7,4 @@
 export { VERSION } from './version';
 export * from './format';
 export * from './vault';
+export * from './indexer';

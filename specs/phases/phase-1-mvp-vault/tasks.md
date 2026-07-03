@@ -10,11 +10,11 @@
 - [x] `src/vault/read.ts` (canonical walker → `VaultModel`)
 - [x] `src/vault/write.ts` (non-destructive atomic write) + `tests/{serialize,vault-read}.test.ts` (6 tests)
 
-## G1 — Deterministic index generator
-- [ ] `src/indexer/generate.ts` (pure; nested child-index links; root okf_version)
-- [ ] `src/indexer/reindex.ts` (walk + regen per-dir; `--check`)
-- [ ] Idempotency (LF, unicode sort, trailing newline)
-- [ ] `tests/indexer.test.ts`
+## G1 — Deterministic index generator ✅
+- [x] `src/indexer/generate.ts` (pure; nested child-index links; root okf_version)
+- [x] `src/indexer/reindex.ts` (walk + regen per-dir; `--check`; ancestor dirs indexed for descent)
+- [x] Idempotency (LF, unicode-aware sort, trailing newline) — asserted
+- [x] `tests/indexer.test.ts` (2 tests)
 
 ## G2 — Log writer + write-hook engine
 - [ ] `src/vault/log.ts` (append-only, newest-first)
