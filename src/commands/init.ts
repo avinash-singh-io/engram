@@ -104,6 +104,8 @@ export function runInit(opts: InitOptions = {}): InitResult {
   put('log.md', readAsset('vault', 'log.md'), 'seed');
   put('.gitignore', readAsset('vault', 'gitignore'), 'seed');
   put('.engram/concept.template.md', readAsset('vault', 'concept.template.md'), 'managed');
+  // Authoritative OKF format reference the agent reads before writing a concept.
+  put('.engram/okf-format.md', readAsset('vault', 'okf-format.md'), 'managed');
   // Setup doc lives under .engram/ so it is not enumerated as a concept.
   put('.engram/obsidian-setup.md', readAsset('obsidian', 'obsidian-setup.md'), 'managed');
   put('inbox/.gitkeep', '', 'seed');

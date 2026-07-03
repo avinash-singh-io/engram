@@ -84,6 +84,8 @@ describe('planMigration / applyMigration', () => {
     expect(plan.items.every((i) => i.valid)).toBe(true);
 
     applyMigration(root, plan);
+    // migration is logged
+    expect(readFileSync(join(root, 'log.md'), 'utf8')).toContain('**Migrated**');
     // re-read + validate on disk
     const check = planMigration(root);
     expect(check.items).toHaveLength(0); // everything conformant now

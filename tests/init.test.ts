@@ -32,11 +32,14 @@ describe('runInit', () => {
       '.engram/config.json',
       '.claude/commands/refine.md',
       '.claude/settings.json',
+      '.engram/okf-format.md',
     ]) {
       expect(existsSync(join(dir, f)), f).toBe(true);
     }
     expect(res.created).toContain('index.md');
     expect(readFileSync(join(dir, 'index.md'), 'utf8')).toContain('okf_version: 0.1');
+    // the contract tells the agent to read the format reference before writing
+    expect(readFileSync(join(dir, 'AGENTS.md'), 'utf8')).toContain('.engram/okf-format.md');
   });
 
   it('is non-destructive on a second run', () => {

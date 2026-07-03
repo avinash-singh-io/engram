@@ -274,6 +274,10 @@ Workflows are deterministic functions replayed against an event history.
 - **The write-hook** (a Claude Code PostToolUse hook `init` scaffolds) revalidates
   a concept on every save, reindexes the affected directories, and appends to
   `log.md` — conformance and freshness by construction.
+- **The format is self-documenting for agents:** `.engram/okf-format.md` (in the
+  vault) is the authoritative concept format, and `AGENTS.md`/`CLAUDE.md` tell the
+  agent to read it *before writing*. Combined with the write-hook rejecting
+  non-conformant writes, an agent can't drift from the format.
 - **Links** are standard, absolute (`/dir/file.md`) — OKF-conformant and readable
   by agents, `grep`, and GitHub alike. A link to a not-yet-written concept is
   valid, not an error.

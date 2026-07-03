@@ -35,10 +35,14 @@ matched), not full bodies. It reads the index map, not the vault.
 
 ## Writing
 
+**Before writing or editing a concept, read [`.engram/okf-format.md`](.engram/okf-format.md)**
+— the authoritative format. Non-conformant writes are **rejected** by the
+write-hook, so get the format right first.
+
 - Capture a raw note:  `engram capture "…"`  → lands in `inbox/`.
 - File a concept:      `engram refine <inbox> --type … --title … --description "One sentence." --tags a,b --to dir/slug.md`
 - Cross-link:          `engram link <concept> --to <other>`
 - Indexes and `log.md` are auto-maintained — never hand-edit `index.md`.
 
 Every concept carries required frontmatter: `type`, `title`, `description`
-(one sentence), `tags`, `timestamp`. Non-conformant writes are rejected.
+(one sentence), `tags`, `timestamp`. Full details: `.engram/okf-format.md`.

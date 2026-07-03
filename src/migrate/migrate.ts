@@ -4,6 +4,7 @@ import { parseFrontmatter } from '../format/frontmatter';
 import { serializeConcept } from '../format/serialize';
 import { validateConcept } from '../format/validate';
 import { reindex } from '../indexer/reindex';
+import { appendLog } from '../vault/log';
 import { readVault, type VaultModel } from '../vault/read';
 import { writeFileManaged } from '../vault/write';
 import { deriveFrontmatter, type DeriveOptions } from './derive';
@@ -83,10 +84,15 @@ export function planMigration(vaultRoot: string, opts: DeriveOptions = {}): Migr
   return { items, alreadyValid };
 }
 
-/** Apply a migration plan (write files, then reindex). Returns written paths. */
+/** Apply a migration plan (write files, log, then reindex). Returns written paths. */
 export function applyMigration(vaultRoot: string, plan: MigrationPlan): string[] {
   for (const item of plan.items) {
     writeFileManaged(join(vaultRoot, item.path), item.newText);
+    appendLog(vaultRoot, {
+      action: 'Migrated',
+      title: String(item.frontmatter.title ?? item.path),
+      link: `/${item.path}`,
+    });
   }
   if (plan.items.length > 0) reindex(vaultRoot);
   return plan.items.map((i) => i.path);
