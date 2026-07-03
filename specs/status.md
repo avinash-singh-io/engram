@@ -1,8 +1,8 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Wave 2 landing — Phase 4 lands (v0.4.0); Phase 3 done, awaiting landing (lands 3rd)
-> **Latest Release**: v0.4.0 (Phase 4 — Ecosystem)
+> **Current Phase**: Wave 2 complete (Phases 2/3/4 landed). Next: Wave 3 — Phase 5 (Semantic Layer, optional)
+> **Latest Release**: v0.5.0 (Phase 3 — Sync + Multi-Device)
 > **Health**: On Track
 
 ## Summary
@@ -23,6 +23,7 @@ stays free across Mac + Android.
 | 1 | MVP Vault + Claude Code | Complete | v0.2.0 |
 | 2 | Progressive-Disclosure Retrieval | Complete | v0.3.0 |
 | 4 | Ecosystem | Complete | v0.4.0 |
+| 3 | Sync + Multi-Device | Complete | v0.5.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -42,7 +43,7 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 3 — Sync | phase-3-sync | done (awaiting landing) | built, green (65 tests) — lands 3rd; M5 device evidence pending |
+| _(none — Wave 2 landed; Wave 3 not yet started)_ | | | |
 
 ## Upcoming Phases
 
@@ -64,8 +65,8 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. Land Phase 3 — Sync (rebase → v0.5.0); M5 device evidence pending (accept automated proof or capture on device).
-2. Open Wave 3 — Phase 5 (Semantic Layer).
+1. Open Wave 3 — Phase 5 (Semantic Layer, optional) — needs Phase 2's `RecallResult`.
+2. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
 
 ## Key Decisions Made
 
@@ -81,9 +82,12 @@ stays free across Mac + Android.
 - ADR-0010 — Bounded-read metric + `/recall` output contract
 - ADR-0011 — Multi-agent adapters converge on AGENTS.md; a new agent is a descriptor
 - ADR-0012 — `/promote` imports momentum artifacts as one-way Reference snapshots
+- ADR-0013 — Canonical free sync path: Obsidian Git + free private GitHub repo
+- ADR-0014 — `engram doctor` + locked round-trip protocol as the M5 verification instrument
 
 ## Recent Changes
 
+- 2026-07-03 — Released v0.5.0 (Phase 3 — Sync + Multi-Device): `engram doctor`, sync recipes, round-trip test. **Wave 2 complete** — 3 lanes built in parallel, landed 2 → 4 → 3.
 - 2026-07-03 — Released v0.4.0 (Phase 4 — Ecosystem): Codex + Antigravity adapters, `/promote` bridge. Rebased onto main; ADRs renumbered 0011/0012 (0010 taken by Phase 2).
 - 2026-07-03 — Released v0.3.0 (Phase 2 — Retrieval); Wave 2 built in 3 parallel lanes.
 - 2026-07-03 — Released v0.2.0 (Phase 1); v0.1.0 (Phase 0).

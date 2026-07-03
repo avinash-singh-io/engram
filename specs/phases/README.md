@@ -6,6 +6,7 @@
 | 1 | MVP Vault + Claude Code | Complete (v0.2.0) | `phase-1-mvp-vault/` |
 | 2 | Progressive-Disclosure Retrieval | Complete (v0.3.0) | `phase-2-retrieval/` |
 | 4 | Ecosystem | Complete (v0.4.0) | `phase-4-ecosystem/` |
+| 3 | Sync + Multi-Device | Complete (v0.5.0) | `phase-3-sync/` |
 
 ## Phase Structure
 
