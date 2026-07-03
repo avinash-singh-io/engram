@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Phase 0 — Foundation (`planned`)
+> **Current Phase**: Phase 0 — Foundation (`in-progress`)
 > **Latest Release**: None
 > **Health**: On Track
 
@@ -39,7 +39,7 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 0 — Foundation | phase-0-foundation | planned | 0/17 tasks — not started |
+| Phase 0 — Foundation | phase-0-foundation | in-progress | 0/17 tasks — started |
 
 ## Upcoming Phases
 
