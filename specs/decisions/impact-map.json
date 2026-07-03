@@ -1,9 +1,31 @@
-{"topics": {
-  "okf-format": ["specs/decisions/0002-okf-v01-format.md", "specs/architecture/overview.md", "specs/phases/phase-0-foundation/overview.md"],
-  "links-wikilinks": ["specs/decisions/0003-standard-links-not-wikilinks.md"],
-  "retrieval": ["specs/decisions/0005-navigate-first-retrieval.md", "specs/architecture/overview.md"],
-  "indexes": ["specs/decisions/0006-auto-generated-indexes.md"],
-  "sync": ["specs/decisions/0004-git-source-of-truth.md"],
-  "engine-primitives": ["specs/decisions/0001-separate-product-shared-engine.md", "specs/decisions/0007-typescript-single-package.md", "specs/architecture/overview.md"],
-  "tooling": ["specs/decisions/0007-typescript-single-package.md", "specs/phases/phase-0-foundation/overview.md"]
-}}
+{
+  "topics": {
+    "okf-format": [
+      "specs/decisions/0002-okf-v01-format.md",
+      "specs/architecture/overview.md",
+      "specs/phases/phase-0-foundation/overview.md"
+    ],
+    "links-wikilinks": [
+      "specs/decisions/0003-standard-links-not-wikilinks.md"
+    ],
+    "retrieval": [
+      "specs/decisions/0005-navigate-first-retrieval.md",
+      "specs/architecture/overview.md"
+    ],
+    "indexes": [
+      "specs/decisions/0006-auto-generated-indexes.md"
+    ],
+    "sync": [
+      "specs/decisions/0004-git-source-of-truth.md"
+    ],
+    "engine-primitives": [
+      "specs/decisions/0001-separate-product-shared-engine.md",
+      "specs/decisions/0007-typescript-single-package.md",
+      "specs/architecture/overview.md"
+    ],
+    "tooling": [
+      "specs/decisions/0007-typescript-single-package.md",
+      "specs/phases/phase-0-foundation/overview.md"
+    ]
+  }
+}

@@ -22,27 +22,27 @@
 - [x] `src/hooks/write-hook.ts` (validate → reindex + log Updated; fail-loud/blocked)
 - [x] `tests/write-hook.test.ts` (5 tests)
 
-## G3 — CLI implementations + dispatch wiring
-- [ ] `registry.ts` register-hook + `cli-program.ts` single dispatch loop + hidden `hook`
-- [ ] `src/adapters/*` (interface + Claude Code adapter)
-- [ ] `src/commands/init.ts` (non-destructive scaffold + settings deep-merge + `--force`)
-- [ ] `src/commands/capture.ts` (text/stdin → inbox)
-- [ ] `src/commands/refine.ts` (inbox → concept, validate-gated, archive, reindex+log)
-- [ ] `src/commands/link.ts` (`--suggest` tag-overlap; insert absolute link; re-validate)
-- [ ] `src/commands/reindex.ts` (delegates; `--check`)
-- [ ] `src/commands/hook.ts` (stdin write-hook entry)
-- [ ] Update `tests/cli.test.ts` (surface + hidden hook)
+## G3 — CLI implementations + dispatch wiring ✅
+- [x] `registry.ts` register-hook + `cli-program.ts` single dispatch loop + hidden `hook`
+- [x] `src/adapters/*` (interface + Claude Code adapter) — shared foundation
+- [x] `src/commands/init.ts` (non-destructive scaffold + settings deep-merge + `--force`)
+- [x] `src/commands/capture.ts` (text/stdin → inbox)
+- [x] `src/commands/refine.ts` (inbox → concept, validate-gated, archive, reindex+log)
+- [x] `src/commands/link.ts` (`--suggest` tag-overlap; insert absolute link; re-validate)
+- [x] `src/commands/reindex.ts` (delegates; `--check`)
+- [x] `src/commands/hook.ts` (stdin write-hook entry; fail-loud exit 2)
+- [x] Update `tests/cli.test.ts` (surface + hidden hook + stub guard)
 
-## G4 — Bundled scaffold assets
-- [ ] `assets/vault/*` (root files, inbox, `.engram/`, `.gitignore`)
-- [ ] `package.json` files[] += assets; runtime asset resolution from dist
+## G4 — Bundled scaffold assets ✅
+- [x] `assets/vault/*` (AGENTS.md, log.md, concept template, gitignore)
+- [x] `package.json` files[] += assets; runtime asset resolution from dist (verified via built binary)
 
-## G5 — Claude Code adapter commands + settings hook
-- [ ] `assets/claude/commands/{capture,refine,link,reindex}.md`
-- [ ] `assets/claude/settings.json` (PostToolUse → `engram hook`)
+## G5 — Claude Code adapter commands + settings hook ✅
+- [x] `assets/claude/commands/{capture,refine,link,reindex}.md`
+- [x] `assets/claude/settings.json` (PostToolUse Write|Edit|MultiEdit → `engram hook`)
 
-## G6 — Obsidian setup doc
-- [ ] `docs/obsidian-setup.md` + `assets/obsidian/*`
+## G6 — Obsidian setup doc ✅
+- [x] `docs/obsidian-setup.md` + `assets/obsidian/obsidian-setup.md` (scaffolded into `.engram/`)
 
 ## G7 — End-to-end acceptance tests
 - [ ] `tests/{vault,init,refine,link,reindex-idempotency,e2e-vault}.test.ts`
