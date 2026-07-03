@@ -48,7 +48,7 @@
 - [x] `tests/init.test.ts` + `tests/e2e-vault.test.ts` (init→capture→refine→link→reindex×2; validate-gate; write-hook) + CliError refactor for testable failures
 - [x] `npm run check` exit 0 — 52 tests; fresh evidence captured this session
 
-## G8 — Tracking, ADRs, docs sync
-- [ ] ADR-0008 (write-hook), ADR-0009 (.engram sidecar)
-- [ ] `/sync-docs`; status/changelog/roadmap; additive `architecture/overview.md`
-- [ ] retrospective + Verification Evidence
+## G8 — Tracking, ADRs, docs sync ✅
+- [x] ADR-0008 (write-hook), ADR-0009 (.engram sidecar) + decisions index
+- [x] status/changelog/roadmap; additive `architecture/overview.md` (Rule 10)
+- [x] retrospective + Verification Evidence

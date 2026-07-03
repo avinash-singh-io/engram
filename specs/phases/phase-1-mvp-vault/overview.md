@@ -1,6 +1,6 @@
 # Phase 1 — MVP Vault + Claude Code
 
-> **Status**: in-progress
+> **Status**: verified — awaiting `/complete-phase`
 > **Branch**: `phase-1-mvp-vault`
 > **Target release**: v0.2.0
 > **Design source**: parallel brainstorm 2026-07-03 (see `specs/planning/parallel-execution-plan.md`)
@@ -45,16 +45,16 @@ maintenance — and Obsidian opens it cleanly with Properties populated.
 - Link suggestion = tag-overlap heuristic only (N3). Refine archives inbox items non-destructively (Principle 6).
 
 ## Acceptance Criteria (Rule 12 — evidence required)
-- [ ] `engram init` (empty dir) creates all scaffold files incl. `.claude/settings.json` PostToolUse hook (asserted)
-- [ ] `engram init` twice is non-destructive; existing `.claude/settings.json` is deep-merged
-- [ ] `engram capture "note"` (and stdin `-`) creates an `inbox/*.md` raw note
-- [ ] `engram refine <inbox> --type … --to system-design/x.md` writes a concept with `validateConcept().ok === true`, archives the inbox item, appends an `Added` log entry
-- [ ] `engram reindex` builds dir + root indexes with the bullet; second `reindex --check` → exit 0 (idempotent)
-- [ ] `engram link a --to b` inserts an absolute markdown link; re-validation has no link warnings
-- [ ] `engram hook` on a sample PostToolUse payload: valid concept → reindex+log (0); invalid → non-zero
-- [ ] `tests/e2e-vault.test.ts` green (empty dir → init → capture → refine → reindex×2)
-- [ ] `npm run check` exits 0 with fresh output this session
-- [ ] public command surface test passes (7 COMMANDS; hidden hook registered)
+- [x] `engram init` (empty dir) creates all scaffold files incl. `.claude/settings.json` PostToolUse hook (asserted)
+- [x] `engram init` twice is non-destructive; existing `.claude/settings.json` is deep-merged
+- [x] `engram capture "note"` (and stdin `-`) creates an `inbox/*.md` raw note
+- [x] `engram refine <inbox> --type … --to system-design/x.md` writes a concept with `validateConcept().ok === true`, archives the inbox item, appends an `Added` log entry
+- [x] `engram reindex` builds dir + root indexes with the bullet; second `reindex --check` → exit 0 (idempotent)
+- [x] `engram link a --to b` inserts an absolute markdown link; re-validation has no link warnings
+- [x] `engram hook` on a sample PostToolUse payload: valid concept → reindex+log (0); invalid → non-zero
+- [x] `tests/e2e-vault.test.ts` green (empty dir → init → capture → refine → reindex×2)
+- [x] `npm run check` exits 0 with fresh output this session
+- [x] public command surface test passes (7 COMMANDS; hidden hook registered)
 
 ## Risks (mitigations in plan.md)
 - PostToolUse payload schema mismatch → payload fixture test + full-vault reindex fallback.

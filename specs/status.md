@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Phase 1 — MVP Vault + Claude Code (`in-progress`) · roadmap running full-auto (Waves 1→2→3)
+> **Current Phase**: Phase 1 verified — awaiting merge to `main` (v0.2.0). Next: Wave 2 (Phases 2 ∥ 3 ∥ 4)
 > **Latest Release**: v0.1.0 (Phase 0 — Foundation)
 > **Health**: On Track
 
@@ -20,6 +20,7 @@ stays free across Mac + Android.
 | Phase | Name | Status | Released |
 |-------|------|--------|---------|
 | 0 | Foundation | Complete | v0.1.0 |
+| 1 | MVP Vault + Claude Code | Verified (awaiting merge) | v0.2.0 (pending) |
 
 ## Ad-hoc / Patch Releases
 
@@ -39,7 +40,7 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 1 — MVP Vault | phase-1-mvp-vault | in-progress | 0/9 groups — started (Wave 1) |
+| Phase 1 — MVP Vault | phase-1-mvp-vault | verified | 9/9 groups — verified, awaiting merge (v0.2.0) |
 
 ## Upcoming Phases
 

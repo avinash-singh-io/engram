@@ -10,7 +10,7 @@
     },
     "phase-1-mvp-vault": {
       "name": "MVP Vault + Claude Code",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-1-mvp-vault",
       "topics": ["okf-format", "vault", "indexes", "tooling", "engine-primitives"]
     }
