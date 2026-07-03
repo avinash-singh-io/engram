@@ -1,5 +1,6 @@
 import type { Command } from 'commander';
 import { registerCapture } from './capture';
+import { registerDoctor } from './doctor';
 import { registerInit } from './init';
 import { registerLink } from './link';
 import { registerPromote } from './promote';
@@ -62,5 +63,11 @@ export const COMMANDS: readonly CommandSpec[] = [
     summary: 'Import a momentum ADR/learning as an OKF concept.',
     phase: 'Phase 4',
     register: registerPromote,
+  },
+  {
+    name: 'doctor',
+    summary: 'Validate every concept and check sync health (read-only).',
+    phase: 'Phase 3',
+    register: registerDoctor,
   },
 ] as const;
