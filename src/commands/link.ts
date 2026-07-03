@@ -5,7 +5,7 @@ import { reindex } from '../indexer/reindex';
 import { appendLog } from '../vault/log';
 import { readVault, type ConceptRecord, type VaultModel } from '../vault/read';
 import { writeFileManaged } from '../vault/write';
-import { fail, requireVaultRoot } from './util';
+import { fail, requireVaultRoot, runCommand } from './util';
 
 function tagsOf(c: ConceptRecord): string[] {
   const t = c.frontmatter?.tags;
@@ -93,5 +93,5 @@ export function registerLink(program: Command): void {
     .description('Suggest and insert cross-links between related concepts. (Phase 1)')
     .option('--to <concept>', 'target concept to link to')
     .option('--suggest', 'list tag-overlap suggestions')
-    .action((concept: string, opts: LinkOptions) => runLink(concept, opts));
+    .action((concept: string, opts: LinkOptions) => runCommand(() => runLink(concept, opts)));
 }

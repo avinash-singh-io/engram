@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import type { Command } from 'commander';
 import { appendLog } from '../vault/log';
 import { writeFileSafe } from '../vault/write';
-import { fileStamp, readStdin, requireVaultRoot, slugify } from './util';
+import { fileStamp, readStdin, requireVaultRoot, runCommand, slugify } from './util';
 
 /** Write a raw note into the vault inbox. Returns the created path. */
 export function runCapture(text: string, cwd = process.cwd()): string {
@@ -23,9 +23,11 @@ export function registerCapture(program: Command): void {
   program
     .command('capture [text]')
     .description('Drop a raw note into the inbox for later refinement. (Phase 1)')
-    .action(async (text: string | undefined) => {
-      const content = text ?? (await readStdin());
-      const abs = runCapture(content);
-      process.stdout.write(`engram: captured -> ${abs}\n`);
-    });
+    .action((text: string | undefined) =>
+      runCommand(async () => {
+        const content = text ?? (await readStdin());
+        const abs = runCapture(content);
+        process.stdout.write(`engram: captured -> ${abs}\n`);
+      }),
+    );
 }

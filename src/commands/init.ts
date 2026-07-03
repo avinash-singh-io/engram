@@ -6,6 +6,7 @@ import { assetsRoot, readAsset } from '../assets';
 import { reindex } from '../indexer/reindex';
 import { defaultConfig, writeConfig } from '../vault/config';
 import { writeFileSafe } from '../vault/write';
+import { runCommand } from './util';
 
 export interface InitOptions {
   dir?: string;
@@ -100,10 +101,12 @@ export function registerInit(program: Command): void {
     .description('Scaffold an OKF-conformant vault in [dir] (default: cwd). (Phase 1)')
     .option('--force', 'overwrite existing managed files')
     .option('--agent <id>', 'agent adapter to scaffold', 'claude')
-    .action((dir: string | undefined, opts: { force?: boolean; agent?: string }) => {
-      const res = runInit({ dir, force: opts.force, agent: opts.agent });
-      process.stdout.write(`engram: initialized vault at ${res.root}\n`);
-      for (const f of res.created) process.stdout.write(`  + ${f}\n`);
-      for (const f of res.skipped) process.stdout.write(`  · ${f} (exists, skipped)\n`);
-    });
+    .action((dir: string | undefined, opts: { force?: boolean; agent?: string }) =>
+      runCommand(() => {
+        const res = runInit({ dir, force: opts.force, agent: opts.agent });
+        process.stdout.write(`engram: initialized vault at ${res.root}\n`);
+        for (const f of res.created) process.stdout.write(`  + ${f}\n`);
+        for (const f of res.skipped) process.stdout.write(`  · ${f} (exists, skipped)\n`);
+      }),
+    );
 }

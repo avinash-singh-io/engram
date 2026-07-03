@@ -7,7 +7,7 @@ import { validateConcept } from '../format/validate';
 import { reindex } from '../indexer/reindex';
 import { appendLog } from '../vault/log';
 import { ensureDir, writeFileSafe } from '../vault/write';
-import { fail, isoTimestamp, parseTags, requireVaultRoot } from './util';
+import { fail, isoTimestamp, parseTags, requireVaultRoot, runCommand } from './util';
 
 export interface RefineOptions {
   to: string;
@@ -73,8 +73,10 @@ export function registerRefine(program: Command): void {
     .option('--type <type>', 'OKF type', 'Concept')
     .option('--tags <csv>', 'comma-separated tags', '')
     .option('--force', 'overwrite an existing destination')
-    .action((inbox: string, opts: RefineOptions) => {
-      const dest = runRefine(inbox, opts);
-      process.stdout.write(`engram: filed -> ${dest}\n`);
-    });
+    .action((inbox: string, opts: RefineOptions) =>
+      runCommand(() => {
+        const dest = runRefine(inbox, opts);
+        process.stdout.write(`engram: filed -> ${dest}\n`);
+      }),
+    );
 }

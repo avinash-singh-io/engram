@@ -44,9 +44,9 @@
 ## G6 — Obsidian setup doc ✅
 - [x] `docs/obsidian-setup.md` + `assets/obsidian/obsidian-setup.md` (scaffolded into `.engram/`)
 
-## G7 — End-to-end acceptance tests
-- [ ] `tests/{vault,init,refine,link,reindex-idempotency,e2e-vault}.test.ts`
-- [ ] `npm run check` green; capture fresh evidence
+## G7 — End-to-end acceptance tests ✅
+- [x] `tests/init.test.ts` + `tests/e2e-vault.test.ts` (init→capture→refine→link→reindex×2; validate-gate; write-hook) + CliError refactor for testable failures
+- [x] `npm run check` exit 0 — 52 tests; fresh evidence captured this session
 
 ## G8 — Tracking, ADRs, docs sync
 - [ ] ADR-0008 (write-hook), ADR-0009 (.engram sidecar)
