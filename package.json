@@ -1,6 +1,6 @@
 {
   "name": "engram",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "OKF-native knowledge base that agents and humans read and write together — durable memory, sibling to momentum.",
   "type": "module",
   "license": "MIT",
