@@ -3,6 +3,7 @@
 | Phase | Name | Status | Directory |
 |-------|------|--------|-----------|
 | 0 | Foundation | Complete (v0.1.0) | `phase-0-foundation/` |
+| 1 | MVP Vault + Claude Code | in-progress | `phase-1-mvp-vault/` |
 
 ## Phase Structure
 
