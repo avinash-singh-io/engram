@@ -10,7 +10,21 @@
     ],
     "retrieval": [
       "specs/decisions/0005-navigate-first-retrieval.md",
+      "specs/decisions/0010-bounded-read-metric-and-recall-contract.md",
       "specs/architecture/overview.md"
+    ],
+    "bounded-read": [
+      "specs/decisions/0010-bounded-read-metric-and-recall-contract.md",
+      "specs/phases/phase-2-retrieval/overview.md"
+    ],
+    "recall-contract": [
+      "specs/decisions/0010-bounded-read-metric-and-recall-contract.md"
+    ],
+    "evaluator": [
+      "tests/benchmarks/recall-v1/README.md"
+    ],
+    "agents-contract": [
+      "assets/vault/AGENTS.md"
     ],
     "indexes": [
       "specs/decisions/0006-auto-generated-indexes.md"

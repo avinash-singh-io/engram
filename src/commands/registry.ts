@@ -2,6 +2,7 @@ import type { Command } from 'commander';
 import { registerCapture } from './capture';
 import { registerInit } from './init';
 import { registerLink } from './link';
+import { registerRecall } from './recall';
 import { registerRefine } from './refine';
 import { registerReindex } from './reindex';
 
@@ -53,6 +54,7 @@ export const COMMANDS: readonly CommandSpec[] = [
     name: 'recall',
     summary: 'Navigate the vault and return the minimal relevant concepts.',
     phase: 'Phase 2',
+    register: registerRecall,
   },
   {
     name: 'promote',

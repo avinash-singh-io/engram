@@ -13,6 +13,12 @@
       "status": "complete",
       "directory": "phase-1-mvp-vault",
       "topics": ["okf-format", "vault", "indexes", "tooling", "engine-primitives"]
+    },
+    "phase-2-retrieval": {
+      "name": "Progressive-Disclosure Retrieval",
+      "status": "complete",
+      "directory": "phase-2-retrieval",
+      "topics": ["retrieval", "indexes", "okf-format"]
     }
   }
 }

@@ -1,8 +1,8 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Phase 1 verified — awaiting merge to `main` (v0.2.0). Next: Wave 2 (Phases 2 ∥ 3 ∥ 4)
-> **Latest Release**: v0.1.0 (Phase 0 — Foundation)
+> **Current Phase**: Wave 2 landing — Phase 2 lands (v0.3.0); Phases 4 & 3 done, awaiting landing (order 2 → 4 → 3)
+> **Latest Release**: v0.3.0 (Phase 2 — Progressive-Disclosure Retrieval)
 > **Health**: On Track
 
 ## Summary
@@ -20,7 +20,8 @@ stays free across Mac + Android.
 | Phase | Name | Status | Released |
 |-------|------|--------|---------|
 | 0 | Foundation | Complete | v0.1.0 |
-| 1 | MVP Vault + Claude Code | Verified (awaiting merge) | v0.2.0 (pending) |
+| 1 | MVP Vault + Claude Code | Complete | v0.2.0 |
+| 2 | Progressive-Disclosure Retrieval | Complete | v0.3.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -40,17 +41,14 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 1 — MVP Vault | phase-1-mvp-vault | verified | 9/9 groups — verified, awaiting merge (v0.2.0) |
+| Phase 4 — Ecosystem | phase-4-ecosystem | done (awaiting landing) | built, green (94 tests) — lands 2nd |
+| Phase 3 — Sync | phase-3-sync | done (awaiting landing) | built, green (65 tests) — lands 3rd; M5 device evidence pending |
 
 ## Upcoming Phases
 
 | Phase | Name | Status | Key Deliverables |
 |-------|------|--------|-----------------|
-| Phase 1 | MVP Vault + Claude Code | planned | `engram init`; `/capture` `/refine` `/link` `/reindex`; write-hook; Obsidian setup doc |
-| Phase 2 | Progressive-Disclosure Retrieval | planned | `/recall` structural nav; `AGENTS.md` contract; bounded-read measurement |
-| Phase 3 | Sync + Multi-Device | planned | git-spine; Remotely Save→S3 & Obsidian Git recipes; Mac↔Android round-trip |
-| Phase 4 | Ecosystem | planned | Codex/Antigravity adapters; `/promote` bridge from momentum |
-| Phase 5 (optional) | Semantic Layer | planned | embeddings index + MCP `recall`; hybrid navigate+retrieve |
+| Phase 5 (optional) | Semantic Layer | planned (Wave 3) | embeddings index + MCP `recall`; hybrid navigate+retrieve |
 
 ## Blockers
 
@@ -66,7 +64,8 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. Run `/complete-phase` to verify and release Phase 0 — Foundation (merge `phase-0-foundation`, tag v0.1.0).
+1. Land Phase 4 — Ecosystem (rebase → reconcile registry/ADR numbers → v0.4.0), then Phase 3 — Sync (v0.5.0).
+2. Open Wave 3 — Phase 5 (Semantic Layer) once Phase 2 is on `main`.
 
 ## Key Decisions Made
 
@@ -77,7 +76,11 @@ stays free across Mac + Android.
 - ADR-0005 — Navigate-first retrieval; RAG optional
 - ADR-0006 — Auto-generated indexes
 - ADR-0007 — TypeScript single-package MVP; vendor the engine, extract later
+- ADR-0008 — Write-hook as a hidden subcommand driven by PostToolUse
+- ADR-0009 — `.engram/` tooling sidecar directory
+- ADR-0010 — Bounded-read metric + `/recall` output contract
 
 ## Recent Changes
 
-- 2026-07-03 — Project scaffolded from the Engram PRD: vision, roadmap (Phase 0 + PRD Phases 1–5), 7 ADRs, Phase 0 planned, backlog seeded.
+- 2026-07-03 — Wave 2 built in 3 parallel lanes (worktrees); Phase 2 (Retrieval) landing as v0.3.0.
+- 2026-07-03 — Released v0.2.0 (Phase 1 — MVP Vault); v0.1.0 (Phase 0 — Foundation).

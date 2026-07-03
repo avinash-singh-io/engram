@@ -1,0 +1,69 @@
+{
+  "version": "recall-v1",
+  "frozen": "2026-07-03",
+  "note": "Locked recall evaluator (Rule 11). The scalar is recall-correctness + bounded body-reads. Do NOT mutate; version-bump to recall-v2 for any change and rerun prior runs against v2.",
+  "vault": "vault",
+  "conceptCount": 126,
+  "indexCount": 20,
+  "defaults": {
+    "maxBodyReads": 0,
+    "maxFilesFraction": 0.2,
+    "max": 5
+  },
+  "queries": [
+    {
+      "id": "temporal",
+      "query": "temporal workflow determinism replay durability",
+      "expectedConceptIds": ["distributed-systems/temporal/temporal-internals"]
+    },
+    {
+      "id": "raft",
+      "query": "raft leader election log replication consensus",
+      "expectedConceptIds": ["distributed-systems/consensus/raft-consensus"]
+    },
+    {
+      "id": "idempotency",
+      "query": "idempotency keys safe retries effectively once",
+      "expectedConceptIds": ["system-design/idempotency-patterns"]
+    },
+    {
+      "id": "btree",
+      "query": "b-tree index range lookup logarithmic",
+      "expectedConceptIds": ["databases/indexing/b-tree-indexes"]
+    },
+    {
+      "id": "rust-ownership",
+      "query": "rust ownership borrow checker memory safety",
+      "expectedConceptIds": ["languages/rust/ownership-and-borrowing"]
+    },
+    {
+      "id": "ts-structural",
+      "query": "typescript structural typing shape compatibility",
+      "expectedConceptIds": ["languages/typescript/structural-typing"]
+    },
+    {
+      "id": "bloom",
+      "query": "bloom filter probabilistic membership false positive",
+      "expectedConceptIds": ["algorithms/probabilistic/bloom-filters"]
+    },
+    {
+      "id": "consistent-hashing",
+      "query": "consistent hashing key distribution nodes",
+      "expectedConceptIds": ["system-design/consistent-hashing"]
+    },
+    {
+      "id": "salary-tag",
+      "query": "salary negotiation compensation offer",
+      "tags": ["interview"],
+      "expectedConceptIds": ["interview/salary-negotiation"]
+    },
+    {
+      "id": "tracing-sections",
+      "query": "distributed tracing context propagation request path",
+      "sections": true,
+      "max": 3,
+      "maxBodyReads": 3,
+      "expectedConceptIds": ["observability/distributed-tracing"]
+    }
+  ]
+}
