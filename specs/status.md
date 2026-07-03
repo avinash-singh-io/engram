@@ -1,8 +1,8 @@
 # Project Status
 
 > **Last Updated**: 2026-07-03
-> **Current Phase**: Phase 0 — Foundation (`planned`)
-> **Latest Release**: None
+> **Current Phase**: None — Phase 0 released; Phase 1 (MVP Vault + Claude Code) next
+> **Latest Release**: v0.1.0 (Phase 0 — Foundation)
 > **Health**: On Track
 
 ## Summary
@@ -19,7 +19,7 @@ stays free across Mac + Android.
 
 | Phase | Name | Status | Released |
 |-------|------|--------|---------|
-| _(none yet)_ | | | |
+| 0 | Foundation | Complete | v0.1.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -39,7 +39,7 @@ stays free across Mac + Android.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 0 — Foundation | phase-0-foundation | planned | 0/17 tasks — not started |
+| _(none — no active phase)_ | | | |
 
 ## Upcoming Phases
 
@@ -65,7 +65,7 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. Run `/start-phase` to begin Phase 0 — Foundation (creates the `phase-0-foundation` branch).
+1. Run `/complete-phase` to verify and release Phase 0 — Foundation (merge `phase-0-foundation`, tag v0.1.0).
 
 ## Key Decisions Made
 

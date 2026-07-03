@@ -1,0 +1,4 @@
+{
+  "//": "Scopes momentum's CommonJS git hooks (run-check.js, contract.js) back to CJS. The repo root package.json sets \"type\": \"module\" for the Engram ESM package, which would otherwise force these .js hooks to be parsed as ESM and break `require`. See backlog TD-002; re-verify after `momentum upgrade`.",
+  "type": "commonjs"
+}

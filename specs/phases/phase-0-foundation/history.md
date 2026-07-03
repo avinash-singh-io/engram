@@ -34,3 +34,79 @@ Phase 0 (Rule 11). Freeze v1 before any validator-tuning loop; corpus changes
 go to a v2, never mutate v1.
 
 ---
+
+### [NOTE] 2026-07-03 — Group 0 complete: TypeScript package + toolchain green
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: none
+Detail: Bootstrapped the ESM TypeScript package (`bin: engram`) with tsup build,
+vitest, eslint 9 flat config + prettier, and a GitHub Actions CI workflow.
+Verified fresh: build, typecheck, lint, format:check, and a smoke test all green;
+`node dist/cli.js` prints `engram 0.1.0`. Used package.json `files: ["dist"]`
+instead of a separate `.npmignore`.
+
+---
+
+### [DISCOVERY] 2026-07-03 — ESM package breaks momentum's CJS git hooks
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: specs/backlog/backlog.md
+Detail: Setting `"type": "module"` in the root package.json made Node parse
+momentum's `.githooks/run-check.js` and `contract.js` (CommonJS `require`) as
+ESM, which crashed the commit-msg hook. Fixed non-invasively with a
+`.githooks/package.json` `{"type":"commonjs"}` scope override (no momentum file
+touched). Tracked as TD-002 — must be re-verified after `momentum upgrade`,
+which could add new `.js` hooks or remove the scope file.
+
+---
+
+### [DECISION] 2026-07-03 — OKF conformance spec: locked validator contract
+Topics: okf-format
+Affects-phases: phase-0-foundation
+Affects-specs: docs/okf-conformance.md
+Detail: Wrote the Engram OKF v0.1 conformance profile as the validator contract.
+Split rules into ERROR (reject: missing/invalid required fields) vs WARNING
+(allow: one-sentence/length heuristics, empty tags, link-form). Link checks are
+WARNING-only to honor broken-link tolerance (NFR-5). The error/warning code list
+is locked v1 alongside the fixtures corpus (Rule 11); changes go to a v2 spec.
+
+---
+
+### [NOTE] 2026-07-03 — Group 2 complete: format core library green
+Topics: okf-format, tooling
+Affects-phases: phase-0-foundation
+Affects-specs: none
+Detail: Implemented the format core in `src/format/` — frontmatter parser
+(BOM/CRLF tolerant), the OKF validator (error/warning codes per the spec),
+link extraction/classification, and the concept-ID/path resolver. Locked a v1
+fixtures corpus (16 files + `expected.json`) driving a data-driven test. Verified
+fresh: 27/27 tests, typecheck, lint, format:check, and build all green; dist
+exports the full format API.
+
+---
+
+### [NOTE] 2026-07-03 — Group 3 complete: CLI skeleton green
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: none
+Detail: Built the commander-based CLI. `src/cli-program.ts` builds the program
+(testable); `src/cli.ts` is the thin bin entry that parses argv. Registered all
+seven subcommand stubs (init/capture/refine/link/reindex/recall/promote) from
+`src/commands/registry.ts`, each exiting 2 with a "not yet implemented" note.
+Verified: `--version` → 0.1.0, `--help` lists all commands, unknown command
+errors; 30/30 tests green.
+
+---
+
+### [NOTE] 2026-07-03 — Group 4 complete: Phase 0 verified
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: specs/phases/phase-0-foundation/overview.md#acceptance-criteria
+Detail: Ran the full pipeline as one authoritative check — `npm run check`
+(typecheck + lint + format:check + test + build) exited 0, 30/30 tests, CLI smoke
+(`--version` → 0.1.0, `--help` exit 0, stub → exit 2). All five acceptance
+criteria met with fresh evidence (Rule 12). Phase 0 is verified and awaiting
+`/complete-phase` (merge + tag v0.1.0). No merge/release performed — that is the
+hard-stop gate for user approval.
+
+---

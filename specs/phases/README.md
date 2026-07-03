@@ -2,7 +2,7 @@
 
 | Phase | Name | Status | Directory |
 |-------|------|--------|-----------|
-| 0 | Foundation | planned | `phase-0-foundation/` |
+| 0 | Foundation | Complete (v0.1.0) | `phase-0-foundation/` |
 
 ## Phase Structure
 
