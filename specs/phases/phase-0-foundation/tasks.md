@@ -25,8 +25,8 @@
 - [x] Unit tests over the corpus — 27 tests green (17 fixture cases)
 
 ## Group 3 — CLI Skeleton
-- [ ] CLI entry with `commander`: `--version`, `--help`
-- [ ] Subcommand registry stubs (init/capture/refine/link/reindex/recall/promote)
+- [x] CLI entry with `commander`: `--version`, `--help` (`src/cli.ts` + `src/cli-program.ts`)
+- [x] Subcommand registry stubs (init/capture/refine/link/reindex/recall/promote) — `src/commands/registry.ts`
 
 ## Group 4 — Verification
 - [ ] `npm test` green (validator passes valid, rejects malformed)

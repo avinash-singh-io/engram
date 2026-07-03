@@ -84,3 +84,16 @@ fresh: 27/27 tests, typecheck, lint, format:check, and build all green; dist
 exports the full format API.
 
 ---
+
+### [NOTE] 2026-07-03 — Group 3 complete: CLI skeleton green
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: none
+Detail: Built the commander-based CLI. `src/cli-program.ts` builds the program
+(testable); `src/cli.ts` is the thin bin entry that parses argv. Registered all
+seven subcommand stubs (init/capture/refine/link/reindex/recall/promote) from
+`src/commands/registry.ts`, each exiting 2 with a "not yet implemented" note.
+Verified: `--version` → 0.1.0, `--help` lists all commands, unknown command
+errors; 30/30 tests green.
+
+---
