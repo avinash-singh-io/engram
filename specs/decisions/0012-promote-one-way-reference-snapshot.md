@@ -1,4 +1,4 @@
-# 0011 — /promote imports momentum artifacts as one-way Reference snapshots
+# 0012 — /promote imports momentum artifacts as one-way Reference snapshots
 
 > **Status**: accepted
 > **Date**: 2026-07-03

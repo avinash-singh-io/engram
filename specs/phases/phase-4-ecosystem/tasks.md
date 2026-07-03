@@ -32,5 +32,5 @@
 ## G5 — E2E, golden lock, docs, tracking ✅
 - [x] `tests/e2e/promote.test.ts` (2) + `tests/e2e/adapters.test.ts` (5)
 - [x] `docs/adapters.md` + `docs/promote.md`
-- [x] ADR-0010, ADR-0011 + decisions index + impact-map topics
+- [x] ADR-0011, ADR-0012 + decisions index + impact-map topics
 - [x] `npm run check` exit 0 (94 tests, fresh evidence) + built-binary smoke; tasks/history updated

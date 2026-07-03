@@ -2,7 +2,7 @@
 
 > Import a momentum ADR or history/learning entry into the vault as a one-way
 > OKF `Reference` concept. See
-> [ADR-0011](../specs/decisions/0011-promote-one-way-reference-snapshot.md) and
+> [ADR-0012](../specs/decisions/0012-promote-one-way-reference-snapshot.md) and
 > [ADR-0001](../specs/decisions/0001-separate-product-shared-engine.md).
 
 ## Contract

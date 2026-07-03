@@ -51,10 +51,10 @@ passes the Phase 0 `validateConcept` gate.
 
 ## Key decisions (→ ADRs)
 
-- **ADR-0010** — Multi-agent adapters converge on the shared root `AGENTS.md`
+- **ADR-0011** — Multi-agent adapters converge on the shared root `AGENTS.md`
   traversal contract plus a thin per-agent command wrapper rendered from one
   shared command-definition set; a new agent is a descriptor.
-- **ADR-0011** — `/promote` imports momentum artifacts as one-way `Reference`
+- **ADR-0012** — `/promote` imports momentum artifacts as one-way `Reference`
   snapshots with a `# Source` provenance block, reading momentum by file path
   only (no code dependency; upholds ADR-0001); `validateConcept` is a hard
   pre-write gate.

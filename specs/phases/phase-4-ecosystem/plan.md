@@ -59,5 +59,5 @@ its own.
 
 - `tests/e2e/promote.test.ts`, `tests/e2e/adapters.test.ts`.
 - `docs/adapters.md`, `docs/promote.md`.
-- ADR-0010, ADR-0011 + decisions index + impact-map topics.
+- ADR-0011, ADR-0012 + decisions index + impact-map topics.
 - `npm run check` exit 0 (fresh Rule 12 evidence); update tasks.md/history.md.

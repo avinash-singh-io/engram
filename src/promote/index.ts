@@ -1,6 +1,6 @@
 /**
  * Promote bridge — import a momentum ADR/learning as a one-way OKF `Reference`
- * concept (ADR-0011). Reads momentum artifacts by file path only; no momentum
+ * concept (ADR-0012). Reads momentum artifacts by file path only; no momentum
  * code or SDK dependency (ADR-0001).
  */
 export { parseMomentum } from './parse-momentum';

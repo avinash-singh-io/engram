@@ -21,4 +21,4 @@
 | `learning-entry.md` | `momentum/phases/phase-3-loop/history.md` | `references` |
 
 Every expected concept passes `validateConcept` with zero errors — that is the
-promote write gate (ADR-0011).
+promote write gate (ADR-0012).

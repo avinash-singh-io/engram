@@ -2,7 +2,7 @@
  * Shared command-definition set — the single source of command semantics that
  * every agent adapter renders. Each adapter wraps these definitions in its own
  * per-agent file convention (Claude slash-command, Codex prompt, Antigravity
- * command), so adding an agent is a thin descriptor, not a fork (ADR-0010).
+ * command), so adding an agent is a thin descriptor, not a fork (ADR-0011).
  *
  * Instruction bodies are agent-neutral: they describe the `engram` CLI flow the
  * agent should drive. The root `AGENTS.md` (emitted by `engram init`, shared by

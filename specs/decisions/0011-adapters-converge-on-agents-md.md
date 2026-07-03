@@ -1,4 +1,4 @@
-# 0010 — Multi-agent adapters converge on AGENTS.md; a new agent is a descriptor
+# 0011 — Multi-agent adapters converge on AGENTS.md; a new agent is a descriptor
 
 > **Status**: accepted
 > **Date**: 2026-07-03

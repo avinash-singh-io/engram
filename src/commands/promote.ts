@@ -42,7 +42,7 @@ function printValidation(v: ValidationResult): void {
 /**
  * Promote a momentum artifact into the vault as a one-way OKF `Reference`
  * concept. Reads the source as plain text (no momentum code dependency,
- * ADR-0001), validates before writing (hard gate, ADR-0011), then reuses the
+ * ADR-0001), validates before writing (hard gate, ADR-0012), then reuses the
  * Phase 1 reindex + log writer to link the concept in.
  */
 export function runPromote(sourceArg: string, opts: PromoteOptions = {}): PromoteCommandResult {
@@ -82,7 +82,7 @@ export function runPromote(sourceArg: string, opts: PromoteOptions = {}): Promot
     };
   }
 
-  // HARD GATE: never write a non-conformant concept (ADR-0011).
+  // HARD GATE: never write a non-conformant concept (ADR-0012).
   if (!result.ok) {
     fail(
       'refusing to promote a non-conformant concept:\n' +

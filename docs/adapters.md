@@ -1,7 +1,7 @@
 # Agent adapters
 
 > How Engram scaffolds an agent's command surface, and how to add a new agent.
-> See [ADR-0010](../specs/decisions/0010-adapters-converge-on-agents-md.md).
+> See [ADR-0011](../specs/decisions/0011-adapters-converge-on-agents-md.md).
 
 ## The model
 
@@ -55,7 +55,7 @@ and never pollute `index.md`.
 
 ## Adding a new agent
 
-A new agent is a **descriptor, not a fork** (ADR-0010):
+A new agent is a **descriptor, not a fork** (ADR-0011):
 
 1. Create `src/adapters/<agent>.ts` exporting an `Adapter`. Render each entry of
    `COMMAND_DEFINITIONS` into the agent's file convention (add a

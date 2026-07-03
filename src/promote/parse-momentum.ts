@@ -1,7 +1,7 @@
 /**
  * Parse a momentum artifact from plain text — an ADR or a history/learning
  * entry. Engram reads momentum files as text only; it never imports momentum
- * code or its SDK (ADR-0001 no-runtime-coupling, ADR-0011). The parser is a
+ * code or its SDK (ADR-0001 no-runtime-coupling, ADR-0012). The parser is a
  * tolerant heuristic: anything it cannot recognize still yields a usable
  * artifact so the downstream validate-before-write gate can reject bad mappings.
  */

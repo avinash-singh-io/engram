@@ -42,11 +42,11 @@
       "specs/phases/phase-0-foundation/overview.md"
     ],
     "adapters": [
-      "specs/decisions/0010-adapters-converge-on-agents-md.md",
+      "specs/decisions/0011-adapters-converge-on-agents-md.md",
       "docs/adapters.md"
     ],
     "promote": [
-      "specs/decisions/0011-promote-one-way-reference-snapshot.md",
+      "specs/decisions/0012-promote-one-way-reference-snapshot.md",
       "docs/promote.md"
     ],
     "ecosystem": [

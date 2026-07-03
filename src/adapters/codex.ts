@@ -6,7 +6,7 @@ import type { Adapter, AdapterFile } from './types';
  * contract, emitted by `engram init`) and exposes each engram command as a Codex
  * custom prompt under `.codex/prompts/<name>.md`, invokable as `/<name>`. The
  * command bodies are rendered from the same shared definitions as every other
- * agent, so Codex is a descriptor, not a fork (ADR-0010).
+ * agent, so Codex is a descriptor, not a fork (ADR-0011).
  */
 export const codexAdapter: Adapter = {
   id: 'codex',

@@ -8,7 +8,7 @@ import { toConcept } from './to-concept';
  * Pure promote pipeline: parse a momentum artifact → map to an OKF concept →
  * `validateConcept` (the hard gate). It never writes; `result.ok` reflects the
  * gate and the caller MUST refuse to place a non-conformant concept, so the
- * vault can never contain an invalid promoted concept (ADR-0011).
+ * vault can never contain an invalid promoted concept (ADR-0012).
  */
 
 export interface PromoteInput {
