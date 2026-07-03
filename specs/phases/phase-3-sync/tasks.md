@@ -27,7 +27,7 @@
 ## G6 — Verified procedure + M5 evidence + tracking ✅ (device screenshots pending)
 - [x] `docs/sync/round-trip.md` (instrument table, automated proof, real-device procedure, frozen pass criteria)
 - [x] `specs/phases/phase-3-sync/evidence/README.md` (capture checklist + status)
-- [x] ADR-0010 (canonical free path) + ADR-0011 (M5 instrument) + decisions README + impact-map
+- [x] ADR-0013 (canonical free path) + ADR-0014 (M5 instrument) + decisions README + impact-map
 - [x] `overview.md`, `plan.md`, `tasks.md`, `history.md`
 - [x] own-row `status.md`; append `changelog/2026-07.md`
 - [x] `npm run check` exit 0 — 65 tests; fresh evidence captured this session

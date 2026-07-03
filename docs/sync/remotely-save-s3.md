@@ -5,7 +5,7 @@
 > and is a natural fit if you already run AWS. But it is **free only within AWS's
 > 12-month / 5 GB free tier**; after that it bills per GB-month + requests. The
 > **canonical free path is [Obsidian Git](obsidian-git.md)**
-> ([ADR-0010](../../specs/decisions/0010-canonical-free-sync-path.md)).
+> ([ADR-0013](../../specs/decisions/0013-canonical-free-sync-path.md)).
 >
 > Even with this leg, **git remains the source of truth**
 > ([ADR-0004](../../specs/decisions/0004-git-source-of-truth.md)): the S3 copy is

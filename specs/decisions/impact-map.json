@@ -31,14 +31,14 @@
     ],
     "sync": [
       "specs/decisions/0004-git-source-of-truth.md",
-      "specs/decisions/0010-canonical-free-sync-path.md",
+      "specs/decisions/0013-canonical-free-sync-path.md",
       "docs/sync/git-spine.md",
       "docs/sync/obsidian-git.md",
       "docs/sync/remotely-save-s3.md",
       "docs/sync/round-trip.md"
     ],
     "sync-verification": [
-      "specs/decisions/0011-m5-verification-instrument.md",
+      "specs/decisions/0014-m5-verification-instrument.md",
       "src/commands/doctor.ts",
       "docs/sync/round-trip.md"
     ],

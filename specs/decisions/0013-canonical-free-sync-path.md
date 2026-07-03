@@ -1,4 +1,4 @@
-# 0010 — Canonical free sync path: Obsidian Git + free private GitHub repo
+# 0013 — Canonical free sync path: Obsidian Git + free private GitHub repo
 
 > **Status**: accepted
 > **Date**: 2026-07-03

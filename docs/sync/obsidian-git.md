@@ -1,7 +1,7 @@
 # Mobile leg: Obsidian Git on Android (canonical free path)
 
 > This is the **canonical zero-cost, verified path** the Mac↔Android round-trip
-> (M5) is proven against ([ADR-0010](../../specs/decisions/0010-canonical-free-sync-path.md)).
+> (M5) is proven against ([ADR-0013](../../specs/decisions/0013-canonical-free-sync-path.md)).
 > It pairs a **free private GitHub repo** with the **Obsidian Git** community
 > plugin so the phone pulls the same git history the Mac writes — diffs and
 > revert reach the device, and it stays free with no expiry.

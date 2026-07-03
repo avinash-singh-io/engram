@@ -26,7 +26,7 @@ The vault is personal knowledge — the remote **must be private**.
 
 | Option | Cost | Notes |
 |--------|------|-------|
-| **GitHub free private repo** (recommended) | Free, no expiry | Unlimited private repos on the free plan; pairs with Obsidian Git on Android. This is the **canonical free path** ([ADR-0010](../../specs/decisions/0010-canonical-free-sync-path.md)). |
+| **GitHub free private repo** (recommended) | Free, no expiry | Unlimited private repos on the free plan; pairs with Obsidian Git on Android. This is the **canonical free path** ([ADR-0013](../../specs/decisions/0013-canonical-free-sync-path.md)). |
 | GitLab / Bitbucket private repo | Free tier | Equivalent; pick what you already use. |
 | Self-hosted bare repo over SSH | Free (your box) | `git init --bare` on any always-on machine; maximum control, no third party. |
 

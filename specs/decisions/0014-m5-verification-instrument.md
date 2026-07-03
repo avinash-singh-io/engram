@@ -1,4 +1,4 @@
-# 0011 — `engram doctor` + locked round-trip protocol as the M5 verification instrument
+# 0014 — `engram doctor` + locked round-trip protocol as the M5 verification instrument
 
 > **Status**: accepted
 > **Date**: 2026-07-03
@@ -49,7 +49,7 @@ The **M5 evaluator is frozen** (Rule 11) as: a concept written via the format
 core is **byte-faithful AND OKF-valid** on the far side after **both** a
 simulated git-clone transport and an S3 object-copy transport (including
 adversarial CRLF/BOM/unicode-NFD cases), plus a real-device Obsidian eyeball via
-the canonical free path ([ADR-0010](0010-canonical-free-sync-path.md)). This
+the canonical free path ([ADR-0013](0013-canonical-free-sync-path.md)). This
 protocol lives in `tests/round-trip.test.ts` + `tests/fixtures/sync/`. It is
 version-bumped, never mutated, if it must change (Rule 11).
 

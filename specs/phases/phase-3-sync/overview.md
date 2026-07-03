@@ -28,7 +28,7 @@ procedure closes M5.
   write node, commit cadence, revert workflow (NFR-4), PAT/SSH auth, read-mostly
   discipline; plus `assets/vault.gitignore` and `assets/s3-iam-policy.json`.
 - **Obsidian Git (Android) recipe** (`docs/sync/obsidian-git.md`) — the
-  **canonical zero-cost verified path** for M5 (ADR-0010).
+  **canonical zero-cost verified path** for M5 (ADR-0013).
 - **Remotely Save → S3 recipe** (`docs/sync/remotely-save-s3.md`) — AWS-native
   alternative; E2E encryption + out-of-band key management; scheduled sync;
   labelled *not free past the AWS free tier*.
@@ -52,9 +52,9 @@ procedure closes M5.
   handed off, not implemented here.
 
 ## Key decisions (→ ADRs)
-- **ADR-0010** — Canonical free sync path = Obsidian Git + free private GitHub
+- **ADR-0013** — Canonical free sync path = Obsidian Git + free private GitHub
   repo (M5 proven against this); Remotely Save → S3 is the AWS-native alternative.
-- **ADR-0011** — `engram doctor` (read-only checker, reuses the format core) +
+- **ADR-0014** — `engram doctor` (read-only checker, reuses the format core) +
   the frozen round-trip protocol (byte-fidelity + OKF-validity through git-clone
   and S3-copy transports + a real-device eyeball) as the locked M5 evaluator
   (Rule 11).
@@ -75,7 +75,7 @@ procedure closes M5.
 - Two channels (git + S3) off one folder can diverge → read-mostly + doctor
   conflict-marker detection.
 - Remotely Save → S3 not free past the AWS free tier → Obsidian Git is the named
-  canonical free path (ADR-0010).
+  canonical free path (ADR-0013).
 - Android plugin auth / scoped storage is fiddly and version-sensitive → pin
   versions, capture dated screenshots.
 - Line-ending/BOM/unicode mangling can corrupt frontmatter → round-trip test

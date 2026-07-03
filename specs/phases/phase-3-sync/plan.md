@@ -48,7 +48,7 @@ cloned checkout.
 
 ### G6 — Verified procedure + M5 evidence + tracking
 `docs/sync/round-trip.md`; `evidence/README.md` (capture checklist + status);
-ADR-0010, ADR-0011; phase `overview/plan/tasks/history`; own-row `status.md`;
+ADR-0013, ADR-0014; phase `overview/plan/tasks/history`; own-row `status.md`;
 append `changelog/2026-07.md`.
 
 ## Verification (Rule 12)

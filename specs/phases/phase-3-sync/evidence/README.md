@@ -1,7 +1,7 @@
 # Phase 3 — M5 evidence
 
 > Verification evidence for the Mac↔Android round-trip (metric M5). The pass
-> protocol is frozen in [ADR-0011](../../../decisions/0011-m5-verification-instrument.md);
+> protocol is frozen in [ADR-0014](../../../decisions/0014-m5-verification-instrument.md);
 > the procedure is [`docs/sync/round-trip.md`](../../../../docs/sync/round-trip.md).
 
 ## Capture checklist

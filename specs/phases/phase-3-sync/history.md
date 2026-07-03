@@ -13,10 +13,10 @@ Engram stays sync-agnostic (ADR-0004). Lands last of Wave 2 (order 2 → 4 → 3
 
 ---
 
-### [DECISION] 2026-07-03 — ADR-0010: canonical free sync path
+### [DECISION] 2026-07-03 — ADR-0013: canonical free sync path
 Topics: sync
 Affects-phases: phase-3-sync
-Affects-specs: specs/decisions/0010-canonical-free-sync-path.md
+Affects-specs: specs/decisions/0013-canonical-free-sync-path.md
 Detail: ADR-0004 named two mobile legs without deciding which M5 is proven
 against. Decided the **canonical free, verified path is Obsidian Git + a free
 private GitHub repo** (zero cost, no expiry, git-native so diffs/revert reach the
@@ -26,10 +26,10 @@ out-of-band and git — not S3 — is the recovery source of truth.
 
 ---
 
-### [DECISION] 2026-07-03 — ADR-0011: `engram doctor` + frozen round-trip protocol as the M5 instrument
+### [DECISION] 2026-07-03 — ADR-0014: `engram doctor` + frozen round-trip protocol as the M5 instrument
 Topics: sync-verification, tooling
 Affects-phases: phase-3-sync
-Affects-specs: specs/decisions/0011-m5-verification-instrument.md
+Affects-specs: specs/decisions/0014-m5-verification-instrument.md
 Detail: M5 needed a checkable proof, not an eyeball. Shipped `engram doctor`, a
 read-only command that reuses the shipped `validateConcept` + `reindex --check`
 and adds sync-health checks (conflict markers, CRLF/BOM, case-fold collisions,

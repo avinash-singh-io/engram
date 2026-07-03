@@ -3,10 +3,10 @@
 > **Goal (M5):** a concept an agent writes on the Mac appears — OKF-valid and
 > rendering with Properties — in Obsidian on Android, via the **canonical free
 > path** ([Obsidian Git](obsidian-git.md) + a free private GitHub repo,
-> [ADR-0010](../../specs/decisions/0010-canonical-free-sync-path.md)).
+> [ADR-0013](../../specs/decisions/0013-canonical-free-sync-path.md)).
 >
 > The pass/fail protocol is **frozen** (Rule 11,
-> [ADR-0011](../../specs/decisions/0011-m5-verification-instrument.md)): a concept
+> [ADR-0014](../../specs/decisions/0014-m5-verification-instrument.md)): a concept
 > is **byte-faithful AND OKF-valid** on the far side after transport, confirmed
 > by `engram doctor` on a clean checkout plus a real-device Obsidian eyeball.
 
