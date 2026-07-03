@@ -25,6 +25,12 @@
       "status": "complete",
       "directory": "phase-4-ecosystem",
       "topics": ["adapters", "promote", "ecosystem", "engine-primitives"]
+    },
+    "phase-3-sync": {
+      "name": "Sync + Multi-Device",
+      "status": "complete",
+      "directory": "phase-3-sync",
+      "topics": ["sync", "okf-format", "tooling"]
     }
   }
 }

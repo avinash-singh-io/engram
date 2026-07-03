@@ -19,6 +19,8 @@
 | [0010](0010-bounded-read-metric-and-recall-contract.md) | Bounded-read metric + `/recall` output contract | accepted | 2026-07-03 |
 | [0011](0011-adapters-converge-on-agents-md.md) | Multi-agent adapters converge on AGENTS.md; a new agent is a descriptor | accepted | 2026-07-03 |
 | [0012](0012-promote-one-way-reference-snapshot.md) | /promote imports momentum artifacts as one-way Reference snapshots | accepted | 2026-07-03 |
+| [0013](0013-canonical-free-sync-path.md) | Canonical free sync path: Obsidian Git + free private GitHub repo | accepted | 2026-07-03 |
+| [0014](0014-m5-verification-instrument.md) | `engram doctor` + locked round-trip protocol as the M5 verification instrument | accepted | 2026-07-03 |
 
 ## Process
 

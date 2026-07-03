@@ -1,0 +1,34 @@
+# Engram vault .gitignore — keep sync noise and secrets out of the git spine.
+# Copy the relevant lines into your vault's root .gitignore. Concepts, index.md,
+# log.md, AGENTS.md, and the .engram/ config ARE tracked — everything below is not.
+
+# --- Obsidian per-device / volatile state (never share across devices) ---
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspace*.json
+.obsidian/cache
+.obsidian/hotkeys.json
+
+# --- Obsidian plugin secrets & local state ---
+# Remotely Save keeps its password and per-device sync DB under its plugin dir.
+.obsidian/plugins/remotely-save/data.json
+.obsidian/plugins/remotely-save/
+# Obsidian Git per-device state.
+.obsidian/plugins/obsidian-git/data.json
+
+# --- Trash & OS cruft ---
+.trash/
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# --- Tooling / build (not vault content) ---
+node_modules/
+dist/
+
+# --- Never commit credentials of any kind ---
+*.pem
+*.key
+.env
+.env.*
