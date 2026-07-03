@@ -22,6 +22,7 @@
 | ID | Title | Priority | Status | Phase | Detail |
 |----|-------|----------|--------|-------|--------|
 | BUG-001 | Emitted markdown link destinations use raw spaces (break CommonMark + engram's own index parse) | P1 | resolved | ad-hoc | Fixed in v0.6.5 — percent-encode link targets on write, decode on read. See `specs/adhoc/BUG-001/record.md`. Follow-ups: ENH-002, ENH-003 |
+| BUG-002 | CI publish workflow fails `ENEEDAUTH` — npm auto-publish broken | P1 | open | ad-hoc | `.github/workflows/publish.yml` uses `secrets.NPM_TOKEN`; secret is missing/expired → tag pushes fail to publish (v0.6.4 + v0.6.5 both failed; releases published manually). Fix: add an npm **Automation** token as the `NPM_TOKEN` GitHub Actions secret, then `gh run rerun` the tag's Publish run |
 
 ## Features
 
