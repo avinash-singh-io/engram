@@ -1,4 +1,5 @@
 import { basename, isReservedFile } from '../format/concept-id';
+import { encodeLinkTarget } from '../format/links';
 import { validateConcept } from '../format/validate';
 import type { ValidationResult } from '../format/types';
 import { parseMomentum, type MomentumArtifact } from './parse-momentum';
@@ -100,6 +101,6 @@ export function promoteMomentum(input: PromoteInput): PromoteResult {
     sourceRef: artifact.sourceRef,
     validation,
     logEntry: { action: 'Promoted', title: rendered.title, link },
-    logLine: `- **Promoted** [${rendered.title}](${link}) from momentum ${artifact.sourceRef}`,
+    logLine: `- **Promoted** [${rendered.title}](${encodeLinkTarget(link)}) from momentum ${artifact.sourceRef}`,
   };
 }

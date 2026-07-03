@@ -1,12 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { encodeLinkTarget } from '../format/links';
 import { writeFileManaged } from './write';
 
 export interface LogEntry {
   /** Bold verb, e.g. Added / Refined / Linked / Updated / Captured. */
   action: string;
   title: string;
-  /** Absolute-bundle-relative link to the concept. */
+  /** Absolute-bundle-relative link to the concept (raw/decoded; encoded on write). */
   link: string;
   /** Defaults to now (UTC). Injectable for deterministic tests. */
   date?: Date;
@@ -41,7 +42,7 @@ export function renderLog(existing: string, day: string, line: string): string {
 export function appendLog(vaultRoot: string, entry: LogEntry): void {
   const logPath = join(vaultRoot, 'log.md');
   const day = isoDate(entry.date ?? new Date());
-  const line = `- **${entry.action}** [${entry.title}](${entry.link})`;
+  const line = `- **${entry.action}** [${entry.title}](${encodeLinkTarget(entry.link)})`;
   const existing = existsSync(logPath) ? readFileSync(logPath, 'utf8') : '# Log\n';
   writeFileManaged(logPath, renderLog(existing, day, line));
 }

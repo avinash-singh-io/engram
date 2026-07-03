@@ -21,7 +21,7 @@
 
 | ID | Title | Priority | Status | Phase | Detail |
 |----|-------|----------|--------|-------|--------|
-| _(none)_ | | | | | |
+| BUG-001 | Emitted markdown link destinations use raw spaces (break CommonMark + engram's own index parse) | P1 | resolved | ad-hoc | Fixed in v0.6.5 — percent-encode link targets on write, decode on read. See `specs/adhoc/BUG-001/record.md`. Follow-ups: ENH-002, ENH-003 |
 
 ## Features
 
@@ -43,3 +43,5 @@
 | ID | Title | Priority | Status | Phase | Detail |
 |----|-------|----------|--------|-------|--------|
 | ENH-001 | Real-time sync (self-hosted CouchDB + LiveSync) | P3 | open | post-Phase 3 | Only if heavy mobile writing is needed; not MVP (ADR-0004) |
+| ENH-002 | `doctor` link-resolution check (`link-unresolved`) | P2 | open | future | Deferred from BUG-001. Flag any internal link whose decoded target doesn't resolve to a file — catches broken/stale links (doctor currently reports 0 errors on them) |
+| ENH-003 | `reindex --rewrite-links` for legacy in-body links | P3 | open | future | Deferred from BUG-001. BUG-001 self-heals index.md/log.md on reindex, but pre-existing See-also/promoted-body links stay raw. A decode→encode rewrite pass would migrate them |

@@ -2,13 +2,16 @@
  * Parse an OKF `index.md` (docs/okf-conformance.md §5 + ADR-0006) into sections
  * of bullets. Pure — no filesystem access. Tolerant of a flat or malformed
  * index: bullets outside any `## heading` land in the `''` section, non-bullet
- * lines are ignored.
+ * lines are ignored. Link targets are percent-decoded so they match
+ * filesystem paths (BUG-001).
  */
+
+import { decodeLinkTarget } from '../format/links';
 
 /** One bullet: `* [Title](/abs/target.md) - one-line description`. */
 export interface IndexEntry {
   title: string;
-  /** Link target as written (absolute bundle-relative, e.g. `/dir/x.md`). */
+  /** Link target, percent-DECODED for matching (absolute bundle-relative, e.g. `/dir/x.md`). */
   target: string;
   description: string;
   /** The `## heading` this bullet appeared under (`''` if none). */
@@ -50,7 +53,7 @@ export function parseIndex(content: string): ParsedIndex {
     const bullet = BULLET_RE.exec(rawLine);
     if (!bullet) continue;
     const title = (bullet[1] ?? '').trim();
-    const target = (bullet[2] ?? '').trim();
+    const target = decodeLinkTarget((bullet[2] ?? '').trim());
     const description = (bullet[3] ?? '').trim();
     entries.push({
       title,
