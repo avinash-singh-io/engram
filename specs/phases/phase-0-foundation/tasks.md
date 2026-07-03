@@ -4,13 +4,13 @@
 > verification command produced passing output this session (Rule 12).
 
 ## Group 0 — Package & Toolchain
-- [ ] Initialize `package.json` with `bin: engram` + scripts (build/test/lint)
-- [ ] Add `tsconfig.json` (strict mode)
-- [ ] Configure build (tsup or tsc)
-- [ ] Configure test runner (vitest)
-- [ ] Configure lint (eslint + prettier)
-- [ ] Add CI workflow (build + test + lint)
-- [ ] Add `.gitignore` and `.npmignore`
+- [x] Initialize `package.json` with `bin: engram` + scripts (build/test/lint)
+- [x] Add `tsconfig.json` (strict mode)
+- [x] Configure build (tsup, ESM, dts)
+- [x] Configure test runner (vitest)
+- [x] Configure lint (eslint flat config + prettier)
+- [x] Add CI workflow (typecheck + lint + format + test + build)
+- [x] Add `.gitignore` (`files: ["dist"]` in package.json replaces `.npmignore`)
 
 ## Group 1 — OKF Format Spec
 - [ ] Write internal OKF v0.1 conformance spec (required fields, body, links, index/log rules, concept-ID)

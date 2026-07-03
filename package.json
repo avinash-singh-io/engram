@@ -1,0 +1,59 @@
+{
+  "name": "engram",
+  "version": "0.1.0",
+  "description": "OKF-native knowledge base that agents and humans read and write together — durable memory, sibling to momentum.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Avinash Kumar Singh",
+  "keywords": [
+    "okf",
+    "knowledge-base",
+    "agents",
+    "markdown",
+    "obsidian",
+    "progressive-disclosure"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "engram": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src tests",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@types/node": "^22.7.4",
+    "eslint": "^9.11.1",
+    "prettier": "^3.3.3",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.8.0",
+    "vitest": "^2.1.1"
+  }
+}

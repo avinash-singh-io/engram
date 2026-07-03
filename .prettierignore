@@ -1,0 +1,15 @@
+dist
+node_modules
+coverage
+
+# Docs & specs are prose/markdown — not code-formatted
+specs
+docs
+*.md
+
+# momentum framework files
+.claude
+.agent
+.githooks
+.momentum
+scripts

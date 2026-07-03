@@ -34,3 +34,28 @@ Phase 0 (Rule 11). Freeze v1 before any validator-tuning loop; corpus changes
 go to a v2, never mutate v1.
 
 ---
+
+### [NOTE] 2026-07-03 — Group 0 complete: TypeScript package + toolchain green
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: none
+Detail: Bootstrapped the ESM TypeScript package (`bin: engram`) with tsup build,
+vitest, eslint 9 flat config + prettier, and a GitHub Actions CI workflow.
+Verified fresh: build, typecheck, lint, format:check, and a smoke test all green;
+`node dist/cli.js` prints `engram 0.1.0`. Used package.json `files: ["dist"]`
+instead of a separate `.npmignore`.
+
+---
+
+### [DISCOVERY] 2026-07-03 — ESM package breaks momentum's CJS git hooks
+Topics: tooling
+Affects-phases: phase-0-foundation
+Affects-specs: specs/backlog/backlog.md
+Detail: Setting `"type": "module"` in the root package.json made Node parse
+momentum's `.githooks/run-check.js` and `contract.js` (CommonJS `require`) as
+ESM, which crashed the commit-msg hook. Fixed non-invasively with a
+`.githooks/package.json` `{"type":"commonjs"}` scope override (no momentum file
+touched). Tracked as TD-002 — must be re-verified after `momentum upgrade`,
+which could add new `.js` hooks or remove the scope file.
+
+---
