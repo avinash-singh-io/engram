@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Least-privilege IAM policy for a Remotely Save -> S3 mobile leg. Replace YOUR-ENGRAM-VAULT-BUCKET with your bucket name. This user can only read/write objects in the one vault bucket and cannot create, delete, or reconfigure buckets. Attach to a dedicated IAM user whose access keys go ONLY into the Remotely Save plugin config (out-of-band, never committed).",
+  "Statement": [
+    {
+      "Sid": "ListOnlyThisVaultBucket",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::YOUR-ENGRAM-VAULT-BUCKET"
+    },
+    {
+      "Sid": "ReadWriteObjectsInThisVaultBucket",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::YOUR-ENGRAM-VAULT-BUCKET/*"
+    }
+  ]
+}
