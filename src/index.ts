@@ -10,5 +10,6 @@ export * from './vault';
 export * from './indexer';
 export * from './hooks';
 export * from './adapters';
+export * from './editors';
 export * from './retrieval';
 export * from './promote';
