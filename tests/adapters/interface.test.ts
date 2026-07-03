@@ -51,7 +51,10 @@ describe('adapter seam', () => {
     for (const id of adapterIds()) {
       const dests = (getAdapter(id)?.files(assetsRoot()) ?? []).map((f) => f.dest);
       for (const name of COMMAND_NAMES) {
-        expect(dests.some((d) => d.endsWith(`${name}.md`)), `${id}:${name}`).toBe(true);
+        expect(
+          dests.some((d) => d.endsWith(`${name}.md`)),
+          `${id}:${name}`,
+        ).toBe(true);
       }
     }
   });

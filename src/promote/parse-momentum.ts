@@ -35,13 +35,12 @@ export interface MomentumArtifact {
   sourceRef: string;
 }
 
-const LEARNING_HEADER =
-  /^#{0,6}\s*\[([A-Za-z_]+)\]\s+(\d{4}-\d{2}-\d{2})\s*[—–-]\s*(.+?)\s*$/m;
+const LEARNING_HEADER = /^#{0,6}\s*\[([A-Za-z_]+)\]\s+(\d{4}-\d{2}-\d{2})\s*[—–-]\s*(.+?)\s*$/m;
 const ADR_TITLE = /^#\s+(.+?)\s*$/m;
 const ADR_NUMBERED_TITLE = /^(\d{1,4})\s*[—–-]\s+(.+)$/;
 
 function normalize(text: string): string {
-  return text.replace(/^﻿/, '').replace(/\r\n/g, '\n');
+  return text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
 }
 
 function firstMatch(text: string, re: RegExp): string | undefined {

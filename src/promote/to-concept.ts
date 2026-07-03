@@ -85,7 +85,8 @@ function buildTags(artifact: MomentumArtifact, extra: string[] = []): string[] {
 /** Map an ADR date (or now) to an ISO-8601 UTC timestamp. */
 function toTimestamp(date: string | undefined, now: Date): string {
   if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) return `${date}T00:00:00Z`;
-  if (date && !Number.isNaN(Date.parse(date))) return new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  if (date && !Number.isNaN(Date.parse(date)))
+    return new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z');
   return now.toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
@@ -105,7 +106,8 @@ function splitFragment(target: string): [string, string] {
 export function rewriteLinks(md: string, targetDir: string): string {
   const wikified = md.replace(
     /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
-    (_m, target: string, label?: string) => `[${(label ?? target).trim()}](/${slug(target.trim())}.md)`,
+    (_m, target: string, label?: string) =>
+      `[${(label ?? target).trim()}](/${slug(target.trim())}.md)`,
   );
   return wikified.replace(
     /\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g,

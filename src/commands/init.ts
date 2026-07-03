@@ -111,7 +111,11 @@ export function registerInit(program: Command): void {
     .command('init [dir]')
     .description('Scaffold an OKF-conformant vault in [dir] (default: cwd). (Phase 1)')
     .option('--force', 'overwrite existing managed files')
-    .option('--agent <id>', `agent adapter to scaffold (${[...adapterIds(), 'all'].join('|')})`, 'claude')
+    .option(
+      '--agent <id>',
+      `agent adapter to scaffold (${[...adapterIds(), 'all'].join('|')})`,
+      'claude',
+    )
     .action((dir: string | undefined, opts: { force?: boolean; agent?: string }) =>
       runCommand(() => {
         const res = runInit({ dir, force: opts.force, agent: opts.agent });

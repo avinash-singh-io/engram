@@ -67,12 +67,19 @@ export function runPromote(sourceArg: string, opts: PromoteOptions = {}): Promot
   if (destAbs !== root && !destAbs.startsWith(root + sep)) fail('destination escapes the vault');
 
   if (opts.dryRun) {
-    process.stdout.write(`engram promote (dry-run): ${result.sourceRef} -> ${result.targetPath}\n\n`);
+    process.stdout.write(
+      `engram promote (dry-run): ${result.sourceRef} -> ${result.targetPath}\n\n`,
+    );
     process.stdout.write(result.conceptText);
     process.stdout.write(`\n${result.logLine}\n`);
     printValidation(result.validation);
     if (!result.ok) fail('non-conformant mapping — nothing written', 1);
-    return { targetPath: result.targetPath, written: false, ok: true, conceptText: result.conceptText };
+    return {
+      targetPath: result.targetPath,
+      written: false,
+      ok: true,
+      conceptText: result.conceptText,
+    };
   }
 
   // HARD GATE: never write a non-conformant concept (ADR-0011).
@@ -89,7 +96,12 @@ export function runPromote(sourceArg: string, opts: PromoteOptions = {}): Promot
 
   reindex(root);
   appendLog(root, result.logEntry);
-  return { targetPath: result.targetPath, written: true, ok: true, conceptText: result.conceptText };
+  return {
+    targetPath: result.targetPath,
+    written: true,
+    ok: true,
+    conceptText: result.conceptText,
+  };
 }
 
 export function registerPromote(program: Command): void {

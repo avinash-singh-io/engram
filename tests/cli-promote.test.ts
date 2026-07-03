@@ -85,7 +85,9 @@ describe('engram promote (CLI)', () => {
     const bad = join(srcDir, 'bad-adr.md');
     writeFileSync(
       bad,
-      ['# 9 — Bad Date', '', '> **Date**: 2026-13-45', '', '## Decision', '', 'Ship it.'].join('\n'),
+      ['# 9 — Bad Date', '', '> **Date**: 2026-13-45', '', '## Decision', '', 'Ship it.'].join(
+        '\n',
+      ),
     );
 
     expect(() => runPromote(bad, { cwd: root })).toThrow(CliError);

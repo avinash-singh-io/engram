@@ -109,9 +109,15 @@ describe('promote hard gate (validate-before-write)', () => {
   });
 
   it('reports ok:false with the timestamp error when a source carries a malformed date', () => {
-    const bad = ['# 3 — Typo Date', '', '> **Date**: 2026-13-45', '', '## Decision', '', 'Ship.'].join(
-      '\n',
-    );
+    const bad = [
+      '# 3 — Typo Date',
+      '',
+      '> **Date**: 2026-13-45',
+      '',
+      '## Decision',
+      '',
+      'Ship.',
+    ].join('\n');
     const result = promoteMomentum({ sourceText: bad, sourcePath: 'm/bad.md' });
     expect(result.ok).toBe(false);
     expect(result.validation.errors.map((e) => e.code)).toContain('timestamp-unparseable');
