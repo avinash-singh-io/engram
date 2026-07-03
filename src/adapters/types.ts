@@ -23,6 +23,14 @@ export interface Adapter {
   id: string;
   /** Human-facing one-liner (used by `engram init --agent` help + docs). */
   label: string;
+  /**
+   * The file this agent loads its instructions from — Claude Code reads
+   * `CLAUDE.md`, Codex and others read `AGENTS.md`. `engram init` renders the
+   * FULL traversal contract into this file (agents load only their own file, so
+   * a cross-file pointer is unreliable — the contract must be self-contained in
+   * each). Single source, generated per agent → no manual duplication (ADR-0017).
+   */
+  contractFile: string;
   /** The files this adapter scaffolds into a vault. */
   files(assetsRoot: string): AdapterFile[];
 }

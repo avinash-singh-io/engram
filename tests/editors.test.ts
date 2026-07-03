@@ -49,10 +49,8 @@ describe('obsidian editor adapter', () => {
   });
 });
 
-describe('claude adapter native pointer', () => {
-  it('emits a CLAUDE.md that points at AGENTS.md', () => {
-    const claudeMd = claudeAdapter.files('/assets').find((f) => f.dest === 'CLAUDE.md');
-    expect(claudeMd).toBeDefined();
-    expect(claudeMd?.content).toContain('AGENTS.md');
+describe('agent contract files', () => {
+  it('Claude Code reads CLAUDE.md; Codex/Antigravity read AGENTS.md', () => {
+    expect(claudeAdapter.contractFile).toBe('CLAUDE.md');
   });
 });

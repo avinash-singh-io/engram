@@ -11,6 +11,7 @@ import type { Adapter, AdapterFile } from './types';
 export const codexAdapter: Adapter = {
   id: 'codex',
   label: 'Codex (AGENTS.md + .codex/prompts custom prompts)',
+  contractFile: 'AGENTS.md',
   files(): AdapterFile[] {
     return COMMAND_DEFINITIONS.map((def) => ({
       dest: `.codex/prompts/${def.name}.md`,

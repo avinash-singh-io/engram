@@ -130,7 +130,8 @@ a repo. engram never *depends* on an editor — it only configures one it detect
 --no-editor-setup  don't configure a detected editor
 --no-git           don't run `git init`
 ```
-Creates: `index.md`, `AGENTS.md`, `CLAUDE.md` (Claude Code pointer), `log.md`,
+Creates: `index.md`, `AGENTS.md` + `CLAUDE.md` (each carries the **full**
+traversal contract, so every agent loads it from its own native file), `log.md`,
 `inbox/`, `.engram/` (config + templates), the agent adapter's slash-commands +
 write-hook, and an Obsidian setup guide.
 

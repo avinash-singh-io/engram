@@ -45,9 +45,12 @@ describe('init auto-setup', () => {
     expect(res.editors).toEqual([]);
   });
 
-  it('scaffolds CLAUDE.md pointing to AGENTS.md', () => {
+  it('renders the FULL contract into CLAUDE.md (identical to AGENTS.md, not a pointer)', () => {
     const root = tmp();
     runInit({ dir: root, git: false, agent: 'claude' });
-    expect(readFileSync(join(root, 'CLAUDE.md'), 'utf8')).toContain('AGENTS.md');
+    const claude = readFileSync(join(root, 'CLAUDE.md'), 'utf8');
+    const agents = readFileSync(join(root, 'AGENTS.md'), 'utf8');
+    expect(claude).toContain('NEVER read the whole vault'); // full contract, not a "see AGENTS.md" pointer
+    expect(claude).toBe(agents); // same source, rendered per agent
   });
 });

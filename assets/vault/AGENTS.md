@@ -1,4 +1,4 @@
-# AGENTS.md — How to navigate this vault
+# How to navigate this knowledge vault
 
 This is an OKF (Open Knowledge Format) knowledge vault maintained by `engram`.
 Read this before answering from the vault.

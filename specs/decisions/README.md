@@ -23,6 +23,7 @@
 | [0014](0014-m5-verification-instrument.md) | `engram doctor` + locked round-trip protocol as the M5 verification instrument | accepted | 2026-07-03 |
 | [0015](0015-editor-adapters.md) | Editor adapters (engram is editor-agnostic) | accepted | 2026-07-03 |
 | [0016](0016-okf-migration.md) | OKF migration (`engram migrate`) | accepted | 2026-07-03 |
+| [0017](0017-agent-contract-files-full.md) | Agent contract files carry the full contract (not a pointer) — amends 0011 | accepted | 2026-07-03 |
 
 ## Process
 

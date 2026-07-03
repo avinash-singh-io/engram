@@ -11,6 +11,7 @@ import type { Adapter, AdapterFile } from './types';
 export const antigravityAdapter: Adapter = {
   id: 'antigravity',
   label: 'Antigravity (AGENTS.md + .antigravity/commands surface)',
+  contractFile: 'AGENTS.md',
   files(): AdapterFile[] {
     return COMMAND_DEFINITIONS.map((def) => ({
       dest: `.antigravity/commands/${def.name}.md`,

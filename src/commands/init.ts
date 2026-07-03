@@ -100,10 +100,24 @@ export function runInit(opts: InitOptions = {}): InitResult {
 
   // Adapter files (per-agent command surface + any hooks). A file carries either
   // inline `content` (rendered from the shared command set) or a bundled `src`.
-  for (const adapter of resolveAdapters(opts.agent)) {
+  const adapters = resolveAdapters(opts.agent);
+  for (const adapter of adapters) {
     for (const f of adapter.files(assetsRoot())) {
       const content = f.content ?? readFileSync(f.src as string, 'utf8');
       put(f.dest, content, f.mode === 'merge-json' ? 'merge-json' : 'skip');
+    }
+  }
+
+  // Each agent's native instructions file carries the FULL traversal contract
+  // (agents load only their own file, so a cross-file pointer is unreliable —
+  // ADR-0017). AGENTS.md is written above; render the same contract into every
+  // other agent contract file (e.g. Claude Code's CLAUDE.md).
+  const contract = readAsset('vault', 'AGENTS.md');
+  const contractWritten = new Set<string>(['AGENTS.md']);
+  for (const adapter of adapters) {
+    if (!contractWritten.has(adapter.contractFile)) {
+      put(adapter.contractFile, contract);
+      contractWritten.add(adapter.contractFile);
     }
   }
 
