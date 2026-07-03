@@ -31,6 +31,12 @@
       "status": "complete",
       "directory": "phase-3-sync",
       "topics": ["sync", "okf-format", "tooling"]
+    },
+    "phase-6-onboarding": {
+      "name": "Onboarding & OKF Migration",
+      "status": "complete",
+      "directory": "phase-6-onboarding",
+      "topics": ["adapters", "migration", "onboarding", "okf-format", "tooling"]
     }
   }
 }

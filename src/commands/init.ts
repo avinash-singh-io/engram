@@ -1,8 +1,10 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { Command } from 'commander';
 import { ADAPTERS, adapterIds, getAdapter, type Adapter } from '../adapters';
 import { assetsRoot, readAsset } from '../assets';
+import { setupEditors, type EditorSetupResult } from '../editors';
 import { reindex } from '../indexer/reindex';
 import { defaultConfig, writeConfig } from '../vault/config';
 import { writeFileSafe } from '../vault/write';
@@ -12,12 +14,18 @@ export interface InitOptions {
   dir?: string;
   force?: boolean;
   agent?: string;
+  /** Configure a detected editor (default true). */
+  editorSetup?: boolean;
+  /** Run `git init` if the vault is not a repo (default true). */
+  git?: boolean;
 }
 
 export interface InitResult {
   root: string;
   created: string[];
   skipped: string[];
+  editors: EditorSetupResult[];
+  gitInitialized: boolean;
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -103,7 +111,21 @@ export function runInit(opts: InitOptions = {}): InitResult {
   reindex(root);
   created.push('index.md');
 
-  return { root, created, skipped };
+  // Configure any detected editor for OKF conformance (editor-agnostic, ADR-0015).
+  const editors = opts.editorSetup === false ? [] : setupEditors(root);
+
+  // Git is the source of truth (ADR-0004): init a repo if there isn't one.
+  let gitInitialized = false;
+  if (opts.git !== false && !existsSync(join(root, '.git'))) {
+    try {
+      execFileSync('git', ['init', '-q'], { cwd: root, stdio: 'ignore' });
+      gitInitialized = true;
+    } catch {
+      /* git unavailable — skip silently */
+    }
+  }
+
+  return { root, created, skipped, editors, gitInitialized };
 }
 
 export function registerInit(program: Command): void {
@@ -116,12 +138,29 @@ export function registerInit(program: Command): void {
       `agent adapter to scaffold (${[...adapterIds(), 'all'].join('|')})`,
       'claude',
     )
-    .action((dir: string | undefined, opts: { force?: boolean; agent?: string }) =>
-      runCommand(() => {
-        const res = runInit({ dir, force: opts.force, agent: opts.agent });
-        process.stdout.write(`engram: initialized vault at ${res.root}\n`);
-        for (const f of res.created) process.stdout.write(`  + ${f}\n`);
-        for (const f of res.skipped) process.stdout.write(`  · ${f} (exists, skipped)\n`);
-      }),
+    .option('--no-editor-setup', 'skip configuring a detected editor (e.g. Obsidian)')
+    .option('--no-git', 'skip `git init` when the vault is not a repo')
+    .action(
+      (
+        dir: string | undefined,
+        opts: { force?: boolean; agent?: string; editorSetup?: boolean; git?: boolean },
+      ) =>
+        runCommand(() => {
+          const res = runInit({
+            dir,
+            force: opts.force,
+            agent: opts.agent,
+            editorSetup: opts.editorSetup,
+            git: opts.git,
+          });
+          process.stdout.write(`engram: initialized vault at ${res.root}\n`);
+          for (const f of res.created) process.stdout.write(`  + ${f}\n`);
+          for (const f of res.skipped) process.stdout.write(`  · ${f} (exists, skipped)\n`);
+          for (const e of res.editors) {
+            const detail = e.changes.length ? e.changes.join(', ') : 'already configured';
+            process.stdout.write(`  ⚙ ${e.editor}: ${detail}\n`);
+          }
+          if (res.gitInitialized) process.stdout.write(`  ⚙ git: initialized repository\n`);
+        }),
     );
 }

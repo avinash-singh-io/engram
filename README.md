@@ -50,7 +50,7 @@ CLI command is `engram`**. Requires **Node.js ≥ 20**.
 
 ```bash
 npm install -g @avinash-singh-io/engram
-engram --version   # 0.5.1
+engram --version   # 0.6.0
 engram --help
 ```
 
@@ -115,18 +115,24 @@ concept**; indexes and `log.md` update automatically.
 | [`recall`](#engram-recall-query) | Navigate the vault, return the minimal relevant concepts |
 | [`promote`](#engram-promote-source) | Import a momentum ADR/learning as an OKF concept |
 | [`doctor`](#engram-doctor-dir) | Validate every concept + check sync health (read-only) |
+| [`migrate`](#engram-migrate-dir) | Adopt existing Markdown notes as OKF concepts |
 
 ### `engram init [dir]`
 Scaffold a vault in `[dir]` (default: current directory). Non-destructive — it
 never overwrites your files, and deep-merges an existing `.claude/settings.json`.
+It also **auto-configures the environment**: if it detects an editor (Obsidian),
+it sets it to standard/absolute links, and it runs `git init` if the vault isn't
+a repo. engram never *depends* on an editor — it only configures one it detects.
 
 ```
---force         overwrite existing managed files
---agent <id>    adapter to scaffold: claude | codex | antigravity | all   (default: claude)
+--force            overwrite existing managed files
+--agent <id>       adapter to scaffold: claude | codex | antigravity | all   (default: claude)
+--no-editor-setup  don't configure a detected editor
+--no-git           don't run `git init`
 ```
-Creates: `index.md`, `AGENTS.md`, `log.md`, `inbox/`, `.engram/` (config +
-templates), the agent adapter's slash-commands + write-hook, and an Obsidian
-setup guide.
+Creates: `index.md`, `AGENTS.md`, `CLAUDE.md` (Claude Code pointer), `log.md`,
+`inbox/`, `.engram/` (config + templates), the agent adapter's slash-commands +
+write-hook, and an Obsidian setup guide.
 
 ### `engram capture [text]`
 Write a raw note into `inbox/` for later refinement. Reads from stdin if `text`
@@ -200,6 +206,27 @@ missing git spine). Exits non-zero on errors.
 
 ```
 --json    emit the full report as JSON
+```
+
+### `engram migrate [dir]`
+Adopt an existing folder of Markdown notes as OKF concepts. Best-effort,
+deterministic (no LLM): derives frontmatter (title from the first heading/filename,
+description from the first sentence, tags from the folder, timestamp from mtime),
+converts `[[wikilinks]]` → standard absolute links, and skips already-conformant
+files. **Dry-run by default.**
+
+```
+--write         apply the migration (default: preview only)
+--type <type>   OKF type for migrated notes   (default: Reference)
+```
+
+Onboarding an existing notes folder end-to-end:
+```bash
+cd ~/my-notes
+engram init            # scaffold + configure editor/git (non-destructive)
+engram migrate         # preview what would change
+engram migrate --write # add frontmatter + fix links
+engram doctor          # confirm 0 errors
 ```
 
 ---

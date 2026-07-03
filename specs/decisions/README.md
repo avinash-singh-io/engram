@@ -21,6 +21,8 @@
 | [0012](0012-promote-one-way-reference-snapshot.md) | /promote imports momentum artifacts as one-way Reference snapshots | accepted | 2026-07-03 |
 | [0013](0013-canonical-free-sync-path.md) | Canonical free sync path: Obsidian Git + free private GitHub repo | accepted | 2026-07-03 |
 | [0014](0014-m5-verification-instrument.md) | `engram doctor` + locked round-trip protocol as the M5 verification instrument | accepted | 2026-07-03 |
+| [0015](0015-editor-adapters.md) | Editor adapters (engram is editor-agnostic) | accepted | 2026-07-03 |
+| [0016](0016-okf-migration.md) | OKF migration (`engram migrate`) | accepted | 2026-07-03 |
 
 ## Process
 

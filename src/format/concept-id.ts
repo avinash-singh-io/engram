@@ -3,7 +3,9 @@
  * See docs/okf-conformance.md §7. Reserved files are not concepts.
  */
 
-export const RESERVED_FILENAMES = ['index.md', 'log.md', 'AGENTS.md'] as const;
+// index/log are OKF structural files; AGENTS.md + CLAUDE.md are agent-instruction
+// files (not vault knowledge). None are enumerated, validated, or migrated as concepts.
+export const RESERVED_FILENAMES = ['index.md', 'log.md', 'AGENTS.md', 'CLAUDE.md'] as const;
 
 /** Normalize to forward slashes and strip any leading `./` or `/` segments. */
 export function normalizeVaultPath(p: string): string {
