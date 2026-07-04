@@ -11,8 +11,12 @@
 #   Workflow filename:    publish.yml
 #   Environment:          (leave blank)
 #   Allowed actions:      npm publish
-# Requires npm >= 11.5.1 (upgraded below) and Node >= 22.14; provenance is
-# emitted automatically under trusted publishing (no --provenance flag needed).
+#
+# Config mirrors the official npm example (https://docs.npmjs.com/trusted-publishers/):
+# setup-node@v6 + Node 24 ship npm >= 11.5.1, which the OIDC flow REQUIRES —
+# an older npm ignores OIDC, uses setup-node's empty-token .npmrc, and fails
+# with an anonymous E404. Caching is disabled for release builds; provenance
+# is automatic (no --provenance flag needed).
 #
 # Release flow:
 #   npm version patch|minor|major   # bumps package.json + creates the tag
@@ -39,14 +43,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: npm
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-
-      # Trusted publishing needs npm >= 11.5.1; Node's bundled npm is older.
-      - run: npm install -g npm@latest
+          package-manager-cache: false # never cache release builds (npm guidance)
 
       - run: npm ci
 
