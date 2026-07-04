@@ -1,8 +1,8 @@
 # Project Status
 
-> **Last Updated**: 2026-07-04
+> **Last Updated**: 2026-07-05
 > **Current Phase**: Phase 6 (Onboarding & OKF Migration) verified — awaiting merge (v0.6.0). Phase 5 (Semantic Layer) still deferred (optional).
-> **Latest Release**: v0.6.7 (BUG-002 — OIDC trusted-publishing release; no functional change)
+> **Latest Release**: v0.6.8 (BUG-002 — OIDC trusted-publishing release; no functional change)
 > **Health**: On Track — published on npm (@avinash-singh-io/engram)
 
 ## Summary
@@ -36,7 +36,8 @@ stays free across Mac + Android.
 |---------|------|------|---------|
 | v0.6.5 | 2026-07-04 | quick-task (BUG-001) | Percent-encode markdown link targets (CommonMark §6.3) — fixes broken links on spaced filenames + engram's own dropped index bullets. `specs/adhoc/BUG-001/` |
 | v0.6.6 | 2026-07-04 | release-infra (BUG-002) | OIDC publish attempt — **failed to publish** (npm < 11.5.1 via setup-node@v4/Node22 ignored OIDC → E404). Git tag exists; never on npm. Superseded by v0.6.7. |
-| v0.6.7 | 2026-07-04 | release-infra (BUG-002) | OIDC trusted-publishing release (setup-node@v6/Node24, tokenless, auto-provenance). No functional/package change vs 0.6.5. |
+| v0.6.7 | 2026-07-04 | release-infra (BUG-002) | OIDC attempt — **failed E404**: setup-node's `registry-url` injected a dummy `_authToken`, so npm used a bogus token and skipped OIDC. Git tag exists; never on npm. Superseded by v0.6.8. |
+| v0.6.8 | 2026-07-05 | release-infra (BUG-002) | OIDC trusted-publishing release with `registry-url` removed (tokenless, auto-provenance). No functional/package change vs 0.6.5. |
 
 ## Active Phase
 
