@@ -12,11 +12,11 @@
 #   Environment:          (leave blank)
 #   Allowed actions:      npm publish
 #
-# Config mirrors the official npm example (https://docs.npmjs.com/trusted-publishers/):
-# setup-node@v6 + Node 24 ship npm >= 11.5.1, which the OIDC flow REQUIRES —
-# an older npm ignores OIDC, uses setup-node's empty-token .npmrc, and fails
-# with an anonymous E404. Caching is disabled for release builds; provenance
-# is automatic (no --provenance flag needed).
+# IMPORTANT — do NOT add `registry-url` to setup-node. With registry-url,
+# setup-node writes an .npmrc containing a DUMMY `_authToken=XXXXX-...`; npm
+# then authenticates with that bogus token (E404) and never falls back to
+# OIDC. The default registry (registry.npmjs.org) + OIDC is what we want.
+# OIDC also requires npm >= 11.5.1 (upgraded below); provenance is automatic.
 #
 # Release flow:
 #   npm version patch|minor|major   # bumps package.json + creates the tag
@@ -46,8 +46,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false # never cache release builds (npm guidance)
+
+      # Trusted publishing needs npm >= 11.5.1; guarantee it (and log it).
+      - run: npm install -g npm@latest
+      - run: npm --version
 
       - run: npm ci
 
@@ -61,6 +64,6 @@ jobs:
             exit 1
           fi
 
-      # OIDC trusted publishing: no NODE_AUTH_TOKEN. `npm publish` runs
+      # OIDC trusted publishing: no token, no registry-url. `npm publish` runs
       # prepublishOnly (npm run check) first; provenance is automatic.
       - run: npm publish --access public
