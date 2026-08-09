@@ -43,12 +43,14 @@ users makes this free.
 
 | Version | Phase | Key deliverables | Gate |
 |---------|-------|-----------------|------|
-| _(none)_ | **Phase 7 — Evidence** | Question-traffic instrumentation over the real vault; classification of lookup vs structural; locked evaluator in `tests/benchmarks/` (Rule 11) | **GATE 1 — can end the project** |
-| v0.7.0 | **Phase 8 — Core** | Clean-room `src/`. Node + Edge; OKF v0.2 parse / validate / serialize; identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
+| _(none)_ | **Phase 7 — Evidence & Observation** | The append-only event log (`.engram/memory/events/`, ADR-0035); question-traffic instrumentation; classification of lookup vs structural; locked evaluator in `tests/benchmarks/` (Rule 11). **Dual purpose — this log is also the foundation of the intelligence layer** | **GATE 1 — can end the project** |
+| v0.7.0 | **Phase 8 — Core** | Clean-room `src/`. `core/model.ts` (Node + Edge, version-free) + `format/` codec registry (ADR-0032); narrow ports (`FileStore`, `Detector`, `Clock`); identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
 | v0.8.0 | **Phase 9 — Structure, views & health** | `init --structure=<x>` scaffolds; view generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian link-format detection | — |
-| v0.9.0 | **Phase 10 — Agent surface** | The `format` operation (scratchpad → OKF); write-time relation extraction; AGENTS.md contract; adapters (Claude Code, Codex, Antigravity); MCP server | **GATE 2 — edge accuracy** |
-| v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; hybrid structural + lookup routing; must beat the Phase 7 baseline on the locked evaluator | — |
-| v0.11.0 | **Phase 12 — Obsidian surface** | Community plugin; agent inside Obsidian; the first non-CLI Surface | — |
+| v0.9.0 | **Phase 10 — Agent surface** | `format(content, hints)` — content from anywhere, no capture prerequisite (ADR-0033); write-time relation extraction; write gate + guardrails; skills; AGENTS.md; adapters; MCP server | **GATE 2 — edge accuracy** |
+| v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; validity filter (drop superseded/expired); trust weighting (`verified` > `generated`); must beat the Phase 7 baseline on the locked evaluator | — |
+| v0.11.0 | **Phase 12 — Intelligence I** | Distillation: events → proposed patterns as nodes; confirm/reject; **gaps** (retrieval failure) and **re-derivation** — the two that need a log, not a model | — |
+| v0.12.0 | **Phase 13 — Intelligence II** | `contradicts` with code behind it; staleness × intent; dead-weight signal; proactive surfacing — opt-in, evidence-cited, rate-limited | — |
+| v0.13.0 | **Phase 14 — Obsidian surface** | Community plugin; agent inside Obsidian; approval queue panel. **Independent lane — can move earlier** | — |
 
 ### The two gates
 
@@ -73,8 +75,24 @@ See [ADR-0031](../decisions/0031-evidence-gates-before-graph.md).
 - Phase 9 depends on 8 (`part-of` edges to project from).
 - Phase 10 depends on 8 (something to write into) and produces the data Gate 2 samples.
 - Phase 11 depends on 10 clearing Gate 2.
-- Phase 12 is independent of 11 — it is Tier 2 *Surface*, and can slip without
-  blocking anything. That independence is the test that the tiering is real.
+- **Phases 12–13 depend on 7 (the log) and 11 (the graph) — by *dependency*, not
+  priority.** You cannot learn from usage you do not have, and there is no usage yet.
+- **Phase 14 is independent of 11–13.** It is Tier 2 *Surface* and can move earlier
+  or slip without blocking anything. That independence is the test that the tiering
+  is real rather than decorative.
+
+### Why the intelligence layer is possible here and not elsewhere
+
+Roam cannot tell you a note is stale — it never knew *when it was true*. Obsidian
+cannot tell you two notes conflict — its links are untyped. Notion cannot tell you a
+claim is unsupported — it has no provenance.
+
+**Intelligence is downstream of the metadata, not a module bolted beside it.** The
+Tier-1 core is what makes Phases 12–13 buildable at all, which is the strongest
+retroactive justification for [ADR-0020](../decisions/0020-adopt-okf-v02.md).
+
+Note also that the two highest-value inferences — **retrieval gaps** and
+**re-derivation** — need no model whatsoever. They need a log nobody keeps.
 
 ---
 
@@ -90,8 +108,10 @@ can wait without creating debt.
 | **Guardrails** — constraints on agent behavior (propose-don't-write, never delete, require `verified` before X, rate limits on autonomous filing) | Agency | The counterweight to write-time autonomy ([ADR-0027](../decisions/0027-write-time-extraction-only.md)) |
 | **Engram's own agent** | Agency | Optional — the vault must stay usable by any external agent |
 | **Engram's own UI** | Surface | Only after Obsidian proves the surface layer is genuinely swappable |
-| Additional closed relation types (`contradicts`, `depends-on`, `duplicate-of`) | Relation | Each requires code behind it first ([ADR-0022](../decisions/0022-relations-in-frontmatter.md)) |
+| **Connectors** — calendar, events, external feeds | Surface / Derivation | ⚠️ **This is where engram becomes a productivity suite** competing with much larger incumbents. Worth doing eventually; worth not doing *accidentally*. Inference item 6 in [ADR-0036](../decisions/0036-intelligence-loop.md) — ranked last because it demos best |
+| `depends-on`, `duplicate-of` relation types | Relation | Each requires code behind it first ([ADR-0022](../decisions/0022-relations-in-frontmatter.md)). `contradicts` lands in Phase 13 |
 | Semantic / embedding layer | Retrieval | The cancelled Phase 5, revisited only if Phase 11 shows structural traversal is insufficient |
+| Local model for the private vault | Agency | The answer to "the agent is the egress path" ([ADR-0034](../decisions/0034-encryption-is-a-substrate-concern.md)) once quality permits |
 
 ---
 
@@ -105,4 +125,9 @@ can wait without creating debt.
    directory of files*; everything the core needs is in-band.
 4. A closed contract requires code behind it. No code, no closed type.
 5. Validation gates promotion, never capture.
-6. Ship working software in every phase; each leaves the project releasable.
+6. **Inference is proposed, evidenced, and decays — never asserted.** A proactive
+   system that is wrong is worse than none, because it teaches the user to ignore
+   the tool.
+7. **Engram never transmits anything.** No account, no telemetry, no network calls
+   ([ADR-0034](../decisions/0034-encryption-is-a-substrate-concern.md)).
+8. Ship working software in every phase; each leaves the project releasable.

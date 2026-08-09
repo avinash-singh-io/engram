@@ -3,8 +3,8 @@
     "okf-format": [
       "specs/decisions/0002-okf-v01-format.md",
       "specs/decisions/0020-adopt-okf-v02.md",
-      "specs/architecture/overview.md",
-      "specs/phases/phase-0-foundation/overview.md"
+      "specs/decisions/0032-internal-model-versioned-codecs.md",
+      "specs/architecture/overview.md"
     ],
     "links-wikilinks": [
       "specs/decisions/0003-standard-links-not-wikilinks.md",
@@ -87,10 +87,12 @@
     ],
     "architecture-tiers": [
       "specs/decisions/0024-three-tier-dependency-inversion.md",
-      "specs/decisions/0025-detection-over-configuration.md"
+      "specs/decisions/0025-detection-over-configuration.md",
+      "specs/decisions/0032-internal-model-versioned-codecs.md"
     ],
     "capture-lifecycle": [
       "specs/decisions/0026-validation-gates-promotion.md",
+      "specs/decisions/0033-format-takes-content.md",
       "specs/decisions/0008-write-hook-mechanism.md"
     ],
     "boundaries": [
@@ -105,6 +107,18 @@
       "specs/vision/problem-statement-v2.md",
       "specs/vision/project-charter.md",
       "README.md"
+    ],
+    "security-privacy": [
+      "specs/decisions/0034-encryption-is-a-substrate-concern.md",
+      "specs/decisions/0030-boundaries-are-repos.md"
+    ],
+    "user-memory": [
+      "specs/decisions/0035-user-memory-second-store.md"
+    ],
+    "intelligence": [
+      "specs/decisions/0036-intelligence-loop.md",
+      "specs/decisions/0035-user-memory-second-store.md",
+      "specs/planning/roadmap.md"
     ]
   }
 }

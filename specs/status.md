@@ -60,16 +60,19 @@ is rewritten clean-room rather than patched.
 
 | Phase | Name | Status | Key Deliverables |
 |-------|------|--------|-----------------|
-| Phase 7 | Evidence | **next** | Question-traffic instrumentation; lookup-vs-structural classification; locked evaluator. **GATE 1 — can end the project** |
-| Phase 8 | Core | planned | Clean-room `src/`: Node + Edge; OKF v0.2; identity (slug/path/aliases); relations in frontmatter; capture never rejected |
+| Phase 7 | Evidence & Observation | **next** | Append-only event log; lookup-vs-structural classification; locked evaluator. **Dual purpose — also the foundation of the intelligence layer.** **GATE 1 — can end the project** |
+| Phase 8 | Core | planned | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
 | Phase 9 | Structure, views & health | planned | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
-| Phase 10 | Agent surface | planned | `format` operation (scratchpad → OKF); write-time relation extraction; adapters; MCP. **GATE 2 — edge accuracy** |
-| Phase 11 | Retrieval | planned | Traversal over closed relations; must beat the Phase 7 baseline on the locked evaluator |
-| Phase 12 | Obsidian surface | planned | Community plugin; agent inside Obsidian |
+| Phase 10 | Agent surface | planned | `format(content, hints)` — no capture prerequisite (ADR-0033); write-time extraction; write gate + guardrails; skills; adapters; MCP. **GATE 2 — edge accuracy** |
+| Phase 11 | Retrieval | planned | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
+| Phase 12 | Intelligence I | planned | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
+| Phase 13 | Intelligence II | planned | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
+| Phase 14 | Obsidian surface | planned | Community plugin; agent inside Obsidian. **Independent lane — can move earlier** |
 | ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
 
-Post-v2 (Tier-2 Agency/Surface, no debt created by waiting): **skills**,
-**guardrails**, engram's own agent, engram's own UI. See
+Post-v2 (Tier-2, no debt created by waiting): engram's own agent, engram's own UI,
+**connectors (calendar/events)** — the last of which is where engram would become a
+productivity suite, and is deliberately kept out of the core. See
 [roadmap](planning/roadmap.md).
 
 ## Blockers
@@ -133,8 +136,21 @@ Post-v2 (Tier-2 Agency/Surface, no debt created by waiting): **skills**,
 - ADR-0030 — Boundaries are repositories; one root is the whole world
 - ADR-0031 — Evidence gates before graph investment; each can end the project
 
+### Architecture + intelligence (2026-08-10)
+
+- ADR-0032 — Internal model + versioned codecs; narrow ports (fixes OCP/DIP/ISP violations in the first sketch)
+- ADR-0033 — `format` takes content, not a path; the inbox is a buffer, not a stage
+- ADR-0034 — Encryption is a substrate concern; engram never transmits; **the agent is the egress path**
+- ADR-0035 — User memory is a second store (`.engram/memory/`) with the same primitives
+- ADR-0036 — The intelligence loop: observe → distill → confirm → act → decay
+
 ## Recent Changes
 
+- 2026-08-10 — **Architecture + intelligence pass** — ADR-0032…0036. Fixed a real
+  OCP/DIP violation (`core/okf.ts`), corrected the `format` signature, settled the
+  security posture, and added the user-memory store and intelligence loop. Roadmap
+  extended to Phase 14; Phase 7 is now dual-purpose (Gate 1 **and** the observation
+  substrate).
 - 2026-08-09 — **v2 design review** — 14 ADRs (0018–0031), new canonical problem
   statement, roadmap rewritten for Phases 7–12. Phase 5 cancelled. Branch
   `feat/v2-architecture`. No code changed; Gate 1 blocks all v2 implementation.

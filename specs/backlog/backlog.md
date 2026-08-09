@@ -32,7 +32,10 @@
 | FEAT-002 | `/recall` output contract | P2 | resolved | Phase 2 | Resolved by ADR-0010: ranked references (path+title+description+why); `--sections` for headings, not bodies |
 | FEAT-003 | Skills — packaged instruction sets for KB operations | P3 | open | post-v2 | Tier-2 *Agency* (ADR-0024). Literature review, connect-the-dots, weekly digest, PRD-from-sources. Vault-local so they travel with the vault. Adds affordances over a core that doesn't know about them — no debt from waiting |
 | FEAT-004 | Guardrails — constraints on agent behavior | P3 | open | post-v2 | Tier-2 *Agency*. Propose-don't-write, never-delete, require `verified` before X, rate limits on autonomous filing. The counterweight to write-time autonomy (ADR-0027) |
-| FEAT-005 | Additional closed relation types (`contradicts`, `depends-on`, `duplicate-of`) | P3 | open | post-v2 | Each gated by ADR-0022: no code behind it, no closed type. `duplicate-of` becomes relevant once cloud-sync conflict copies are observed in practice |
+| FEAT-005 | Additional closed relation types (`depends-on`, `duplicate-of`) | P3 | open | post-v2 | Each gated by ADR-0022: no code behind it, no closed type. `contradicts` now lands in Phase 13 (ADR-0036 inference #3). `duplicate-of` becomes relevant once cloud-sync conflict copies are observed in practice |
+| FEAT-006 | Connectors — calendar, events, external feeds | P3 | open | post-v2 | ⚠️ **Scope warning**: this is where engram becomes a productivity suite competing with Notion/Obsidian ecosystems. ADR-0036 ranks it inference #6 — least differentiated, demos best. Worth doing eventually; worth not doing accidentally |
+| FEAT-007 | Local model for the private vault | P3 | open | post-v2 | The real answer to "the agent is a network egress path" (ADR-0034) once local quality permits. Architecture already permits it — engram has no opinion about which agent is used |
+| FEAT-008 | Event-log compaction / retention policy | P2 | open | Phase 12 | `.engram/memory/events/*.jsonl` accumulates. ADR-0035 defers the retention policy to ADR-0036's decay step; needs a concrete rule before Intelligence I ships |
 
 ## Tech Debt
 
