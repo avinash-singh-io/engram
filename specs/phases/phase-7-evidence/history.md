@@ -107,3 +107,43 @@ dependency, which it is not — that is a personal workflow choice. FEAT-008
 (event-log compaction) and FEAT-005's `contradicts` park with Phases 12–13.
 
 ---
+
+### [EVALUATOR] 2026-08-10 — gate1-v1 stage 1 locked; seed labeling deferred to stage 2
+Topics: evaluator, rule-11, gate-1, classification
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0037-gate1-measurement-protocol.md
+Detail: `rubric.md` and `protocol.md` are frozen under a checksum manifest before
+any data was seen, and the freeze test was verified to **fail** on a deliberate
+mutation — a freeze test that cannot fail is worthless. Found while executing
+Group 0 that the plan was circular: the seed set must be drawn from the corpus,
+which is unreadable until the Group 1 reader exists. Resolved by a two-stage lock
+(ADR-0037 §6) — rubric and protocol now, seed after extraction and before the
+classifier runs. Rule 11's load-bearing property holds: the rubric is the only
+artifact tunable to flatter a result, and it is fixed first.
+
+---
+
+### [DECISION] 2026-08-10 — The rubric declares its own biases rather than correcting them
+Topics: methodology, gate-1, classification
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0037-gate1-measurement-protocol.md
+Detail: Two directional biases are written into the locked rubric and required in
+the report. Ambiguous prompts label `not-a-kb-question`, which shrinks the
+denominator and makes the structural fraction *easier* to clear. The retrospective
+corpus undercounts structural traffic, making the reading a lower bound. They point
+in opposite directions and neither is corrected — a measurement that hides the
+direction of its own error is not evidence.
+
+---
+
+### [NOTE] 2026-08-10 — Phase branch is stacked on feat/v2-architecture, not main
+Topics: git, phasing, lanes
+Affects-phases: phase-7-evidence
+Affects-specs: none
+Detail: `main` carries none of ADR-0018..0036, the v2 architecture overview, or the
+Phase 7 plan, so `/start-phase`'s canonical `git checkout main && git checkout -b`
+would have produced a branch that could not execute this phase. Branched from
+`feat/v2-architecture` instead — a stacked lane under Rule 6. The parent must land
+first; this branch rebases onto `main` afterwards.
+
+---

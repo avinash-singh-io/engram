@@ -3,18 +3,24 @@
 > Legend: `[ ]` todo · `[/]` in progress · `[x]` done
 > Execution: Group 0 → Group 1 → (Groups 2 + 3 parallel) → Group 4 → [Group 5 if unresolved]
 
-## Group 0 — Lock the evaluator (Rule 11) — blocks everything
+## Group 0 — Lock the evaluator, stage 1 (Rule 11) — blocks everything
 
-- [ ] Write ADR-0037 — Gate 1 measurement protocol
-- [ ] Write ADR-0038 — intelligence deferred post-v1.0 as an indivisible system
-- [ ] Author `tests/benchmarks/gate1-v1/rubric.md` — three labels, worked examples
-- [ ] Fix the `not-a-kb-question` boundary explicitly (this sets the denominator)
-- [ ] Hand-label `tests/benchmarks/gate1-v1/seed.jsonl` (~60 real questions)
-- [ ] Write `protocol.md` — corpus, decision rule, κ floor, contingency trigger
-- [ ] Record the per-root egress decision (machine-classified vs hand-labeled only)
-- [ ] Add `tests/benchmarks/gate1-v1.freeze.test.ts` — manifest checksum
-- [ ] Verify: `npx vitest run tests/benchmarks/gate1-v1.freeze.test.ts` passes
-- [ ] Commit and freeze `gate1-v1` before any real data is touched
+- [x] Write ADR-0037 — Gate 1 measurement protocol
+- [x] Write ADR-0038 — intelligence deferred post-v1.0 as an indivisible system
+- [x] Author `tests/benchmarks/gate1-v1/rubric.md` — three labels, worked examples
+- [x] Fix the `not-a-kb-question` boundary explicitly (this sets the denominator)
+- [x] Write `protocol.md` — corpus, decision rule, κ floor, contingency trigger
+- [x] Add `tests/benchmarks/gate1-v1.freeze.test.ts` + `tools/gate1/freeze.js`
+- [x] Verify: freeze test passes, **and fails on a deliberate mutation**
+- [x] Verify: `npm run check` exits 0 with fresh output
+- [x] Commit and freeze `gate1-v1` stage 1 before any real data is touched
+- [ ] **BLOCKED — needs user**: record the per-root egress decision
+      (`machine` vs `hand-only`) before Group 2 runs
+
+> **Seed labeling moved to stage 2** (ADR-0037 §6). The seed must be drawn from the
+> corpus, which is unreadable until the Group 1 reader exists — the original plan
+> had it circular. Rule 11 holds regardless: the rubric, the only artifact tunable
+> to flatter a result, is locked here in stage 1.
 
 ## Group 1 — Transcript reader
 
@@ -27,6 +33,9 @@
 
 ## Group 2 — Classify and adjudicate — parallel with Group 3
 
+- [ ] **Lock stage 2**: hand-label `seed.jsonl` (~60 real questions drawn from the
+      extracted corpus), regenerate the manifest via `node tools/gate1/freeze.js`,
+      re-verify the freeze test — **before the classifier runs**
 - [ ] Implement Cohen's κ + Wilson interval; unit test against known values
 - [ ] Verify: `npx vitest run tests/gate1/stats.test.ts` passes
 - [ ] Run the classifier over the corpus against the locked rubric
