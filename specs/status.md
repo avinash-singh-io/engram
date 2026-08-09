@@ -54,7 +54,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 7 — Evidence & Observation | `phase-7-evidence` | In Progress — Gate 1 | Group 0 |
+| Phase 7 — Evidence & Observation | `phase-7-evidence` | **Blocked** — needs corpus extraction + labeling | Groups 0, 1 done; 2 partial |
 
 ## Upcoming Phases — the v2 line
 
