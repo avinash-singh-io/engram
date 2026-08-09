@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractFromLines, isHumanPrompt } from '../../tools/gate1/reader.js';
+import { extractFromLines, isHumanPrompt, normalizeText } from '../../tools/gate1/reader.js';
 
 /**
  * Synthetic fixture mirroring the record shapes observed in real transcripts.
@@ -54,6 +54,63 @@ const attachmentOnly = {
 };
 
 const assistantTurn = { type: 'assistant', uuid: 'a-1', message: { content: 'hi' } };
+
+const userTurn = (uuid: string, content: string) => ({
+  type: 'user',
+  uuid,
+  sessionId: 's-1',
+  timestamp: '2026-08-10T09:00:00Z',
+  message: { role: 'user', content },
+});
+
+const taskNotification = userTurn(
+  'u-6',
+  '<task-notification>\n<task-id>abc</task-id>\n</task-notification>',
+);
+const commandStdout = userTurn(
+  'u-7',
+  '<local-command-stdout>Set model to opus</local-command-stdout>',
+);
+
+describe('harness-injected turns are not human prompts', () => {
+  it.each([
+    ['a task notification', taskNotification],
+    ['command stdout', commandStdout],
+  ])('rejects %s', (_label, record) => {
+    expect(isHumanPrompt(record)).toBe(false);
+  });
+});
+
+describe('normalizeText — slash-command unwrapping', () => {
+  it('keeps the args, which carry the human question', () => {
+    const raw =
+      '<command-message>brainstorm-phase</command-message>\n' +
+      '<command-name>/brainstorm-phase</command-name>\n' +
+      '<command-args>how are we planning phase 7?</command-args>';
+    expect(normalizeText(raw)).toBe('/brainstorm-phase how are we planning phase 7?');
+  });
+
+  it('keeps a bare command with empty args', () => {
+    const raw = '<command-name>/start-phase</command-name>\n<command-args></command-args>';
+    expect(normalizeText(raw)).toBe('/start-phase');
+  });
+
+  it('leaves ordinary prose untouched', () => {
+    expect(normalizeText('  what did we decide about retries?  ')).toBe(
+      'what did we decide about retries?',
+    );
+  });
+
+  it('drops a wrapper carrying neither name nor args', () => {
+    const got = extractFromLines(
+      [JSON.stringify(userTurn('u-8', '<command-name></command-name>'))],
+      {
+        rootId: 'root-abc123',
+      },
+    );
+    expect(got).toHaveLength(0);
+  });
+});
 
 describe('isHumanPrompt', () => {
   it('accepts a real human prompt', () => {

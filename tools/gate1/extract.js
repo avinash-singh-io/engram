@@ -35,6 +35,7 @@ const opaqueId = (name) => `root-${createHash('sha256').update(name).digest('hex
 
 const corpus = [];
 const roots = [];
+const seen = new Set();
 
 for (const dirName of readdirSync(projectsDir).sort()) {
   const dir = join(projectsDir, dirName);
@@ -50,9 +51,15 @@ for (const dirName of readdirSync(projectsDir).sort()) {
   let prompts = 0;
   for (const file of sessions) {
     const lines = readFileSync(join(dir, file), 'utf8').split('\n');
-    const extracted = extractFromLines(lines, { rootId });
-    corpus.push(...extracted);
-    prompts += extracted.length;
+    for (const p of extractFromLines(lines, { rootId })) {
+      // A resumed or compacted session re-stores the same record in a second
+      // file. Measured: 1715 records carried only 1194 distinct uuids. These are
+      // storage duplicates, not a human re-asking, so they must not inflate n.
+      if (seen.has(p.id)) continue;
+      seen.add(p.id);
+      corpus.push(p);
+      prompts++;
+    }
   }
   roots.push({ rootId, dirName, sessions: sessions.length, prompts });
 }

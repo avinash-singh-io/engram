@@ -8,4 +8,6 @@ export interface Gate1Prompt {
 
 export function isHumanPrompt(record: unknown): boolean;
 
+export function normalizeText(text: string): string;
+
 export function extractFromLines(lines: string[], opts: { rootId: string }): Gate1Prompt[];

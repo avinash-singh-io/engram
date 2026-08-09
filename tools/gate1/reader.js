@@ -15,6 +15,13 @@
  */
 
 /**
+ * Harness-injected turns that arrive as `type: "user"` but were never typed by
+ * anyone. Found in the real corpus: 155 task notifications and 30 command stdout
+ * blocks out of 1715 extracted records.
+ */
+const INJECTED = /^<(task-notification|local-command-stdout|local-command-stderr)[>\s]/;
+
+/**
  * True when a transcript record is a prompt typed by the human.
  * @param {any} record
  * @returns {boolean}
@@ -24,7 +31,25 @@ export function isHumanPrompt(record) {
   if (record.isMeta === true) return false;
   if (record.isSidechain === true) return false;
   if (record.toolUseResult !== undefined) return false;
-  return typeof record.message?.content === 'string';
+  if (typeof record.message?.content !== 'string') return false;
+  return !INJECTED.test(record.message.content.trim());
+}
+
+/**
+ * Unwrap a slash-command invocation to what the human actually expressed.
+ *
+ * A `/command` turn is stored as a wrapper whose `<command-args>` holds the real
+ * text. Dropping these wholesale would discard genuine questions — 47 of 56
+ * wrappers in the real corpus carry non-empty args.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function normalizeText(text) {
+  if (!text.includes('<command-name>')) return text.trim();
+  const name = text.match(/<command-name>([\s\S]*?)<\/command-name>/)?.[1].trim() ?? '';
+  const args = text.match(/<command-args>([\s\S]*?)<\/command-args>/)?.[1].trim() ?? '';
+  return [name, args].filter(Boolean).join(' ').trim();
 }
 
 /**
@@ -45,9 +70,11 @@ export function extractFromLines(lines, opts) {
       continue; // a truncated tail line is not a reason to lose the file
     }
     if (!isHumanPrompt(record)) continue;
+    const text = normalizeText(record.message.content);
+    if (text === '') continue; // wrapper with neither a name nor args
     out.push({
       id: record.uuid,
-      text: record.message.content,
+      text,
       ts: record.timestamp,
       session: record.sessionId,
       root: opts.rootId,

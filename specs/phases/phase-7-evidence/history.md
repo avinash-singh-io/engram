@@ -190,3 +190,34 @@ when both raters used a single identical label, so a degenerate sample cannot fe
 NaN into a gate decision.
 
 ---
+
+### [DECISION] 2026-08-10 — Sample parameters pre-registered before any prompt was read
+Topics: gate-1, methodology, rule-11, sampling
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0037-gate1-measurement-protocol.md
+Detail: Extraction returned n=1715 human prompts across 21 roots and 105 sessions —
+far more than the interval needs. Classification therefore runs on a deterministic
+random sample, **N=400, seed=20260810**, fixed and recorded here before a single
+prompt was read. The choice was made on a volume fact, not an outcome fact. The
+seeded hash-sort makes the sample reproducible and auditable rather than
+convenient, and 400 keeps the human's blind 20% (80 items) a realistic ask.
+
+---
+
+### [DISCOVERY] 2026-08-10 — Corpus was 38% inflated by storage duplicates and harness turns
+Topics: gate-1, corpus, measurement, tooling
+Affects-phases: phase-7-evidence
+Affects-specs: none
+Detail: Inspecting the first sample batch — before classifying any of it — exposed
+two instrument defects. (1) **Storage duplicates**: 1715 extracted records carried
+only 1194 distinct uuids, because a resumed or compacted session re-stores the same
+record in a second file. These are not a human re-asking, so the rubric's
+"label each occurrence" rule does not apply; they are now deduped by uuid. (2)
+**Harness-injected turns**: 155 `<task-notification>` and 30
+`<local-command-stdout>` blocks arrive as `type:"user"` but were typed by nobody.
+Slash-command wrappers are *not* dropped — 47 of 56 carry non-empty
+`<command-args>` holding a genuine question, so they are unwrapped to
+`/name args` instead. Corrected corpus: **1066** human prompts, down 38%. Caught
+before any classification, so no result was influenced.
+
+---
