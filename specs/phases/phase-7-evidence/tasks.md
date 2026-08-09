@@ -24,12 +24,19 @@
 
 ## Group 1 — Transcript reader
 
-- [ ] **GATE: confirm a real transcript file parses and contains user prompt text**
-      — if not, stop and re-plan
-- [ ] Enumerate roots; assign opaque ids (no semantic naming)
-- [ ] Extract prompts: text, timestamp, session id, opaque root id
-- [ ] Unit test the reader against a synthetic fixture
-- [ ] Verify: `npx vitest run tests/gate1/reader.test.ts` passes
+- [x] **GATE PASSED: transcript format confirmed parseable** — `type:"user"`
+      records carry `message.content`, `timestamp`, `sessionId`, `cwd`
+- [x] Establish the human-prompt filter from observed field distributions
+      (not guessed): excludes tool results, meta turns, sidechain/subagent
+      turns, attachment-only turns
+- [x] Enumerate roots; assign opaque ids via sha256 of the directory name
+- [x] Extract prompts: text, timestamp, session id, opaque root id
+- [x] Unit test the reader against a synthetic fixture (13 tests)
+- [x] Gitignore `.gate1/` — the corpus holds raw prompt text
+- [x] Verify: `npx vitest run tests/gate1/reader.test.ts` passes
+- [x] Verify: `npm run check` exits 0 with fresh output
+- [ ] **BLOCKED — needs user**: run `node tools/gate1/extract.js`. The sandbox
+      classifier denies reading session data across all project roots.
 
 ## Group 2 — Classify and adjudicate — parallel with Group 3
 

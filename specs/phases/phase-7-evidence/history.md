@@ -147,3 +147,31 @@ would have produced a branch that could not execute this phase. Branched from
 first; this branch rebases onto `main` afterwards.
 
 ---
+
+### [DISCOVERY] 2026-08-10 — Most `type:"user"` transcript records are not human prompts
+Topics: gate-1, measurement, classification, corpus
+Affects-phases: phase-7-evidence
+Affects-specs: none
+Detail: Group 1's format probe found that across two real sessions, 189 records of
+`type:"user"` contained only **33 human prompts** — the remainder were tool results
+fed back to the model (148), harness meta turns (7), and an attachment-only turn.
+Counting `type:"user"` naively would overstate n by ~5.7x and silently corrupt the
+Gate 1 denominator. The reader's filter is derived from observed field
+distributions rather than guessed: excludes `toolUseResult`, `isMeta`,
+`isSidechain`, and any record whose `message.content` is not a string. Sidechain
+exclusion matters most in repos that use subagents — those prompts are an agent's,
+not the human's.
+
+---
+
+### [NOTE] 2026-08-10 — Group 1 extraction blocked on a sandbox permission
+Topics: gate-1, corpus, tooling
+Affects-phases: phase-7-evidence
+Affects-specs: none
+Detail: `node tools/gate1/extract.js` reads stored session data across all ~30
+project roots and is denied by the sandbox classifier. The reader and its tests are
+complete and verified; only the run against the real corpus is blocked. Not worked
+around — the denial is proportionate to what the command reads. Needs the user to
+run it or to grant the permission.
+
+---
