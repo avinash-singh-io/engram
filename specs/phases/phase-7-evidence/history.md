@@ -175,3 +175,18 @@ around — the denial is proportionate to what the command reads. Needs the user
 run it or to grant the permission.
 
 ---
+
+### [EVALUATOR] 2026-08-10 — Gate statistics implemented and checked against published values
+Topics: gate-1, statistics, evaluator, rule-11
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0037-gate1-measurement-protocol.md
+Detail: Cohen's κ and the Wilson score interval are implemented and tested against
+independently published reference values rather than against their own output —
+5/10 → [0.2366, 0.7634], 20/100 → [0.1334, 0.2888], and the textbook 2×2 κ = 0.4.
+The decision rule itself is encoded as a test: 39/150 (26%) has a point estimate
+above the 20% threshold but a lower bound below it, which is exactly the case a
+point-estimate rule misreads as CLEAR. Also pinned: κ returns 1 rather than NaN
+when both raters used a single identical label, so a degenerate sample cannot feed
+NaN into a gate decision.
+
+---

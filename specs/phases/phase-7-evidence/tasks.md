@@ -43,10 +43,14 @@
 - [ ] **Lock stage 2**: hand-label `seed.jsonl` (~60 real questions drawn from the
       extracted corpus), regenerate the manifest via `node tools/gate1/freeze.js`,
       re-verify the freeze test — **before the classifier runs**
-- [ ] Implement Cohen's κ + Wilson interval; unit test against known values
-- [ ] Verify: `npx vitest run tests/gate1/stats.test.ts` passes
-- [ ] Run the classifier over the corpus against the locked rubric
-- [ ] Blind hand-label a random 20% (machine labels hidden)
+- [x] Implement Cohen's κ + Wilson interval; unit test against **published**
+      reference values (5/10 → [.2366,.7634]; 20/100 → [.1334,.2888]; textbook
+      2×2 κ → 0.4), not against this implementation's own output
+- [x] Encode the decision rule as a test: 39/150 (26%) has a point estimate above
+      the threshold but a lower bound below it — the case a point rule misreads
+- [x] Verify: `npx vitest run tests/gate1/stats.test.ts` passes (14 tests)
+- [ ] **BLOCKED on corpus**: run the classifier against the locked rubric
+- [ ] **BLOCKED on corpus + user**: blind hand-label a random 20%
 - [ ] Compute κ; if below floor → hand-label all, or version-bump to `gate1-v2`
 
 ## Group 3 — Baseline harness — parallel with Group 2
