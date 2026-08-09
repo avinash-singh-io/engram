@@ -55,9 +55,16 @@
 
 ## Group 3 — Baseline harness — parallel with Group 2
 
-- [ ] Build the rg-over-markdown baseline harness
-- [ ] Run against the structural questions found; score and record
-- [ ] Verify: `node tools/gate1/baseline/run.js` produces a scored result
+- [x] Extract the 32 real structural questions (`tools/gate1/structural.js`) —
+      the most valuable artifact this phase produces for Phase 11
+- [ ] **CANNOT COMPLETE AS SPECIFIED — scope error found in execution.** A grep
+      baseline must be *scored*, and scoring needs an answer key mapping each
+      question to the documents that correctly answer it. The 32 questions are
+      real; their answers were never recorded. Authoring that key is human work
+      and belongs to **Phase 11 Group 0**, not here. Running rg against
+      `recall-v1` instead would measure the wrong thing — those queries are
+      synthetic and lookup-shaped, which is precisely what Phase 11 is *not*
+      required to beat.
 
 ## Group 4 — Report and decide
 

@@ -221,3 +221,64 @@ Slash-command wrappers are *not* dropped — 47 of 56 carry non-empty
 before any classification, so no result was influenced.
 
 ---
+
+### [DECISION] 2026-08-10 — TypeScript re-decided for v2 (ADR-0039)
+Topics: language, runtime, architecture, obsidian, tooling
+Affects-phases: phase-7-evidence, phase-8-core, phase-14-obsidian
+Affects-specs: specs/decisions/0007-typescript-single-package.md
+Detail: ADR-0007 chose TypeScript for the v1 MVP; v2 is a clean-room rewrite, so
+the choice was re-decided rather than inherited. Prompted by a challenge on why
+`tools/gate1/` was plain JS — it is disposable scaffolding kept outside the
+typecheck, which was a defensible call made silently rather than stated. Decision:
+TypeScript, because it is the only candidate that loses badly on no axis and the
+only one that keeps a JavaScript plugin ecosystem reachable — you cannot consume JS
+plugins from a process that cannot run JS. Under uncertainty about how far the
+product goes, optionality is the right thing to optimise, not fit. Two measurable
+reopen triggers recorded.
+
+---
+
+### [DISCOVERY] 2026-08-10 — Sync + E2E encryption would reverse ADR-0034, not extend it
+Topics: security, sync, encryption, product-scope
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0034-encryption-is-a-substrate-concern.md
+Detail: Raised while thinking aloud about post-v1.0 ambitions (own agent, own UI,
+plugin ecosystems, sync with E2E). Sync-with-encryption is not a feature addition —
+ADR-0034 states engram never transmits and ships no encryption *because an
+encrypted note is a note engram cannot help with*. It also collides with ADR-0004
+(git as source of truth) and ADR-0013 (the free sync path already exists without
+engram transmitting). Recorded so it cannot creep in feature-by-feature; it needs
+an explicit ADR-0034 revisit before any design work. Not scheduled.
+
+---
+
+### [SCOPE_CHANGE] 2026-08-10 — Group 3's baseline cannot be scored in this phase
+Topics: gate-1, baseline, evaluator, phase-11
+Affects-phases: phase-7-evidence, phase-11-retrieval
+Affects-specs: specs/planning/roadmap.md
+Detail: The plan called for an rg-over-markdown baseline "scored on the structural
+questions actually collected" — the number Phase 11 must beat. Executing it exposed
+the flaw: a baseline must be *scored*, and scoring needs an answer key mapping each
+question to the documents that answer it. The 32 structural questions are real;
+their answers were never recorded anywhere. Authoring that key is human work and
+belongs to Phase 11 Group 0. Substituting `recall-v1` would measure the wrong thing
+— it is synthetic and lookup-shaped, exactly what Phase 11 is not required to beat.
+The questions are extracted to `.gate1/structural-questions.jsonl` with every
+`expected` field explicitly null, so the gap is visible rather than assumed filled.
+
+---
+
+### [EVALUATOR] 2026-08-10 — Stage A classified; report refuses a verdict by construction
+Topics: gate-1, classification, evaluator, rule-11
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0037-gate1-measurement-protocol.md
+Detail: 400 sampled prompts classified against the locked rubric by a single
+machine rater: 364 not-a-kb-question, 4 lookup, 32 structural. Denominator 36 (9.0%
+of the sample); structural fraction 88.9%, Wilson 95% CI [74.7%, 95.6%]. The report
+tool emits **PROVISIONAL — NOT A GATE DECISION** and states no verdict, because
+ADR-0037 §5 requires a blind human sample and κ ≥ 0.7 first. The refusal is
+enforced in code and covered by five tests, including one proving it still refuses
+against a maximally strong signal — a prose caveat gets skipped, a code refusal
+does not.
+
+---
