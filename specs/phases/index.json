@@ -37,6 +37,21 @@
       "status": "complete",
       "directory": "phase-6-onboarding",
       "topics": ["adapters", "migration", "onboarding", "okf-format", "tooling"]
+    },
+    "phase-7-evidence": {
+      "name": "Evidence & Observation",
+      "status": "in-progress",
+      "directory": "phase-7-evidence",
+      "topics": [
+        "gate-1",
+        "evaluator",
+        "measurement",
+        "classification",
+        "retrieval",
+        "intelligence",
+        "observation",
+        "roadmap"
+      ]
     }
   }
 }

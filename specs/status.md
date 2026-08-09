@@ -1,7 +1,7 @@
 # Project Status
 
-> **Last Updated**: 2026-08-09
-> **Current Phase**: **v2 architecture adopted** (ADR-0018 … ADR-0031, branch `feat/v2-architecture`). v1 line closed at v0.6.8. Next: Phase 7 — Evidence (Gate 1).
+> **Last Updated**: 2026-08-10
+> **Current Phase**: **Phase 7 — Evidence & Observation** (branch `phase-7-evidence`, stacked on `feat/v2-architecture`). **GATE 1** — can end the project. v1 line closed at v0.6.8.
 > **Latest Release**: v0.6.8 (BUG-002 — OIDC trusted-publishing release; no functional change)
 > **Health**: On Track — design settled, awaiting Gate 1 measurement before any v2 code
 
@@ -54,7 +54,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Wave 2 landed; Wave 3 not yet started)_ | | | |
+| Phase 7 — Evidence & Observation | `phase-7-evidence` | In Progress — Gate 1 | Group 0 |
 
 ## Upcoming Phases — the v2 line
 
