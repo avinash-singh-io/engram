@@ -146,6 +146,9 @@ productivity suite, and is deliberately kept out of the core. See
 
 ## Recent Changes
 
+- 2026-08-10 — **Architecture spec landed** — `specs/architecture/v2-overview.md`
+  is now the canonical reference (constitutional, Rule 10); `overview.md` marked
+  superseded as the v1 shape.
 - 2026-08-10 — **Architecture + intelligence pass** — ADR-0032…0036. Fixed a real
   OCP/DIP violation (`core/okf.ts`), corrected the `format` signature, settled the
   security posture, and added the user-memory store and intelligence loop. Roadmap

@@ -4,7 +4,8 @@
       "specs/decisions/0002-okf-v01-format.md",
       "specs/decisions/0020-adopt-okf-v02.md",
       "specs/decisions/0032-internal-model-versioned-codecs.md",
-      "specs/architecture/overview.md"
+      "specs/architecture/overview.md",
+      "specs/architecture/v2-overview.md"
     ],
     "links-wikilinks": [
       "specs/decisions/0003-standard-links-not-wikilinks.md",
@@ -14,7 +15,8 @@
     "retrieval": [
       "specs/decisions/0005-navigate-first-retrieval.md",
       "specs/decisions/0010-bounded-read-metric-and-recall-contract.md",
-      "specs/architecture/overview.md"
+      "specs/architecture/overview.md",
+      "specs/architecture/v2-overview.md"
     ],
     "bounded-read": [
       "specs/decisions/0010-bounded-read-metric-and-recall-contract.md",
@@ -32,7 +34,8 @@
     "indexes": [
       "specs/decisions/0006-auto-generated-indexes.md",
       "specs/decisions/0023-structure-tree-plus-views.md",
-      "specs/decisions/0029-derived-state-never-committed.md"
+      "specs/decisions/0029-derived-state-never-committed.md",
+      "specs/architecture/v2-overview.md"
     ],
     "sync": [
       "specs/decisions/0004-git-source-of-truth.md",
@@ -58,7 +61,8 @@
     ],
     "adapters": [
       "specs/decisions/0011-adapters-converge-on-agents-md.md",
-      "docs/adapters.md"
+      "docs/adapters.md",
+      "specs/architecture/v2-overview.md"
     ],
     "promote": [
       "specs/decisions/0012-promote-one-way-reference-snapshot.md",
@@ -69,34 +73,42 @@
     ],
     "primitives": [
       "specs/decisions/0019-node-edge-primitives.md",
-      "specs/vision/problem-statement-v2.md"
+      "specs/vision/problem-statement-v2.md",
+      "specs/architecture/v2-overview.md"
     ],
     "identity": [
-      "specs/decisions/0021-identity-slug-path-aliases.md"
+      "specs/decisions/0021-identity-slug-path-aliases.md",
+      "specs/architecture/v2-overview.md"
     ],
     "relations": [
       "specs/decisions/0022-relations-in-frontmatter.md",
-      "specs/decisions/0027-write-time-extraction-only.md"
+      "specs/decisions/0027-write-time-extraction-only.md",
+      "specs/architecture/v2-overview.md"
     ],
     "provenance-trust": [
       "specs/decisions/0020-adopt-okf-v02.md",
-      "specs/decisions/0027-write-time-extraction-only.md"
+      "specs/decisions/0027-write-time-extraction-only.md",
+      "specs/architecture/v2-overview.md"
     ],
     "structure-views": [
-      "specs/decisions/0023-structure-tree-plus-views.md"
+      "specs/decisions/0023-structure-tree-plus-views.md",
+      "specs/architecture/v2-overview.md"
     ],
     "architecture-tiers": [
       "specs/decisions/0024-three-tier-dependency-inversion.md",
       "specs/decisions/0025-detection-over-configuration.md",
-      "specs/decisions/0032-internal-model-versioned-codecs.md"
+      "specs/decisions/0032-internal-model-versioned-codecs.md",
+      "specs/architecture/v2-overview.md"
     ],
     "capture-lifecycle": [
       "specs/decisions/0026-validation-gates-promotion.md",
       "specs/decisions/0033-format-takes-content.md",
-      "specs/decisions/0008-write-hook-mechanism.md"
+      "specs/decisions/0008-write-hook-mechanism.md",
+      "specs/architecture/v2-overview.md"
     ],
     "boundaries": [
-      "specs/decisions/0030-boundaries-are-repos.md"
+      "specs/decisions/0030-boundaries-are-repos.md",
+      "specs/architecture/v2-overview.md"
     ],
     "evidence-gates": [
       "specs/decisions/0031-evidence-gates-before-graph.md",
@@ -110,15 +122,22 @@
     ],
     "security-privacy": [
       "specs/decisions/0034-encryption-is-a-substrate-concern.md",
-      "specs/decisions/0030-boundaries-are-repos.md"
+      "specs/decisions/0030-boundaries-are-repos.md",
+      "specs/architecture/v2-overview.md"
     ],
     "user-memory": [
-      "specs/decisions/0035-user-memory-second-store.md"
+      "specs/decisions/0035-user-memory-second-store.md",
+      "specs/architecture/v2-overview.md"
     ],
     "intelligence": [
       "specs/decisions/0036-intelligence-loop.md",
       "specs/decisions/0035-user-memory-second-store.md",
-      "specs/planning/roadmap.md"
+      "specs/planning/roadmap.md",
+      "specs/architecture/v2-overview.md"
+    ],
+    "architecture": [
+      "specs/architecture/v2-overview.md",
+      "specs/architecture/overview.md"
     ]
   }
 }
