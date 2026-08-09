@@ -1,8 +1,12 @@
 # 0006 — Auto-generated indexes
 
-> **Status**: accepted
+> **Status**: accepted, extended by [ADR-0023](0023-structure-tree-plus-views.md) and [ADR-0029](0029-derived-state-never-committed.md) (2026-08-09)
 > **Date**: 2026-07-03
 > **Deciders**: Avinash Kumar Singh
+
+> **Extended.** Per-directory `index.md` becomes a special case of a *view* —
+> a projection of `part-of` edges. ADR-0029 adds the rule that all derived state
+> is gitignored by default and resolved by regeneration, never merged.
 
 ## Context
 

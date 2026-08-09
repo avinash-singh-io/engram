@@ -1,19 +1,26 @@
 # Project Status
 
-> **Last Updated**: 2026-07-05
-> **Current Phase**: Phase 6 (Onboarding & OKF Migration) verified — awaiting merge (v0.6.0). Phase 5 (Semantic Layer) still deferred (optional).
+> **Last Updated**: 2026-08-09
+> **Current Phase**: **v2 architecture adopted** (ADR-0018 … ADR-0031, branch `feat/v2-architecture`). v1 line closed at v0.6.8. Next: Phase 7 — Evidence (Gate 1).
 > **Latest Release**: v0.6.8 (BUG-002 — OIDC trusted-publishing release; no functional change)
-> **Health**: On Track — published on npm (@avinash-singh-io/engram)
+> **Health**: On Track — design settled, awaiting Gate 1 measurement before any v2 code
 
 ## Summary
 
-Engram is an open-source, OKF-native knowledge base that agents and humans read
-and write together — durable, cross-project memory. It is the sibling of
-`momentum` (**momentum is motion; Engram is memory**): it reuses momentum's
-engine (scaffold, adapters, hooks) but swaps the primitive — an evergreen
-**Concept** replaces a terminal **Phase**. A distributable npm CLI scaffolds and
-auto-maintains an OKF v0.1 vault, enables progressive-disclosure retrieval, and
-stays free across Mac + Android.
+Engram is a **notes system for humans where the organizing work is done by an
+agent**, on plain files the human owns. You write however you think — scratchpad,
+pasted links, half-finished thought — and the agent formats it to OKF, resolves
+references, works out relations and supersession, and files it.
+
+It is explicitly **not** agent memory (Mem0/Zep/Letta store what you told an agent,
+for the agent), **not** a context-window fix, and **not** a better Obsidian. See
+[problem-statement-v2](vision/problem-statement-v2.md) — the canonical framing as
+of 2026-08-09.
+
+**v1 (v0.1.0 – v0.6.8) shipped and is now superseded.** The v2 architecture
+replaces the primitive (Node + Edge, not a single Concept), the format (OKF v0.2),
+the identity model (slug, not path), and the capture policy (never reject). `src/`
+is rewritten clean-room rather than patched.
 
 ## Completed Phases
 
@@ -49,11 +56,21 @@ stays free across Mac + Android.
 |-------|--------|--------|----------|
 | _(none — Wave 2 landed; Wave 3 not yet started)_ | | | |
 
-## Upcoming Phases
+## Upcoming Phases — the v2 line
 
 | Phase | Name | Status | Key Deliverables |
 |-------|------|--------|-----------------|
-| Phase 5 (optional) | Semantic Layer | planned (Wave 3) | embeddings index + MCP `recall`; hybrid navigate+retrieve |
+| Phase 7 | Evidence | **next** | Question-traffic instrumentation; lookup-vs-structural classification; locked evaluator. **GATE 1 — can end the project** |
+| Phase 8 | Core | planned | Clean-room `src/`: Node + Edge; OKF v0.2; identity (slug/path/aliases); relations in frontmatter; capture never rejected |
+| Phase 9 | Structure, views & health | planned | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
+| Phase 10 | Agent surface | planned | `format` operation (scratchpad → OKF); write-time relation extraction; adapters; MCP. **GATE 2 — edge accuracy** |
+| Phase 11 | Retrieval | planned | Traversal over closed relations; must beat the Phase 7 baseline on the locked evaluator |
+| Phase 12 | Obsidian surface | planned | Community plugin; agent inside Obsidian |
+| ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
+
+Post-v2 (Tier-2 Agency/Surface, no debt created by waiting): **skills**,
+**guardrails**, engram's own agent, engram's own UI. See
+[roadmap](planning/roadmap.md).
 
 ## Blockers
 
@@ -69,9 +86,16 @@ stays free across Mac + Android.
 
 ## Next Actions
 
-1. _(optional)_ Open Wave 3 — Phase 5 (Semantic Layer) when wanted — needs Phase 2's `RecallResult`; design in `specs/planning/parallel-execution-plan.md`.
-2. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
-3. _(optional)_ `npm publish` when ready to distribute (deferred through the core build).
+1. **Run Gate 1 (Phase 7).** Instrument real question traffic against the existing
+   vault; classify lookup vs structural; log questions you *wanted* to ask but
+   didn't bother. Threshold: **<20% structural → stop and ship a folder
+   convention.** Cheapest item on the roadmap and it can end the project.
+2. Lock the Phase 7 evaluator into `tests/benchmarks/` before any optimisation
+   (Rule 11).
+3. Set up the four audience repos (ADR-0030) — retires four originating
+   requirements today, and produces the real corpus Gate 1 needs.
+4. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the
+   automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
 
 ## Key Decisions Made
 
@@ -92,8 +116,28 @@ stays free across Mac + Android.
 - ADR-0015 — Editor adapters (engram is editor-agnostic; Obsidian first)
 - ADR-0016 — OKF migration (`engram migrate`) — deterministic best-effort adoption
 
+### v2 architecture (2026-08-09)
+
+- ADR-0018 — Engram is a human knowledge system with an agent co-pilot (not agent memory)
+- ADR-0019 — Node + Edge are the only primitives; any structure composes from them
+- ADR-0020 — **Adopt OKF v0.2** (supersedes ADR-0002); time + provenance come from the spec
+- ADR-0021 — Identity is a slug; path is an address; `aliases` live in the file
+- ADR-0022 — Typed relations in frontmatter; **no code, no closed type** (amends ADR-0003)
+- ADR-0023 — One human-chosen tree + generated views (extends ADR-0006)
+- ADR-0024 — Three-tier dependency inversion; adapters only add affordances
+- ADR-0025 — Detection over configuration
+- ADR-0026 — Validation gates promotion, never capture (amends ADR-0008)
+- ADR-0027 — Relations extracted at write time only, never post-hoc
+- ADR-0028 — Obsidian owns link rewriting; engram verifies only
+- ADR-0029 — Derived state is never committed; regenerate, never merge
+- ADR-0030 — Boundaries are repositories; one root is the whole world
+- ADR-0031 — Evidence gates before graph investment; each can end the project
+
 ## Recent Changes
 
+- 2026-08-09 — **v2 design review** — 14 ADRs (0018–0031), new canonical problem
+  statement, roadmap rewritten for Phases 7–12. Phase 5 cancelled. Branch
+  `feat/v2-architecture`. No code changed; Gate 1 blocks all v2 implementation.
 - 2026-07-03 — Released v0.5.0 (Phase 3 — Sync + Multi-Device): `engram doctor`, sync recipes, round-trip test. **Wave 2 complete** — 3 lanes built in parallel, landed 2 → 4 → 3.
 - 2026-07-03 — Released v0.4.0 (Phase 4 — Ecosystem): Codex + Antigravity adapters, `/promote` bridge. Rebased onto main; ADRs renumbered 0011/0012 (0010 taken by Phase 2).
 - 2026-07-03 — Released v0.3.0 (Phase 2 — Retrieval); Wave 2 built in 3 parallel lanes.

@@ -2,11 +2,14 @@
   "topics": {
     "okf-format": [
       "specs/decisions/0002-okf-v01-format.md",
+      "specs/decisions/0020-adopt-okf-v02.md",
       "specs/architecture/overview.md",
       "specs/phases/phase-0-foundation/overview.md"
     ],
     "links-wikilinks": [
-      "specs/decisions/0003-standard-links-not-wikilinks.md"
+      "specs/decisions/0003-standard-links-not-wikilinks.md",
+      "specs/decisions/0022-relations-in-frontmatter.md",
+      "specs/decisions/0028-obsidian-owns-link-rewriting.md"
     ],
     "retrieval": [
       "specs/decisions/0005-navigate-first-retrieval.md",
@@ -27,7 +30,9 @@
       "assets/vault/AGENTS.md"
     ],
     "indexes": [
-      "specs/decisions/0006-auto-generated-indexes.md"
+      "specs/decisions/0006-auto-generated-indexes.md",
+      "specs/decisions/0023-structure-tree-plus-views.md",
+      "specs/decisions/0029-derived-state-never-committed.md"
     ],
     "sync": [
       "specs/decisions/0004-git-source-of-truth.md",
@@ -61,6 +66,45 @@
     ],
     "ecosystem": [
       "specs/phases/phase-4-ecosystem/overview.md"
+    ],
+    "primitives": [
+      "specs/decisions/0019-node-edge-primitives.md",
+      "specs/vision/problem-statement-v2.md"
+    ],
+    "identity": [
+      "specs/decisions/0021-identity-slug-path-aliases.md"
+    ],
+    "relations": [
+      "specs/decisions/0022-relations-in-frontmatter.md",
+      "specs/decisions/0027-write-time-extraction-only.md"
+    ],
+    "provenance-trust": [
+      "specs/decisions/0020-adopt-okf-v02.md",
+      "specs/decisions/0027-write-time-extraction-only.md"
+    ],
+    "structure-views": [
+      "specs/decisions/0023-structure-tree-plus-views.md"
+    ],
+    "architecture-tiers": [
+      "specs/decisions/0024-three-tier-dependency-inversion.md",
+      "specs/decisions/0025-detection-over-configuration.md"
+    ],
+    "capture-lifecycle": [
+      "specs/decisions/0026-validation-gates-promotion.md",
+      "specs/decisions/0008-write-hook-mechanism.md"
+    ],
+    "boundaries": [
+      "specs/decisions/0030-boundaries-are-repos.md"
+    ],
+    "evidence-gates": [
+      "specs/decisions/0031-evidence-gates-before-graph.md",
+      "specs/planning/roadmap.md"
+    ],
+    "product-definition": [
+      "specs/decisions/0018-product-definition.md",
+      "specs/vision/problem-statement-v2.md",
+      "specs/vision/project-charter.md",
+      "README.md"
     ]
   }
 }

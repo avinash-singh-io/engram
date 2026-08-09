@@ -1,41 +1,108 @@
 # Roadmap
 
-> **Last Updated**: 2026-07-03 · Phase 0 released as v0.1.0
+> **Last Updated**: 2026-08-09 · v2 architecture adopted (ADR-0018 … ADR-0031)
+> **Current line**: v0.6.8 shipped on the v1 architecture. The v2 line starts at Phase 7.
 
 ## Vision
 
-Engram becomes the OKF-native, agent-navigable knowledge base that both a
-technical individual and their AI agents grow together — durable, cross-project
-memory that compounds instead of being re-derived, with retrieval that stays
-bounded no matter how large the vault gets.
+A notes system for humans where the **organizing work is done by an agent**, on
+plain files the human owns. You write however you think; the agent formats,
+relates, supersedes, and files. Durable for decades, readable with `cat`, navigable
+by any agent, and dependent on nothing above a directory of files.
 
-## Release Plan
+See [problem-statement-v2](../vision/problem-statement-v2.md) for the canonical framing.
 
-| Version | Phase | Key Deliverables | Target |
-|---------|-------|-----------------|--------|
-| v0.1.0 | Phase 0 — Foundation | TS/Node package + toolchain + CI; OKF v0.1 conformance spec; frontmatter validator + concept-ID resolver; CLI skeleton | ✅ Released 2026-07-03 |
-| v0.2.0 | Phase 1 — MVP Vault + Claude Code | `engram init` scaffolds OKF vault; Claude Code adapter (`/capture`, `/refine`, `/link`, `/reindex`); write-hook (validate + reindex + log); adapter seam; Obsidian setup doc | ✅ Verified 2026-07-03 (merge pending) |
-| v0.3.0 | Phase 2 — Progressive-Disclosure Retrieval | `/recall` structural navigation (index→tags→links→grep); `AGENTS.md` traversal contract; auto-index quality; bounded-read measurement | ✅ Released 2026-07-03 |
-| v0.4.0 | Phase 4 — Ecosystem | Codex + Antigravity adapters (a new agent is a descriptor); `/promote` momentum→OKF bridge | ✅ Released 2026-07-03 |
-| v0.5.0 | Phase 3 — Sync + Multi-Device | git-spine; Remotely Save→S3 & Obsidian Git recipes; `engram doctor`; Mac↔Android round-trip | ✅ Released 2026-07-03 (M5 device evidence pending) |
-| v0.6.0 | Phase 6 — Onboarding & OKF Migration | Editor adapters (Obsidian) + `init` auto-setup; agent native pointer (CLAUDE.md); `engram migrate` (adopt existing notes) | ✅ Released 2026-07-03 |
-| v0.7.0 | Phase 5 (optional) — Semantic Layer | Embeddings index + MCP `recall` tool; hybrid navigate+retrieve; structural path stays default | Deferred (optional) |
+---
 
-## Phase Dependencies
+## v1 — shipped (2026-07)
 
-- Phase 0 blocks everything — the format core (spec + validator) is the shared
-  foundation.
-- Phase 1 depends on Phase 0 (validator, concept-ID, CLI skeleton).
-- Phase 2 depends on Phase 1 (a populated vault + indexes to navigate).
-- Phase 3 is largely independent of Phase 2 (sync operates on the folder) but
-  needs a real vault from Phase 1.
-- Phase 4 depends on Phase 1 (adapter architecture) and momentum (for `/promote`).
-- Phase 5 is optional and additive — it never replaces the structural path.
+| Version | Phase | Status |
+|---------|-------|--------|
+| v0.1.0 | Phase 0 — Foundation | ✅ Released |
+| v0.2.0 | Phase 1 — MVP Vault + Claude Code | ✅ Released |
+| v0.3.0 | Phase 2 — Progressive-Disclosure Retrieval | ✅ Released |
+| v0.4.0 | Phase 4 — Ecosystem | ✅ Released |
+| v0.5.0 | Phase 3 — Sync + Multi-Device | ✅ Released |
+| v0.6.0 | Phase 6 — Onboarding & OKF Migration | ✅ Released |
+| v0.6.5–v0.6.8 | ad-hoc (BUG-001, BUG-002) | ✅ Released |
+| — | Phase 5 — Semantic Layer | ❌ **Cancelled** — superseded by v2 Phase 11 |
 
-## Guiding Principles
+**What v1 proved:** the CLI shape, the adapter seam, the sync path, and the
+bounded-read metric — all of which carry forward. **What v1 got wrong:** one
+Concept primitive with an inert `type`, path-is-identity, five required fields that
+reject mobile capture, and untyped links that discard the structure they draw.
 
-1. Ship working software in every phase.
-2. Each phase leaves the project in a releasable state.
-3. Defer scope, not quality — RAG and real-time sync are explicitly later.
-4. Progressive disclosure is the north star: never trade bounded retrieval for
-   convenience.
+---
+
+## v2 — the rewrite
+
+Clean-room. `src/` is replaced, not patched
+([ADR-0019](../decisions/0019-node-edge-primitives.md) changes the primitive, so
+incremental migration would be patchwork over a different model). Zero external
+users makes this free.
+
+| Version | Phase | Key deliverables | Gate |
+|---------|-------|-----------------|------|
+| _(none)_ | **Phase 7 — Evidence** | Question-traffic instrumentation over the real vault; classification of lookup vs structural; locked evaluator in `tests/benchmarks/` (Rule 11) | **GATE 1 — can end the project** |
+| v0.7.0 | **Phase 8 — Core** | Clean-room `src/`. Node + Edge; OKF v0.2 parse / validate / serialize; identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
+| v0.8.0 | **Phase 9 — Structure, views & health** | `init --structure=<x>` scaffolds; view generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian link-format detection | — |
+| v0.9.0 | **Phase 10 — Agent surface** | The `format` operation (scratchpad → OKF); write-time relation extraction; AGENTS.md contract; adapters (Claude Code, Codex, Antigravity); MCP server | **GATE 2 — edge accuracy** |
+| v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; hybrid structural + lookup routing; must beat the Phase 7 baseline on the locked evaluator | — |
+| v0.11.0 | **Phase 12 — Obsidian surface** | Community plugin; agent inside Obsidian; the first non-CLI Surface | — |
+
+### The two gates
+
+**Gate 1 (before Phase 8) — is the query traffic structural?**
+Threshold: **fewer than 20% structural → stop.** Ship a folder convention and a
+good `AGENTS.md` instead. Log the questions you *wanted* to ask but didn't bother
+asking — nobody asks what nothing can answer, so measuring only today's questions
+undercounts by construction.
+
+**Gate 2 (after write-time extraction, before Phase 11) — are the agent's relations correct?**
+Sample agent-authored edges for semantic directionality and predicate accuracy.
+Threshold fixed before sampling. Poor accuracy → stop at nodes plus untyped links,
+which is still a working product.
+
+See [ADR-0031](../decisions/0031-evidence-gates-before-graph.md).
+
+### Phase dependencies
+
+- **Phase 7 blocks everything.** No product code until Gate 1 passes.
+- Phase 8 is the foundation — Tier 1 of [ADR-0024](../decisions/0024-three-tier-dependency-inversion.md).
+  Nothing above it can be built first.
+- Phase 9 depends on 8 (`part-of` edges to project from).
+- Phase 10 depends on 8 (something to write into) and produces the data Gate 2 samples.
+- Phase 11 depends on 10 clearing Gate 2.
+- Phase 12 is independent of 11 — it is Tier 2 *Surface*, and can slip without
+  blocking anything. That independence is the test that the tiering is real.
+
+---
+
+## Beyond v2 — the Tier-2 expansion
+
+These are **Agency** and **Surface** concerns ([ADR-0024](../decisions/0024-three-tier-dependency-inversion.md)).
+They add affordances over a core that does not know about them, which is why they
+can wait without creating debt.
+
+| Item | Dimension | Notes |
+|---|---|---|
+| **Skills** — packaged instruction sets for KB operations (literature review, connect-the-dots, weekly digest, PRD-from-sources) | Agency | Composable, user-authorable, shipped as vault-local files so they travel with the vault |
+| **Guardrails** — constraints on agent behavior (propose-don't-write, never delete, require `verified` before X, rate limits on autonomous filing) | Agency | The counterweight to write-time autonomy ([ADR-0027](../decisions/0027-write-time-extraction-only.md)) |
+| **Engram's own agent** | Agency | Optional — the vault must stay usable by any external agent |
+| **Engram's own UI** | Surface | Only after Obsidian proves the surface layer is genuinely swappable |
+| Additional closed relation types (`contradicts`, `depends-on`, `duplicate-of`) | Relation | Each requires code behind it first ([ADR-0022](../decisions/0022-relations-in-frontmatter.md)) |
+| Semantic / embedding layer | Retrieval | The cancelled Phase 5, revisited only if Phase 11 shows structural traversal is insufficient |
+
+---
+
+## Guiding principles
+
+1. **Evidence before architecture.** A gate that ends the project is a successful
+   outcome, not a setback.
+2. Every dependency points inward. Policy and detail depend on the core; the core
+   depends on neither.
+3. Design for the floor, not the union. The invariant across substrates is *a
+   directory of files*; everything the core needs is in-band.
+4. A closed contract requires code behind it. No code, no closed type.
+5. Validation gates promotion, never capture.
+6. Ship working software in every phase; each leaves the project releasable.
