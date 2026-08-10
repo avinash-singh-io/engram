@@ -302,3 +302,38 @@ move the measured fraction. v1 is retained as the historical record and stays
 frozen; the freeze test now locks every `gate1-v*` directory.
 
 ---
+
+### [DECISION] 2026-08-10 — Gate 1 answered: PROCEED, classifier validation waived
+Topics: gate-1, decision, methodology, roadmap
+Affects-phases: phase-7-evidence, phase-8-core
+Affects-specs: specs/planning/roadmap.md, specs/status.md, specs/decisions/0031-evidence-gates-before-graph.md
+Detail: 400 sampled prompts from a 1066-prompt corpus gave 36 knowledge-base
+questions, of which 32 were structural — 88.9%, Wilson 95% CI [74.7%, 95.6%]
+against a 20% threshold. The owner waived ADR-0037 §5's blind human sample and κ
+floor and decided to proceed. Recorded as a **waived check, not a passed one**:
+`report.js` still prints PROVISIONAL on this data and was deliberately left
+unmodified, so the instrument never misrepresents its own limits. Defensible on
+sensitivity: the classifier would have to be wrong on 21 of 32 structural calls —
+a 66% error rate — before the gate stops clearing. Two findings carry forward: only
+9% of prompts are knowledge-base questions at all, and the structural ones are
+overwhelmingly project-state questions ("whats the status", "I think we decided X
+right?"), which is exactly where text search cannot separate a live decision from a
+superseded one. Whether that generalises beyond one person's momentum-style
+workflow is untested. Full record in gate-1-report.md.
+
+---
+
+### [SCOPE_CHANGE] 2026-08-10 — Roadmap restructured; v1.0 defined as the base product
+Topics: roadmap, phasing, intelligence, releases
+Affects-phases: phase-7-evidence, phase-8-core, phase-14-obsidian
+Affects-specs: specs/planning/roadmap.md, specs/status.md
+Detail: Phases 12–13 moved to a parked section per ADR-0038, with the ADR-0035
+observation substrate parked alongside them. Phase 14 (Obsidian) moves up to
+v0.11.0, and **v1.0.0 is defined as the base product** — Phases 8, 9, 10, 11, 14:
+the knowledge system without intelligence. Phase numbers left unchanged;
+renumbering to close the cosmetic 12/13 gap would invalidate references across
+ADRs, backlog rows and history. The roadmap's "Phase 7 blocks everything" line was
+corrected — ADR-0031 gates graph work, not all product code — and now records the
+Gate 1 outcome.
+
+---

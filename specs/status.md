@@ -1,9 +1,9 @@
 # Project Status
 
 > **Last Updated**: 2026-08-10
-> **Current Phase**: **Phase 7 — Evidence & Observation** (branch `phase-7-evidence`, stacked on `feat/v2-architecture`). **GATE 1** — can end the project. v1 line closed at v0.6.8.
+> **Current Phase**: **Phase 7 complete — GATE 1 PASSED (validation waived).** Next: Phase 8 — Core. v1 line closed at v0.6.8.
 > **Latest Release**: v0.6.8 (BUG-002 — OIDC trusted-publishing release; no functional change)
-> **Health**: On Track — design settled, awaiting Gate 1 measurement before any v2 code
+> **Health**: On Track — Gate 1 cleared; v2 implementation unblocked
 
 ## Summary
 
@@ -54,19 +54,19 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 7 — Evidence & Observation | `phase-7-evidence` | **Blocked** — needs corpus extraction + labeling | Groups 0, 1 done; 2 partial |
+| Phase 7 — Evidence & Observation | `phase-7-evidence` | **Complete** — Gate 1: PROCEED | Groups 0–5 closed |
 
 ## Upcoming Phases — the v2 line
 
 | Phase | Name | Status | Key Deliverables |
 |-------|------|--------|-----------------|
-| Phase 7 | Evidence & Observation | **next** | Append-only event log; lookup-vs-structural classification; locked evaluator. **Dual purpose — also the foundation of the intelligence layer.** **GATE 1 — can end the project** |
-| Phase 8 | Core | planned | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
+| ~~Phase 7~~ | ~~Evidence & Observation~~ | **complete** | Gate 1 answered 2026-08-10: **PROCEED**. 88.9% structural, 95% CI [74.7%, 95.6%], n=36 of 400 sampled from 1066 real prompts. Classifier validation waived — see [report](phases/phase-7-evidence/gate-1-report.md) |
+| Phase 8 | Core | **next** | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
 | Phase 9 | Structure, views & health | planned | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
 | Phase 10 | Agent surface | planned | `format(content, hints)` — no capture prerequisite (ADR-0033); write-time extraction; write gate + guardrails; skills; adapters; MCP. **GATE 2 — edge accuracy** |
 | Phase 11 | Retrieval | planned | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
-| Phase 12 | Intelligence I | planned | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
-| Phase 13 | Intelligence II | planned | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
+| Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
+| Phase 13 | Intelligence II | **parked** (ADR-0038) | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
 | Phase 14 | Obsidian surface | planned | Community plugin; agent inside Obsidian. **Independent lane — can move earlier** |
 | ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
 
@@ -89,14 +89,14 @@ productivity suite, and is deliberately kept out of the core. See
 
 ## Next Actions
 
-1. **Run Gate 1 (Phase 7).** Instrument real question traffic against the existing
-   vault; classify lookup vs structural; log questions you *wanted* to ask but
-   didn't bother. Threshold: **<20% structural → stop and ship a folder
-   convention.** Cheapest item on the roadmap and it can end the project.
-2. Lock the Phase 7 evaluator into `tests/benchmarks/` before any optimisation
-   (Rule 11).
-3. Set up the four audience repos (ADR-0030) — retires four originating
-   requirements today, and produces the real corpus Gate 1 needs.
+1. **Start Phase 8 — Core.** Clean-room `src/`: `core/model.ts` (Node + Edge,
+   version-free) + `format/` codec registry (ADR-0032); narrow ports; identity
+   (slug · path · `aliases`); relations in frontmatter; capture never rejected.
+2. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
+   and machine labels are preserved in `.gate1/`. Completable at any time without
+   redoing work.
+3. Phase 11 Group 0 must author the answer key for the 32 real structural
+   questions extracted in Phase 7 — the baseline Phase 11 has to beat.
 4. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the
    automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
 

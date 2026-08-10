@@ -40,7 +40,7 @@
     },
     "phase-7-evidence": {
       "name": "Evidence & Observation",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-7-evidence",
       "topics": [
         "gate-1",

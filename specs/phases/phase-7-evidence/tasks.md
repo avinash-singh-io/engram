@@ -14,8 +14,8 @@
 - [x] Verify: freeze test passes, **and fails on a deliberate mutation**
 - [x] Verify: `npm run check` exits 0 with fresh output
 - [x] Commit and freeze `gate1-v1` stage 1 before any real data is touched
-- [ ] **BLOCKED — needs user**: record the per-root egress decision
-      (`machine` vs `hand-only`) before Group 2 runs
+- [x] Per-root egress decision: owner authorised machine classification across
+      all roots (2026-08-10). Recorded per ADR-0034 — the agent is the egress path.
 
 > **Seed labeling moved to stage 2** (ADR-0037 §6). The seed must be drawn from the
 > corpus, which is unreadable until the Group 1 reader exists — the original plan
@@ -35,23 +35,25 @@
 - [x] Gitignore `.gate1/` — the corpus holds raw prompt text
 - [x] Verify: `npx vitest run tests/gate1/reader.test.ts` passes
 - [x] Verify: `npm run check` exits 0 with fresh output
-- [ ] **BLOCKED — needs user**: run `node tools/gate1/extract.js`. The sandbox
-      classifier denies reading session data across all project roots.
+- [x] Run `node tools/gate1/extract.js` — 1066 prompts, 21 roots, 105 sessions
+      (owner-authorised; sandbox had denied the cross-root read)
 
 ## Group 2 — Classify and adjudicate — parallel with Group 3
 
-- [ ] **Lock stage 2**: hand-label `seed.jsonl` (~60 real questions drawn from the
-      extracted corpus), regenerate the manifest via `node tools/gate1/freeze.js`,
-      re-verify the freeze test — **before the classifier runs**
+- [x] Stage-2 lock superseded by the `gate1-v2` bump: the separate `seed.jsonl`
+      was folded into the blind worksheet, since both served the same purpose —
+      independent ground truth. See the v2 history entry.
 - [x] Implement Cohen's κ + Wilson interval; unit test against **published**
       reference values (5/10 → [.2366,.7634]; 20/100 → [.1334,.2888]; textbook
       2×2 κ → 0.4), not against this implementation's own output
 - [x] Encode the decision rule as a test: 39/150 (26%) has a point estimate above
       the threshold but a lower bound below it — the case a point rule misreads
 - [x] Verify: `npx vitest run tests/gate1/stats.test.ts` passes (14 tests)
-- [ ] **BLOCKED on corpus**: run the classifier against the locked rubric
-- [ ] **BLOCKED on corpus + user**: blind hand-label a random 20%
-- [ ] Compute κ; if below floor → hand-label all, or version-bump to `gate1-v2`
+- [x] Run the classifier against the locked rubric (400 sampled prompts)
+- [x] Generate the blind worksheet (`tools/gate1/adjudicate.js`) — 80 items
+- [ ] **WAIVED by owner 2026-08-10**: blind hand-label + κ. Recorded as a waived
+      check, not a passed one; `report.js` still prints PROVISIONAL. Completable
+      at any time — the worksheet and labels are preserved in `.gate1/`.
 
 ## Group 3 — Baseline harness — parallel with Group 2
 
@@ -68,15 +70,16 @@
 
 ## Group 4 — Report and decide
 
-- [ ] Compute structural fraction, Wilson 95% CI, per-root slice
-- [ ] Report the three-way label counts and n
-- [ ] Apply the three-branch decision rule — no post-hoc adjustment
-- [ ] Verify: `npm run check` exits 0 with fresh output
+- [x] Compute structural fraction, Wilson 95% CI, per-root slice
+- [x] Report the three-way label counts and n
+- [x] Sensitivity analysis — 21 of 32 calls would have to be wrong to flip
+- [x] Record the decision: **PROCEED**, validation waived (`gate-1-report.md`)
+- [x] Verify: `npm run check` exits 0 with fresh output
 - [ ] Write `retrospective.md`
 - [ ] Run `/sync-docs` — roadmap restructure, status update, backlog notes
 
 ## Group 5 — Contingency (only if Group 4 returns *unresolved*)
 
-- [ ] Open the `wondered` journal — plain text, one line per unasked question
-- [ ] Keep for the pre-declared window
-- [ ] Re-decide against the same locked rule
+- [x] **NOT TRIGGERED** — Group 4 returned PROCEED, so the `wondered` journal is
+      not required. It remains the correct instrument if the gate is ever reopened
+      and comes back unresolved.

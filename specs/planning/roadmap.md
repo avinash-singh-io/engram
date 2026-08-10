@@ -43,14 +43,25 @@ users makes this free.
 
 | Version | Phase | Key deliverables | Gate |
 |---------|-------|-----------------|------|
-| _(none)_ | **Phase 7 — Evidence & Observation** | The append-only event log (`.engram/memory/events/`, ADR-0035); question-traffic instrumentation; classification of lookup vs structural; locked evaluator in `tests/benchmarks/` (Rule 11). **Dual purpose — this log is also the foundation of the intelligence layer** | **GATE 1 — can end the project** |
+| _(none)_ | **Phase 7 — Evidence & Observation** | ✅ **Complete 2026-08-10.** Gate 1 measured retrospectively over 1066 real prompts from stored transcripts; locked evaluator `gate1-v2` in `tests/benchmarks/` (Rule 11). No product code. | **GATE 1 — PROCEED** |
 | v0.7.0 | **Phase 8 — Core** | Clean-room `src/`. `core/model.ts` (Node + Edge, version-free) + `format/` codec registry (ADR-0032); narrow ports (`FileStore`, `Detector`, `Clock`); identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
 | v0.8.0 | **Phase 9 — Structure, views & health** | `init --structure=<x>` scaffolds; view generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian link-format detection | — |
 | v0.9.0 | **Phase 10 — Agent surface** | `format(content, hints)` — content from anywhere, no capture prerequisite (ADR-0033); write-time relation extraction; write gate + guardrails; skills; AGENTS.md; adapters; MCP server | **GATE 2 — edge accuracy** |
 | v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; validity filter (drop superseded/expired); trust weighting (`verified` > `generated`); must beat the Phase 7 baseline on the locked evaluator | — |
-| v0.11.0 | **Phase 12 — Intelligence I** | Distillation: events → proposed patterns as nodes; confirm/reject; **gaps** (retrieval failure) and **re-derivation** — the two that need a log, not a model | — |
-| v0.12.0 | **Phase 13 — Intelligence II** | `contradicts` with code behind it; staleness × intent; dead-weight signal; proactive surfacing — opt-in, evidence-cited, rate-limited | — |
-| v0.13.0 | **Phase 14 — Obsidian surface** | Community plugin; agent inside Obsidian; approval queue panel. **Independent lane — can move earlier** | — |
+| v0.11.0 | **Phase 14 — Obsidian surface** | Community plugin; agent inside Obsidian; approval queue panel | — |
+| **v1.0.0** | **— base product complete —** | Everything above. The knowledge system, without intelligence | — |
+
+### Parked — reopened only after v1.0 has real usage
+
+Per [ADR-0038](../decisions/0038-intelligence-deferred-post-v1.md), intelligence is
+deferred **as an indivisible system** — the ADR-0035 observation substrate parks with
+it. ADR-0035 and ADR-0036 stay `accepted`; only scheduling changes. Zero debt is
+created: ADR-0036 requires no new fields, so nothing in Phases 8–11 exists to serve it.
+
+| Phase | Name | Key deliverables |
+|---|---|---|
+| Phase 12 | Intelligence I | Observation log; distillation: events → proposed patterns as nodes; confirm/reject; **gaps** and **re-derivation** |
+| Phase 13 | Intelligence II | `contradicts` with code behind it; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
 
 ### The two gates
 
@@ -69,7 +80,11 @@ See [ADR-0031](../decisions/0031-evidence-gates-before-graph.md).
 
 ### Phase dependencies
 
-- **Phase 7 blocks everything.** No product code until Gate 1 passes.
+- **Phase 7 gated the *graph*, not everything.** ADR-0031 gates "any graph work";
+  a failed gate still ships a folder convention needing a format, capture and
+  identity. **Gate 1 was answered on 2026-08-10 — PROCEED** (88.9% structural,
+  95% CI [74.7%, 95.6%]; classifier validation waived by the owner). See
+  [the report](../phases/phase-7-evidence/gate-1-report.md).
 - Phase 8 is the foundation — Tier 1 of [ADR-0024](../decisions/0024-three-tier-dependency-inversion.md).
   Nothing above it can be built first.
 - Phase 9 depends on 8 (`part-of` edges to project from).
