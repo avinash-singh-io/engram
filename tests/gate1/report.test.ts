@@ -34,6 +34,15 @@ function fixture(opts: { machine: string[]; human?: string[] }): string {
   return dir;
 }
 
+/** The single fill-in worksheet: `### <index>` headings with an `ANSWER:` line each. */
+function worksheet(dir: string, labels: (string | null)[]): void {
+  const lines: string[] = ['# worksheet', ''];
+  labels.forEach((label, i) => {
+    lines.push(`### ${i}`, '', '> some prompt text', '', `ANSWER:${label ? ` ${label}` : ''}`, '');
+  });
+  writeFileSync(join(dir, 'adjudication.md'), lines.join('\n'));
+}
+
 const run = (dir: string) => execFileSync('node', [REPORT, '--dir', dir], { encoding: 'utf8' });
 
 // A clearly-structural corpus: any sane rule would call this CLEAR.
@@ -72,5 +81,53 @@ describe('report refuses a verdict without validated ground truth', () => {
   it('reports the denominator, not just the sample size', () => {
     const out = run(fixture({ machine: STRONG }));
     expect(out).toMatch(/denominator \(L\+S\)\s+45/);
+  });
+});
+
+describe('the single fill-in worksheet is the label source', () => {
+  it('reads ANSWER: lines from adjudication.md', () => {
+    const dir = fixture({ machine: STRONG });
+    worksheet(dir, STRONG);
+    const out = run(dir);
+    expect(out).toContain("Cohen's kappa        1.000");
+    expect(out).not.toContain('PROVISIONAL');
+  });
+
+  it('accepts lowercase answers', () => {
+    const dir = fixture({ machine: STRONG });
+    worksheet(
+      dir,
+      STRONG.map((l) => l.toLowerCase()),
+    );
+    expect(run(dir)).toContain("Cohen's kappa        1.000");
+  });
+
+  it('an unfilled worksheet still refuses a verdict', () => {
+    const dir = fixture({ machine: STRONG });
+    worksheet(
+      dir,
+      STRONG.map(() => null),
+    );
+    expect(run(dir)).toContain('PROVISIONAL — NOT A GATE DECISION');
+  });
+
+  it('a partly-filled worksheet scores only the answered items', () => {
+    const dir = fixture({ machine: STRONG });
+    worksheet(
+      dir,
+      STRONG.map((l, i) => (i < 20 ? l : null)),
+    );
+    expect(run(dir)).toContain('blind overlap        20 items');
+  });
+
+  it('disagreement lowers kappa below the floor and blocks the verdict', () => {
+    const dir = fixture({ machine: STRONG });
+    // Flip every structural call to N: same marginals problem, real disagreement.
+    worksheet(
+      dir,
+      STRONG.map((l) => (l === 'S' ? 'N' : l)),
+    );
+    const out = run(dir);
+    expect(out).not.toContain('VERDICT: CLEAR');
   });
 });

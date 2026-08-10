@@ -42,9 +42,12 @@ keyed.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 const picked = keyed.slice(0, Math.round(sample.length * fraction));
 picked.sort((a, b) => a.index - b.index);
 
-const humanPath = join(dir, 'labels-human.tsv');
-if (existsSync(humanPath)) {
-  console.error(`${humanPath} already exists — refusing to overwrite your labels.`);
+const worksheetPath = join(dir, 'adjudication.md');
+if (
+  existsSync(worksheetPath) &&
+  /^ANSWER:\s*[NLSnls]\s*$/m.test(readFileSync(worksheetPath, 'utf8'))
+) {
+  console.error(`${worksheetPath} already has answers — refusing to overwrite your work.`);
   process.exit(1);
 }
 
@@ -55,7 +58,8 @@ const lines = [
   `Machine labels are deliberately NOT shown — seeing them would anchor you and`,
   `turn kappa into a measure of suggestibility rather than agreement.`,
   ``,
-  `Label each item in \`.gate1/labels-human.tsv\` with **N**, **L**, or **S**:`,
+  `**Edit this file.** Put one letter after each \`ANSWER:\` below — \`N\`, \`L\`, or \`S\`.`,
+  `Nothing else to open; the report reads this same file.`,
   ``,
   `| label | meaning | test |`,
   `|---|---|---|`,
@@ -74,13 +78,12 @@ const lines = [
 for (const { index, item } of picked) {
   const text = item.text.replace(/\s+/g, ' ').trim();
   const shown = text.length > 600 ? `${text.slice(0, 600)} …[+${text.length - 600} chars]` : text;
-  lines.push(`### ${index}`, ``, `> ${shown}`, ``);
+  lines.push(`### ${index}`, ``, `> ${shown}`, ``, `ANSWER:`, ``);
 }
 
-writeFileSync(join(dir, 'adjudication.md'), lines.join('\n'));
-writeFileSync(humanPath, picked.map(({ index }) => `${index}\t`).join('\n') + '\n');
+writeFileSync(worksheetPath, lines.join('\n'));
 
 console.log(`blind sample: ${picked.length} of ${sample.length} (${fraction * 100}%)`);
-console.log(`\nwrote ${join(dir, 'adjudication.md')}      <- read this`);
-console.log(`wrote ${humanPath}   <- fill in N | L | S`);
-console.log(`\nthen: node tools/gate1/report.js`);
+console.log(`\nwrote ${worksheetPath}`);
+console.log(`\nEdit that one file — put N, L or S after each ANSWER:`);
+console.log(`Then run: node tools/gate1/report.js`);

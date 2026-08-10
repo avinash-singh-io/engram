@@ -40,8 +40,34 @@ function readLabels(file) {
   return map;
 }
 
+/**
+ * Human labels come from the single fill-in worksheet: lines of the form
+ * `ANSWER: S` following a `### <index>` heading. One file to read and write, so
+ * there is no index-matching by hand between two files.
+ */
+function readWorksheet(file) {
+  const path = join(dir, file);
+  if (!existsSync(path)) return null;
+  const map = new Map();
+  let current = null;
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const heading = line.match(/^###\s+(\d+)\s*$/);
+    if (heading) {
+      current = Number(heading[1]);
+      continue;
+    }
+    const answer = line.match(/^ANSWER:\s*([NLSnls])\s*$/);
+    if (answer && current !== null) {
+      map.set(current, answer[1].toUpperCase());
+      current = null;
+    }
+  }
+  return map.size > 0 ? map : null;
+}
+
 const machine = readLabels('labels-machine.tsv');
-const human = readLabels('labels-human.tsv');
+// Prefer the worksheet; fall back to the raw TSV so either form works.
+const human = readWorksheet('adjudication.md') ?? readLabels('labels-human.tsv');
 
 if (!machine) {
   console.error('no labels-machine.tsv — nothing to report');
