@@ -1,4 +1,4 @@
 # gate1-v1 locked evaluator — Rule 11 freeze manifest
-# Regenerate ONLY for a deliberate stage-2 addition (ADR-0037 §6).
+# Regenerate ONLY for a deliberate version bump.
 aaf1b46b6f6fa83ec5ddb0c3f2d5d0e5066a43c7885462c57dc92214fd0e0a22  protocol.md
 d67159e94a625a0a62440c0d223100259891f85579737801120418f3cb3d3b4f  rubric.md

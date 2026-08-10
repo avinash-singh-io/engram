@@ -282,3 +282,23 @@ against a maximally strong signal — a prose caveat gets skipped, a code refusa
 does not.
 
 ---
+
+### [EVALUATOR] 2026-08-10 — gate1-v2: the v1 adjudication rule was defective
+Topics: evaluator, rule-11, gate-1, methodology, statistics
+Affects-phases: phase-7-evidence
+Affects-specs: specs/decisions/0037-gate1-measurement-protocol.md
+Detail: v1 required "a random 20% of **in-denominator items**" be hand-labeled
+blind. Three defects, found before any human label was written. It cannot be
+executed as written — selecting in-denominator items requires reading the machine
+labels the same sentence requires hidden. It samples only where the machine already
+agrees with itself, so a real question wrongly labelled `not-a-kb-question` was
+structurally uncatchable — and the rubric names that boundary the most consequential
+line in it. And it yields 7 items on the actual run, far too few for a usable κ.
+Fixed by version bump per Rule 11, never by editing v1: v2 draws 20% of the **whole
+sample** by a seeded hash independent of any label. `rubric.md` is byte-identical
+across v1 and v2 (`d67159e9…`), enforced by a test, so no classification result can
+change under the bump — only classifier validation differs, and that step cannot
+move the measured fraction. v1 is retained as the historical record and stays
+frozen; the freeze test now locks every `gate1-v*` directory.
+
+---

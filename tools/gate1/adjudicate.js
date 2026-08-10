@@ -49,7 +49,7 @@ if (existsSync(humanPath)) {
 }
 
 const lines = [
-  `# Gate 1 — blind adjudication worksheet (gate1-v1)`,
+  `# Gate 1 — blind adjudication worksheet (gate1-v2)`,
   ``,
   `${picked.length} items, drawn deterministically (seed ${seed}).`,
   `Machine labels are deliberately NOT shown — seeing them would anchor you and`,
@@ -63,7 +63,7 @@ const lines = [
   `| \`L\` | lookup | seeks recorded information; one hop; text match would find it |`,
   `| \`S\` | structural | needs relations, time or provenance — \`rg\` could not tell the current answer from a superseded one |`,
   ``,
-  `Full definitions and edge cases: \`tests/benchmarks/gate1-v1/rubric.md\`.`,
+  `Full definitions and edge cases: \`tests/benchmarks/gate1-v2/rubric.md\`.`,
   ``,
   `Then run: \`node tools/gate1/report.js\``,
   ``,

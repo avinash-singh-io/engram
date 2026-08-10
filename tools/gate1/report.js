@@ -83,7 +83,7 @@ if (!validated) {
 
 const pct = (x) => `${(x * 100).toFixed(1)}%`;
 
-console.log('# Gate 1 — Stage A report (gate1-v1)\n');
+console.log('# Gate 1 — Stage A report (gate1-v2)\n');
 console.log(`sample                 ${sample.length}`);
 console.log(`  not-a-kb-question    ${counts.N}`);
 console.log(`  lookup               ${counts.L}`);
