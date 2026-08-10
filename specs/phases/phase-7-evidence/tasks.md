@@ -75,8 +75,9 @@
 - [x] Sensitivity analysis — 21 of 32 calls would have to be wrong to flip
 - [x] Record the decision: **PROCEED**, validation waived (`gate-1-report.md`)
 - [x] Verify: `npm run check` exits 0 with fresh output
-- [ ] Write `retrospective.md`
-- [ ] Run `/sync-docs` — roadmap restructure, status update, backlog notes
+- [x] Write `retrospective.md`
+- [x] Sync docs — roadmap restructure, status, phase index, changelog
+- [x] Record the domain-mismatch threat to validity (owner-identified)
 
 ## Group 5 — Contingency (only if Group 4 returns *unresolved*)
 

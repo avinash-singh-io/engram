@@ -337,3 +337,24 @@ corrected — ADR-0031 gates graph work, not all product code — and now record
 Gate 1 outcome.
 
 ---
+
+### [DISCOVERY] 2026-08-10 — The corpus is a different domain from the product
+Topics: gate-1, validity, measurement, methodology
+Affects-phases: phase-7-evidence, phase-11-retrieval
+Affects-specs: specs/phases/phase-7-evidence/gate-1-report.md
+Detail: Named by the owner after the decision was recorded, and it is the most
+serious limitation of the measurement. The corpus is spec-driven **software
+development** traffic — build instructions, phase commands, release steps — while
+engram's use case is a **knowledge base**. The prompt *shape* transfers, since the
+owner will address an agent the same way over a vault, and the structural questions
+found ("what did we decide", "is this still current") are domain-independent in
+form. The **rate** does not transfer: there is no basis for claiming a knowledge
+base yields 88.9% structural traffic, nor that its denominator would be 9%.
+Direction of the error is arguable — a vault accumulates superseded material over
+years where a repo compresses it into months, which would push structural traffic
+up — but that is an argument, not evidence. PROCEED therefore rests on the
+*mechanism* being demonstrated, not on the rate being portable. Recorded in
+gate-1-report.md as a named threat to validity so the figure cannot later be
+misquoted as a property of knowledge-base traffic.
+
+---

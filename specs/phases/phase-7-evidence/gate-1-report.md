@@ -78,8 +78,40 @@ traffic, which makes the reading a *lower bound*. They point in opposite directi
    precisely where text search cannot distinguish a current decision from a
    superseded one. This is engram's core case, and it is what the corpus actually
    contains.
-3. **Whether this generalises beyond momentum-style workflow is untested.** The
-   corpus is one person, one working style, and agent-mediated sessions only.
+## Threat to validity — the corpus is a different domain from the product
+
+**Named by the owner on 2026-08-10, and the most serious limitation of this
+measurement.**
+
+The corpus is spec-driven **software development** traffic — momentum phases, build
+instructions, release steps. Engram's target use case is a **knowledge base**.
+These are not the same domain, so the 88.9% is not a direct measurement of the
+thing the product is for. It is a measurement of an adjacent thing.
+
+What transfers, and what does not:
+
+| | |
+|---|---|
+| **Transfers** | The owner will give an agent this *same style* of prompt when working over a knowledge base — so the prompt shape is representative even when the subject matter is not. |
+| **Transfers** | The structural questions found — *"what did we decide"*, *"is this still current"*, *"whats the status"* — are domain-independent in form. They ask "which recorded claim is live", which is the same question in a repo or a vault. |
+| **Does not transfer** | The **rate**. There is no basis for claiming a knowledge base produces 88.9% structural traffic. A development repo and a personal vault accumulate different question mixes. |
+| **Does not transfer** | The 9% denominator. A knowledge-base session is presumably far more question-heavy than a build session, which is mostly instructions. |
+
+Direction of the error is arguable but not measured. A knowledge base accumulates
+superseded material over *years*, where a repo's history is compressed into months
+— which would push structural traffic **up**, not down. That is a plausible
+argument, not evidence, and it is recorded as such.
+
+**Conclusion: the decision stands, but the evidence is weaker than the number
+looks.** PROCEED rests on the mechanism being demonstrated — real questions exist
+that text search structurally cannot answer — rather than on the specific rate
+being transferable. Anyone citing 88.9% as a property of knowledge-base traffic is
+misreading this report.
+
+## Other findings worth carrying forward
+
+3. The corpus is one person, one working style, and agent-mediated sessions only.
+   No claim is made about anyone else's traffic.
 
 ## Reopening
 
