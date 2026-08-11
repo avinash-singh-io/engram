@@ -70,3 +70,88 @@ nobody should cite it as if it were.
 
 `npm run check` — 40 test files, 265 tests, typecheck, lint, format, build. Green on
 the final commit.
+
+## Verification Evidence (Rule 12)
+
+Captured fresh on 2026-08-10 from `main` at the merge commit `1d810d5`.
+All four commands run in this session; exit codes and output are verbatim.
+
+### `npm run check` — exit 0
+
+```
+ Test Files  40 passed (40)
+      Tests  265 passed (265)
+   Start at  00:32:27
+   Duration  1.49s (transform 675ms, setup 0ms, collect 2.80s, tests 2.60s, environment 4ms, prepare 1.60s)
+> @avinash-singh-io/engram@0.6.8 build
+> tsup
+CLI Building entry: src/cli.ts, src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.5.1
+CLI Using tsup config: /Users/avinash/Workspace/Projects/engram/tsup.config.ts
+CLI Target: node20
+CLI Cleaning output folder
+ESM Build start
+ESM dist/index.js     58.02 KB
+ESM dist/cli.js       85.24 KB
+ESM dist/index.js.map 141.34 KB
+ESM dist/cli.js.map   203.14 KB
+ESM ⚡️ Build success in 18ms
+DTS Build start
+DTS ⚡️ Build success in 566ms
+DTS dist/cli.d.ts   20.00 B
+DTS dist/index.d.ts 37.37 KB
+```
+
+### `npx vitest run tests/benchmarks/gate1.freeze.test.ts` — exit 0
+
+Rule 11 freeze: both locked evaluator versions checksum-verified, and the
+cross-version test proving `rubric.md` is byte-identical so the v2 bump could
+not have moved any result.
+
+```
+ ✓ tests/benchmarks/gate1.freeze.test.ts (10 tests) 2ms
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+```
+
+### `npx vitest run tests/gate1/` — exit 0
+
+Includes the refusal tests: the report will not emit a verdict without a
+validated κ, proven against a maximally strong signal.
+
+```
+ ✓ tests/gate1/stats.test.ts (14 tests) 2ms
+ ✓ tests/gate1/reader.test.ts (19 tests) 2ms
+ ✓ tests/gate1/report.test.ts (10 tests) 285ms
+ Test Files  3 passed (3)
+      Tests  43 passed (43)
+```
+
+### `node tools/gate1/report.js` — exit 0
+
+The instrument still refuses a verdict. This is correct and deliberate: the
+owner waived validation, and the tool was **not** modified to agree.
+
+```
+# Gate 1 — Stage A report (gate1-v2)
+
+sample                 400
+  not-a-kb-question    364
+  lookup               4
+  structural           32
+
+denominator (L+S)      36   (9.0% of sample)
+structural fraction    88.9%
+Wilson 95% CI          [74.7%, 95.6%]
+threshold              20.0%
+
+classifier validation
+  labels-human.tsv     ABSENT
+  Cohen's kappa        UNMEASURED
+
+VERDICT: PROVISIONAL — NOT A GATE DECISION
+
+The classifier is a single unvalidated rater. ADR-0037 §5 requires a blind
+human-labeled sample and kappa >= 0.7 before any number is a gate decision.
+```
