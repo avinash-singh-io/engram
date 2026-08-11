@@ -1,8 +1,14 @@
 # 0002 — OKF v0.1 as the format
 
-> **Status**: accepted
+> **Status**: superseded by [ADR-0020](0020-adopt-okf-v02.md) (2026-08-09)
 > **Date**: 2026-07-03
 > **Deciders**: Avinash Kumar Singh
+
+> **Superseded.** OKF v0.2 shipped with trust signals; engram adopts it. The
+> five-required-field policy and the path-is-identity rule established here are
+> also replaced — see [ADR-0026](0026-validation-gates-promotion.md) and
+> [ADR-0021](0021-identity-slug-path-aliases.md). This ADR anticipated exactly
+> this: *"a future OKF v0.2 is a spec-migration decision, not a silent change."*
 
 ## Context
 

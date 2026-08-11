@@ -1,4 +1,10 @@
-# Engram — Architecture Overview
+# Engram — Architecture Overview (v1, superseded)
+
+> ⚠️ **Superseded by [`v2-overview.md`](v2-overview.md) as of 2026-08-10.**
+> This document describes the **v1 architecture** shipped through v0.6.8 — a single
+> `Concept` primitive, path-as-identity, five required frontmatter fields, and
+> untyped links. All four were replaced by ADR-0018…ADR-0036. Kept for history;
+> **do not use as a reference for new work.**
 
 > Light architecture reference for a **standard (single-package) repo**. This is
 > a starting map, not a constitution — decisions live in `specs/decisions/`.

@@ -1,8 +1,12 @@
 # 0008 — Write-hook as a hidden subcommand driven by PostToolUse
 
-> **Status**: accepted
+> **Status**: accepted, amended by [ADR-0026](0026-validation-gates-promotion.md) (2026-08-09)
 > **Date**: 2026-07-03
 > **Deciders**: Avinash Kumar Singh
+
+> **Amended.** The mechanism survives; the *rejection* behavior does not. The hook
+> validates on promotion and reports on capture — it never rejects a raw capture.
+> A note typed on mobile with no frontmatter is inbox, not an error.
 
 ## Context
 

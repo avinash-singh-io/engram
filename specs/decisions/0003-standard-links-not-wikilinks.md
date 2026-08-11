@@ -1,8 +1,13 @@
 # 0003 — Standard markdown links, not wikilinks
 
-> **Status**: accepted
+> **Status**: accepted, amended by [ADR-0022](0022-relations-in-frontmatter.md) (2026-08-09)
 > **Date**: 2026-07-03
 > **Deciders**: Avinash Kumar Singh
+
+> **Amended.** Standard markdown links remain the body-level, human-facing,
+> graph-drawing layer and stay untyped. ADR-0022 adds a separate machine-facing
+> channel: typed relations in frontmatter, following OKF v0.2's `sources` shape.
+> A markdown link has nowhere to carry a relation type.
 
 ## Context
 

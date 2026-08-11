@@ -1,6 +1,6 @@
 # Backlog
 
-> **Last Updated**: 2026-07-03
+> **Last Updated**: 2026-08-09
 
 ---
 
@@ -28,8 +28,14 @@
 
 | ID | Title | Priority | Status | Phase | Detail |
 |----|-------|----------|--------|-------|--------|
-| FEAT-001 | MOC auto-suggestion from tag clusters | P2 | open | Phase 2+ | PRD open-Q: auto-suggest hub notes vs purely manual |
+| FEAT-001 | MOC auto-suggestion from tag clusters | P2 | open | Phase 9 | Subsumed by view generation (ADR-0023) — a MOC is a projection of `part-of` edges |
 | FEAT-002 | `/recall` output contract | P2 | resolved | Phase 2 | Resolved by ADR-0010: ranked references (path+title+description+why); `--sections` for headings, not bodies |
+| FEAT-003 | Skills — packaged instruction sets for KB operations | P3 | open | post-v2 | Tier-2 *Agency* (ADR-0024). Literature review, connect-the-dots, weekly digest, PRD-from-sources. Vault-local so they travel with the vault. Adds affordances over a core that doesn't know about them — no debt from waiting |
+| FEAT-004 | Guardrails — constraints on agent behavior | P3 | open | post-v2 | Tier-2 *Agency*. Propose-don't-write, never-delete, require `verified` before X, rate limits on autonomous filing. The counterweight to write-time autonomy (ADR-0027) |
+| FEAT-005 | Additional closed relation types (`depends-on`, `duplicate-of`) | P3 | open | post-v2 | Each gated by ADR-0022: no code behind it, no closed type. `contradicts` now lands in Phase 13 (ADR-0036 inference #3). `duplicate-of` becomes relevant once cloud-sync conflict copies are observed in practice |
+| FEAT-006 | Connectors — calendar, events, external feeds | P3 | open | post-v2 | ⚠️ **Scope warning**: this is where engram becomes a productivity suite competing with Notion/Obsidian ecosystems. ADR-0036 ranks it inference #6 — least differentiated, demos best. Worth doing eventually; worth not doing accidentally |
+| FEAT-007 | Local model for the private vault | P3 | open | post-v2 | The real answer to "the agent is a network egress path" (ADR-0034) once local quality permits. Architecture already permits it — engram has no opinion about which agent is used |
+| FEAT-008 | Event-log compaction / retention policy | P2 | open | Phase 12 | `.engram/memory/events/*.jsonl` accumulates. ADR-0035 defers the retention policy to ADR-0036's decay step; needs a concrete rule before Intelligence I ships |
 
 ## Tech Debt
 
@@ -37,7 +43,8 @@
 |----|-------|----------|--------|-------|--------|
 | TD-001 | Engine extraction: single package vs shared lib | P2 | open | post-Phase 1 | Per ADR-0007 — revisit once Engram/momentum boundaries stabilize |
 | TD-002 | ESM package vs momentum CJS git hooks | P3 | resolved | Phase 0 | Root `type: module` broke `.githooks/*.js` (CJS). Fixed via `.githooks/package.json` `{"type":"commonjs"}`. Re-verify after `momentum upgrade`. |
-| TD-003 | Dedupe vault-root discovery entry points | P3 | open | Phase 2 | `resolveVaultRoot` (retrieval, `--vault` + exit-code) wraps `findVaultRoot` (vault/paths); dedupe once Phase 1/2/3 vault access stabilizes |
+| TD-003 | Dedupe vault-root discovery entry points | P3 | resolved | Phase 8 | Resolved by the clean-room rewrite — ADR-0030 makes the invocation root the only root, so there is one discovery path by construction |
+| TD-004 | Concept walker has no notion of a nested vault root | P2 | open | Phase 8 | `enumerateConceptFiles` (`src/vault/read.ts`) skips only dotdirs + `IGNORE_DIRS` (`src/vault/paths.ts:5`). A parent `reindex` descends into a nested vault and writes its titles + one-sentence descriptions into a shared, committed `index.md` — a real disclosure path. Not a shipped bug (nested roots were never supported) but the obvious thing a user tries when told to "keep private notes in a separate directory". ADR-0030 says the answer is a separate **repo**; the walker should still detect and refuse to descend |
 
 ## Enhancements
 
