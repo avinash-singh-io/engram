@@ -15,3 +15,6 @@ build/
 .momentum/runs/
 .momentum/inbox/
 .momentum/.state/
+
+# gate1 extracted corpus — contains raw prompt text, never committed (ADR-0037)
+.gate1/

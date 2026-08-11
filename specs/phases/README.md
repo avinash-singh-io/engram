@@ -8,6 +8,7 @@
 | 4 | Ecosystem | Complete (v0.4.0) | `phase-4-ecosystem/` |
 | 3 | Sync + Multi-Device | Complete (v0.5.0) | `phase-3-sync/` |
 | 6 | Onboarding & OKF Migration | Complete (v0.6.0) | `phase-6-onboarding/` |
+| 7 | Evidence & Observation | Complete — Gate 1: PROCEED | `phase-7-evidence/` |
 
 ## Phase Structure
 
