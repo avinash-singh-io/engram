@@ -65,17 +65,26 @@ the decision silently — the exact failure ADR-0031 exists to prevent.
 
 ## Acceptance (Rule 12)
 
-- [ ] ADR-0037 and ADR-0038 accepted **before** any classification runs
-- [ ] `gate1-v1/` committed and frozen before the classifier is pointed at real data
-- [ ] Transcript format confirmed parseable on a real file (Group 1 task 1 — the
+- [x] ADR-0037 and ADR-0038 accepted **before** any classification runs
+- [x] `gate1-v1/` committed and frozen before the classifier is pointed at real data
+      (superseded by `gate1-v2`; both remain frozen and checksum-verified)
+- [x] Transcript format confirmed parseable on a real file (Group 1 task 1 — the
       phase's first gate)
-- [ ] `npm run check` exits 0 with fresh output
-- [ ] κ ≥ 0.7 on the blind 20% sample, or all items hand-labeled
-- [ ] Baseline harness produces a scored result on the structural subset
-- [ ] Report states: n, three-way label counts, structural fraction, Wilson 95% CI,
+- [x] `npm run check` exits 0 with fresh output — see `retrospective.md`
+      § Verification Evidence
+- [ ] ~~κ ≥ 0.7 on the blind 20% sample, or all items hand-labeled~~ —
+      **WAIVED by the owner, 2026-08-10.** A waived check, not a passed one;
+      `report.js` still emits PROVISIONAL and was deliberately left unmodified.
+      Completable at any time from the preserved `.gate1/` artifacts.
+- [ ] ~~Baseline harness produces a scored result on the structural subset~~ —
+      **DEFERRED to Phase 11 Group 0.** Scoring requires an answer key the corpus
+      never recorded; 32 real structural questions extracted with `expected: null`.
+- [x] Report states: n, three-way label counts, structural fraction, Wilson 95% CI,
       per-root slice
-- [ ] Decision follows the pre-registered three-branch rule with no post-hoc adjustment
-- [ ] `retrospective.md` records what the gate cost and what it returned
+- [x] Decision follows the pre-registered rule — Stage A returned CLEAR on the
+      interval (lower bound 74.7% vs 20% threshold), with no post-hoc adjustment.
+      The *validation* step was waived; the *decision rule* was not altered.
+- [x] `retrospective.md` records what the gate cost and what it returned
 
 ## Risks
 
