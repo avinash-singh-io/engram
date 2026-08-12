@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-08-10
-> **Current Phase**: **Phase 9 complete (v0.8.0)**. Next: Phase 10 — Agent surface (**GATE 2**).
+> **Current Phase**: **Phase 10 — Agent surface (write path)** (branch `phase-10-agent-surface`, target v0.9.0). **GATE 2 — edge accuracy; can stop the graph.**
 > **Latest Release**: **v0.8.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, reopened P0). GitHub tags and releases are current; the registry is five releases behind.
 > **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
 
@@ -57,7 +57,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 9 landed; Phase 10 not yet started)_ | | | |
+| Phase 10 — Agent surface | `phase-10-agent-surface` | In Progress | Group 0 |
 
 ## Upcoming Phases — the v2 line
 
@@ -66,7 +66,7 @@ is rewritten clean-room rather than patched.
 | ~~Phase 7~~ | ~~Evidence & Observation~~ | **complete** | Gate 1 answered 2026-08-10: **PROCEED**. 88.9% structural, 95% CI [74.7%, 95.6%], n=36 of 400 sampled from 1066 real prompts. Classifier validation waived — see [report](phases/phase-7-evidence/gate-1-report.md) |
 | ~~Phase 8~~ | ~~Core~~ | **complete (v0.7.0)** | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
 | ~~Phase 9~~ | ~~Structure, views \& health~~ | **complete (v0.8.0)** | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
-| Phase 10 | Agent surface | **next** | `format(content, hints)` — no capture prerequisite (ADR-0033); write-time extraction; write gate + guardrails; skills; adapters; MCP. **GATE 2 — edge accuracy** |
+| Phase 10 | Agent surface (write path) | **in progress** | `format(content, hints)` — no capture prerequisite (ADR-0033); write-time extraction; write gate + guardrails; skills; adapters; MCP. **GATE 2 — edge accuracy** |
 | Phase 11 | Retrieval | planned | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
 | Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
 | Phase 13 | Intelligence II | **parked** (ADR-0038) | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
