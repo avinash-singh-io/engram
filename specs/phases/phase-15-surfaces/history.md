@@ -214,3 +214,42 @@ argument for HTTP being acceptable rests on it being opt-in, and "opt-in" is a c
 about the built artifact rather than about the source.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — `policy/` and `surface/` were missing from the library exports
+Topics: packaging, exports, wiring
+Affects-phases: phase-15-surfaces
+Affects-specs: none
+Detail: Skills, guardrails, MCP and adapters were reachable from the CLI and over
+MCP, but not from `import`. Found in the Group 6 sweep by calling the built library
+rather than the source — `m.discoverSkills is not a function`. Fixed by exporting
+every shipped module, on the principle that an operation reachable three ways and
+documented one way is a capability nobody can find.
+
+This is the **fourth** instance of one pattern in this project: Phase 9's codec with
+its hardcoded relation list, Phase 9's `nodeFileStore.list()` that never walked the
+disk, Phase 10's guardrails that were never called at the gate, and now this. In every
+case the unit tests passed, the claim was true in isolation, and the wiring between
+the claim and its caller was missing. Coverage of a claim is not coverage of its
+wiring, and the only thing that has reliably caught these is running the built
+artifact.
+
+---
+
+### [NOTE] 2026-08-12 — `tighten()` empties the scope rather than narrowing it
+Topics: guardrails, skills, edge-case
+Affects-phases: phase-15-surfaces
+Affects-specs: none
+Detail: A skill requesting a `pathScope` the vault does not grant gets the
+**intersection**, which is empty — so it can write nowhere at all rather than
+inheriting the vault's scope. Verified through the built library: a skill asking to
+loosen every field came back with `pathScope: []` and the vault's rules intact.
+
+For a greedy skill that is the right outcome. For an honest skill that names a path
+the vault happens not to permit, it is a surprising one: the skill silently loses all
+write access instead of being told its scope is unsatisfiable. Recorded rather than
+changed, because the alternative — falling back to the base scope — would mean a
+skill's declaration can be ignored, and quietly ignoring a permissions declaration is
+the failure mode this whole mechanism exists to prevent. If it proves confusing in
+use, the fix is a warning at load time, not different semantics.
+
+---

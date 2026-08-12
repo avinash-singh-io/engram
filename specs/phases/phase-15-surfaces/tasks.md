@@ -105,10 +105,15 @@
 
 ## Group 6 — Verification
 
-- [ ] Full `npm run check` exits 0 with fresh output
-- [ ] Deliberate import violation re-proves both architecture rules fire
-- [ ] Smoke-test the **built** binary, incl. the HTTP refusal path
-- [ ] Acceptance sweep from `overview.md` — every box
-- [ ] Capture output for `retrospective.md` § Verification Evidence (Rule 12)
-- [ ] Write `retrospective.md`
-- [ ] Run `/sync-docs`
+- [x] Full `npm run check` exits 0 with fresh output — 450 tests
+- [x] Deliberate import violation re-proves both architecture rules fire (3 errors)
+- [x] Confirmed **zero runtime dependencies**, no skips, `core/` clean
+- [x] Smoke-test the **built** binary: both transports, the HTTP warning, skill
+      rejection, and tightening through the library
+- [x] **Found and fixed**: `policy/` and `surface/` were missing from the library
+      exports — skills, guardrails, MCP and adapters were reachable from the CLI
+      and MCP but not from `import`
+- [x] Acceptance sweep from `overview.md` — every box evidenced
+- [x] Capture output for `retrospective.md` § Verification Evidence (Rule 12)
+- [x] Write `retrospective.md`
+- [ ] Run `/sync-docs` and `/complete-phase`

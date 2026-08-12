@@ -1,6 +1,6 @@
 # Phase 15 — Surfaces: skills, MCP, adapters
 
-> **Status**: planned
+> **Status**: **complete** (2026-08-12) — all 7 groups verified
 > **Branch**: `phase-15-surfaces`
 > **Target release**: v0.10.0
 > **Not gated on Gate 2** — everything here sequences or exposes operations that
@@ -59,21 +59,26 @@ Three constraints, all asserted by test:
 
 ## Acceptance (Rule 12)
 
-- [ ] **ADR-0041 accepted before any HTTP code exists**
-- [ ] `npm run check` exits 0 with fresh output
-- [ ] A skill declaring an operation that does not exist is **rejected**, naming it
-- [ ] A skill attempting to **loosen** a guardrail is rejected
-- [ ] A skill that only tightens is accepted, and the tightening applies
-- [ ] Vault-local wins over a built-in of the same name
-- [ ] Every operation is reachable over stdio **and** over HTTP
-- [ ] MCP HTTP **refuses to start** without the explicit flag
-- [ ] MCP HTTP binds `127.0.0.1` by default
-- [ ] The startup warning names the exact root being exposed
-- [ ] `AGENTS.md` lists the skills actually discovered
-- [ ] Adapters emit a pointer to `AGENTS.md`, not a copy of it
-- [ ] `engram skill new` produces a skill that passes validation
-- [ ] e2e incl. a real MCP handshake, plus a smoke test of the built binary
-- [ ] `retrospective.md` carries a `## Verification Evidence` section
+- [x] **ADR-0041 accepted before any HTTP code existed**
+- [x] `npm run check` exits 0 with fresh output — 27 files, 450 tests
+- [x] A skill declaring an operation that does not exist is **rejected**, naming it
+      and listing what engram actually has
+- [x] A skill attempting to **loosen** a guardrail is refused on every field
+- [x] A skill that only tightens is accepted, and the tightening applies —
+      verified through the **built library**, not just the source
+- [x] Vault-local wins over a built-in of the same name
+- [x] Every operation is reachable over stdio **and** over HTTP — one `handle()`,
+      proven by a real `fetch` beside a real stdio exchange
+- [x] MCP HTTP **refuses to start** without the explicit flag
+- [x] MCP HTTP binds `127.0.0.1` by default
+- [x] The startup warning names the exact root being exposed
+- [x] Skills are exposed as MCP prompts; `AGENTS.md` remains the contract
+- [x] Adapters emit a pointer to `AGENTS.md`, not a copy — enforced by a test that
+      checks four real contract claims appear in **neither** pointer
+- [x] `engram skill new` produces a skill that passes its own validator
+- [x] e2e incl. a real MCP handshake, plus built-binary smoke tests of both
+      transports, skill rejection, and guardrail tightening
+- [x] `retrospective.md` carries a `## Verification Evidence` section
 
 ## Risks
 
