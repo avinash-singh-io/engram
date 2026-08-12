@@ -50,15 +50,18 @@
 
 ## Group 3 — `doctor` — parallel with 2
 
-- [ ] Tests first
-- [ ] Structural findings: slug collisions, path-as-identity, dangling edges
-- [ ] Walker findings: nested roots, reserved-path content a generator did not write
-- [ ] **Run every registered relation's detective form**, reported by name
-- [ ] Obsidian link-format detection from `.obsidian/app.json` via `Detector`
-- [ ] Derived-file conflict → report "regenerate, never merge"
-- [ ] **Read-only** — no writes at all in this phase
-- [ ] Exit non-zero on integrity **failures** only, never on warnings
-- [ ] Verify: `npx vitest run tests/ops/doctor.test.ts`
+- [x] Tests first (14 tests)
+- [x] Structural findings: slug collisions, path-as-identity, dangling edges
+- [x] Walker findings: nested roots, derived paths engram did not write
+- [x] **Run every registered relation's detective form**, reported by name
+- [x] **Fixed a real gap the detective caught**: the v0.2 codec hardcoded its
+      relation list, so `part-of` was registered but never serialized. The codec
+      now reads the registry
+- [x] Obsidian link-format detection via `Detector` (ADR-0025/0028)
+- [x] Derived-file conflict → report "regenerate, never merge"
+- [x] **Read-only** — asserted by comparing every file before and after
+- [x] Warnings never fail: collisions, missing slugs, dangling edges, bad YAML
+- [x] Verify: `npx vitest run tests/ops/doctor.test.ts` — 14 passed
 
 ## Group 4 — `reindex` and `init`
 

@@ -5,14 +5,23 @@
  * provenance, and the closed relation set carried in frontmatter (ADR-0022).
  */
 import { makeEdge, makeNode, type Edge, type Node } from '../core/model.js';
+import { relationKinds } from '../core/relations.js';
 import type { Codec, ParsedFrontmatter, ReadResult } from './registry.js';
 
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const list = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
 
-/** The closed set this codec serializes. Semantics live in core/relations.ts. */
-const RELATION_KEYS = ['supersedes', 'sources'] as const;
+/**
+ * The closed set this codec serializes, read from the registry at call time.
+ *
+ * Deliberately NOT a hardcoded list. ADR-0032 says relations are a registry rather
+ * than a switch, and a literal here is a switch wearing a different hat: registering
+ * `part-of` in Phase 9 left it silently unserialized until a detective check caught
+ * it. Reading the registry makes "adding a relation is registering it" true of the
+ * codec too, not only of the gate and the graph.
+ */
+const relationKeys = (): string[] => relationKinds();
 
 export const OKF_V0_2: Codec = {
   version: '0.2',
@@ -39,7 +48,7 @@ export const OKF_V0_2: Codec = {
     });
 
     const edges: Edge[] = [];
-    for (const kind of RELATION_KEYS) {
+    for (const kind of relationKeys()) {
       const raw = fm[kind];
       const targets = typeof raw === 'string' ? [raw] : list(raw);
       for (const to of targets) edges.push(makeEdge({ from: node.id, to, kind, stamp }));
@@ -59,11 +68,12 @@ export const OKF_V0_2: Codec = {
     if (node.stamp.until !== null) lines.push(`stale_after: ${node.stamp.until}`);
     if (node.aliases.length > 0) lines.push(`aliases: [${node.aliases.join(', ')}]`);
 
-    for (const kind of RELATION_KEYS) {
+    for (const kind of relationKeys()) {
       const targets = edges.filter((e) => e.kind === kind).map((e) => e.to);
       if (targets.length > 0) lines.push(`${kind}: [${targets.join(', ')}]`);
     }
-    const unknown = edges.filter((e) => !RELATION_KEYS.includes(e.kind as never));
+    const known = new Set(relationKeys());
+    const unknown = edges.filter((e) => !known.has(e.kind));
     if (unknown.length > 0) {
       warnings.push(
         `okf 0.2 has no field for relation kind(s): ${[...new Set(unknown.map((e) => e.kind))].join(', ')}`,

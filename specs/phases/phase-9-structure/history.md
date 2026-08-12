@@ -129,3 +129,23 @@ they stay listed in `views/superseded.md` by definition, alongside the id of wha
 replaced them, since "what replaced this" is the question that brings someone there.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — The codec hardcoded its relation list; `part-of` was registered but never read
+Topics: relations, codecs, open-closed, architecture
+Affects-phases: phase-9-structure, phase-8-core
+Affects-specs: specs/decisions/0032-internal-model-versioned-codecs.md
+Detail: Registering `part-of` in Group 0 and asserting it in the registry was not
+enough — the OKF v0.2 codec carried its own literal `['supersedes', 'sources']`, so
+`part-of: [x]` in frontmatter was silently ignored. Nothing failed; the relation
+simply did not exist in any file that was read. Caught by `doctor`'s detective check
+in Group 3, which is precisely the job Phase 8 gave detectives.
+
+This narrows a claim Phase 8 made. Its open/closed test proved that adding a relation
+requires no edit to `gate.ts` or `graph.ts` — true, but it never exercised the
+**codec**, which did need one. ADR-0032 says relations are a registry rather than a
+switch, and a literal list in the codec is a switch wearing a different hat. The codec
+now calls `relationKinds()`, so "adding a relation is registering it" is true of
+serialization too. Worth noting that Phase 8's open/closed test passed throughout —
+a property proven at two of three sites reads exactly like one proven everywhere.
+
+---
