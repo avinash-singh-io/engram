@@ -198,3 +198,24 @@ one.** Both halves live in `format/registry.ts` so no codec can implement only o
 and a test runs five write/read cycles to prove the body does not drift.
 
 ---
+
+### [DECISION] 2026-08-12 — Gate 2's corpus is engram's own ADRs
+Topics: gate-2, corpus, measurement
+Affects-phases: phase-10-agent-surface
+Affects-specs: none
+Detail: The corpus is 24 of engram's own ADRs, run through the real `format` path to
+produce 48 edges (24 `part-of`, 22 `sources`, 2 `supersedes`). Chosen over the user's
+knowledge base for two reasons. First, **every judgement is checkable against the
+document itself** — an adjudicator can open the ADR and see whether it really
+supersedes what the edge claims, which is what makes an edge adjudicable rather than
+a matter of recollection. Second, it avoids sending personal vault content anywhere,
+which was the ADR-0034 concern that shaped Gate 1's per-root egress decision.
+
+The relation calls are genuinely the agent's: made by reading each ADR and deciding
+what it relates to, not by parsing its `Refines:` header. Parsing would measure a
+regex, not judgement, and Gate 2 exists to measure judgement. The edges go through
+`format` rather than being written directly, so what is sampled is the output of the
+shipped write path. `.gate2/` is gitignored, and the synthetic-trigger limitation is
+printed on every report run rather than living only in the protocol.
+
+---

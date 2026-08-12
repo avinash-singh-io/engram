@@ -89,13 +89,21 @@
 
 ## Group 6 — Gate 2 measurement
 
-- [ ] Build the corpus by formatting real notes — real agent output, synthetic trigger
-- [ ] Sample ~50 edges per the locked protocol
-- [ ] Classify directionality and predicate accuracy separately
-- [ ] **BLOCKED on user**: blind adjudication of the sample
-- [ ] Report refuses a verdict without human labels
-- [ ] Apply the two-bar rule; record the decision and the trigger limitation
-- [ ] Verify: `node tools/gate2/report.js`
+- [x] Build the corpus: **24 engram ADRs formatted through the real `format` path**,
+      producing **48 edges** (24 `part-of`, 22 `sources`, 2 `supersedes`)
+- [x] Corpus chosen so every judgement is checkable against the document itself —
+      that is what makes an edge adjudicable at all
+- [x] `sample.js` — seeded hash over edge identity, **independent of any label**
+      (the defect that forced `gate1-v1` to be version-bumped)
+- [x] `adjudicate.js` — one fill-in file showing the edge plus the content it was
+      drawn from; machine judgements never shown
+- [x] `report.js` — two-bar rule, Wilson intervals, predicate breakdown, and the
+      synthetic-trigger limitation printed every run
+- [x] Report **refuses a verdict** without human judgements — 10 tests, including
+      that it fails on directionality alone with perfect predicates
+- [x] `.gate2/` gitignored — it holds vault content
+- [ ] **BLOCKED on user**: 48 blind edge judgements in `.gate2/adjudication.md`
+- [x] Verify: `node tools/gate2/report.js` prints PROVISIONAL, as it should
 
 ## Group 7 — Verification
 
