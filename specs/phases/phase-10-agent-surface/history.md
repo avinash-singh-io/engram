@@ -88,3 +88,21 @@ carries a non-empty detective form. That exact mechanism caught `part-of` being
 registered but unserialized in Phase 9, which is the argument for reusing it.
 
 ---
+
+### [EVALUATOR] 2026-08-12 — gate2-v1 locked; the scoring asymmetry is deliberate
+Topics: gate-2, evaluator, rule-11, methodology
+Affects-phases: phase-10-agent-surface
+Affects-specs: specs/decisions/0040-gate2-thresholds-and-protocol.md
+Detail: `gate2-v1` is frozen under a checksum manifest before any edge exists, and
+the freeze was verified by deliberately mutating the rubric and watching it fail. Two
+scoring choices are pinned in the rubric rather than left to whoever runs it. First,
+`n/a` is excluded from **directionality** but never from **predicate** — an edge
+whose kind is wrong still counts against predicate accuracy, since excluding it would
+make the worst errors vanish from the denominator. Second, `should-be-untyped` is
+called out as the most consequential predicate error: inventing a closed relation
+from vague association grants validity semantics the content does not support, which
+is how a graph starts lying rather than merely being incomplete (ADR-0027). The
+freeze machinery was generalised from `gate1-v*` to `gate<N>-v<M>` and gained a test
+that every locked evaluator carries both a rubric and a protocol.
+
+---

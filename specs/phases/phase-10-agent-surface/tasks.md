@@ -6,16 +6,21 @@
 
 ## Group 0 — Lock `gate2-v1` (Rule 11) — blocks everything
 
-- [ ] Write **ADR-0040** — Gate 2 thresholds and protocol
-- [ ] Fix the two bars: **directionality ≥95%, predicate ≥90%** — before any sampling
-- [ ] Record why they differ: a reversed direction inverts meaning; a wrong
-      predicate degrades traversal without lying about currency
-- [ ] Record the fallback: below either bar → nodes plus untyped links (ADR-0031)
-- [ ] `gate2-v1/rubric.md` — directionality vs predicate errors, worked examples
-- [ ] `gate2-v1/protocol.md` — corpus, sample size (~50), blind adjudication,
-      κ floor, two-bar decision rule, and the synthetic-trigger limitation
-- [ ] Extend the freeze test to cover `gate2-v*` alongside `gate1-v*`
-- [ ] Verify: freeze test passes **and fails on a deliberate mutation**
+- [x] Write **ADR-0040** — Gate 2 thresholds and protocol
+- [x] Fix the two bars: **directionality ≥95%, predicate ≥90%** — before any sampling
+- [x] Record why they differ, and that one combined bar would let directionality
+      errors hide behind predicate accuracy
+- [x] Record the fallback: below either bar → nodes plus untyped links (ADR-0031)
+- [x] `gate2-v1/rubric.md` — two independent axes, four predicate verdicts,
+      worked examples in both directions, edge cases decided in advance
+- [x] Pin the scoring asymmetry: `n/a` excluded from directionality only, **never**
+      from predicate — otherwise the worst errors vanish from the denominator
+- [x] `gate2-v1/protocol.md` — corpus, ~50 sample, blind adjudication, κ floor,
+      two-bar rule, and the synthetic-trigger limitation stated
+- [x] Generalise the freeze machinery from `gate1-v*` to `gate<N>-v<M>`
+- [x] New test: every locked evaluator carries both a rubric and a protocol
+- [x] Verify: freeze passes, **and fails on a deliberate mutation of gate2-v1**
+- [x] Verify: `npm run check` exits 0 — 269 passed
 
 ## Group 1 — `format(content, hints)`
 

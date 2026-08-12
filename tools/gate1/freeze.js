@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Regenerate the Rule 11 freeze manifest for every tests/benchmarks/gate1-v* dir.
+ * Regenerate the Rule 11 freeze manifest for every tests/benchmarks/gate<N>-v<M> dir.
  *
  * Run this ONLY for a deliberate version bump — creating gate1-vN+1, never
  * "fixing" a failing freeze test. A failing freeze test means a locked file
@@ -15,7 +15,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const benchmarks = join(here, '..', '..', 'tests', 'benchmarks');
 
 const versions = readdirSync(benchmarks)
-  .filter((name) => /^gate1-v\d+$/.test(name))
+  .filter((name) => /^gate\d+-v\d+$/.test(name))
   .sort();
 
 for (const version of versions) {
