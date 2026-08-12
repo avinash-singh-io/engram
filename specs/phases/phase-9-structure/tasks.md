@@ -35,15 +35,18 @@
 
 ## Group 2 — View generation — parallel with 3
 
-- [ ] Tests first
-- [ ] `index.md` — projection of `part-of`
-- [ ] `views/superseded.md` — from `supersedes` edges
-- [ ] `views/recent.md` — from assertion stamps
-- [ ] `views/orphans.md` — nodes with no edges
-- [ ] **No generated file embeds a generation timestamp** (this is what makes
-      `reindex` idempotent)
-- [ ] Every generated file is deterministic for a given input set
-- [ ] Verify: `npx vitest run tests/views/`
+- [x] Tests first (17 tests)
+- [x] `index.md` — projection of `part-of`, with an `Unfiled` section for nodes
+      that have no container
+- [x] `views/superseded.md` — names what replaced each stale node
+- [x] `views/recent.md` — most recent first, ties broken by id
+- [x] `views/orphans.md` — nodes with no edges in either direction
+- [x] **No generated file embeds a generation timestamp** — proven by generating
+      twice with different clocks and comparing byte-for-byte
+- [x] Deterministic regardless of input order
+- [x] Every generated file declares itself generated and safe to delete
+- [x] Spaced paths percent-encoded (BUG-001 holds downstream of the codec)
+- [x] Verify: `npx vitest run tests/views/` — 17 passed
 
 ## Group 3 — `doctor` — parallel with 2
 

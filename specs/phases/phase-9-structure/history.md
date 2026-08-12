@@ -114,3 +114,18 @@ failure mode is *silently dropping authored content*, the negative tests carry m
 weight than the positive one.
 
 ---
+
+### [DECISION] 2026-08-12 — The index shows live nodes; `recent` shows history
+Topics: views, validity, generation
+Affects-phases: phase-9-structure
+Affects-specs: none
+Detail: `generateAll` filters expired nodes out of `index.md` but keeps them in
+`views/recent.md`, because the two answer different questions. The index is a live
+structure tree — showing a lapsed node there presents it as current, which is exactly
+the confusion the validity filter exists to remove. `recent` is a history, and hiding
+what recently lapsed would make it lie by omission. Asserted by a test rather than
+left as an implementation accident. Superseded nodes are handled differently again:
+they stay listed in `views/superseded.md` by definition, alongside the id of whatever
+replaced them, since "what replaced this" is the question that brings someone there.
+
+---
