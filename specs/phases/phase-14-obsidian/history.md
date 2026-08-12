@@ -97,3 +97,27 @@ Affects-specs: none
 Detail: `.engram/guardrails.md` — frontmatter over the existing `parseFrontmatter`, prose body, absent means today's defaults so no vault changes behaviour on upgrade. Scaffolded by `init` with the fields present and `proposeOnly` empty, so the mechanism is discoverable without silently making writes require review. Consistent with skills, which already use markdown-plus-frontmatter and travel with a `git clone`.
 
 ---
+
+### [DECISION] 2026-08-13 — Resolved proposals are kept, not deleted
+Topics: approval-queue, ports, no-delete
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: The plan said approve should remove the queue entry. Implementing it showed two reasons not to. The queue is the only record that a rejected proposal ever existed — nothing else in the vault carries a trace of what an agent wanted to do and a human declined. And deleting would require a `delete` method on the `FileStore` port, which has four and deliberately not that one; adding it for the queue would hand every future consumer a capability the `no-delete` guardrail exists to discourage. Entries carry `status`, `resolvedBy` and `resolvedAt`; `list` shows pending, `--all` shows the history. Recorded as ADR-0042 §5.
+
+---
+
+### [ARCH_CHANGE] 2026-08-13 — `format` and `link` persist their own proposals
+Topics: approval-queue, write-gate
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: The gate returns a queued outcome; the operation writes the proposal rather than handing it back for a surface to persist. A deferral that a surface forgets to queue is a change that vanishes silently — worse than either applying or refusing it — and this phase already produced one bug of exactly that shape (the fail-closed regression in Group 1). Making it impossible to forget beats documenting that it must not be.
+
+---
+
+### [NOTE] 2026-08-13 — `engram queue show` renders a real line diff
+Topics: approval-queue, surfaces
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: §11 calls the CLI half of the queue "a `git`-style review". Printing the proposed file whole would satisfy the words and miss the point — on a replacement, what a human needs is the three lines that change inside a hundred. `surface/diff.ts` is an LCS line diff with collapsed context, capped at 2000 lines per side, presentation only.
+
+---

@@ -194,7 +194,10 @@ describe('a deferred change does not reach the filesystem', () => {
 
     expect(r.outcome).toBe('queued');
     expect(await files.read('/decisions/x.md')).toBeNull();
-    expect(await files.list()).toEqual([]);
+    // The only thing written is the proposal itself.
+    expect(await files.list()).toEqual([
+      `/.engram/queue/${r.outcome === 'queued' ? r.proposal.id : ''}.md`,
+    ]);
   });
 
   it('and still writes when nothing defers', async () => {
@@ -215,7 +218,7 @@ describe('a deferred change does not reach the filesystem', () => {
       { by: 'agent', id: 'x', path: '/decisions/x.md' },
       { files: memoryFileStore(), clock: fixedClock(AT), guardrails: deferring },
     );
-    expect(r.outcome === 'queued' && r.change.content).toContain('id: x');
+    expect(r.outcome === 'queued' && r.proposal.content).toContain('id: x');
     expect(r.outcome === 'queued' && r.rule).toBe('propose-only');
   });
 });

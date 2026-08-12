@@ -20,6 +20,7 @@ import type { Clock, FileStore } from '../core/ports.js';
 import { isClosedRelation } from '../core/relations.js';
 import { writeNode } from '../format/registry.js';
 import { validate, type Change } from '../gate.js';
+import { propose, type Proposal } from './queue.js';
 import type { GuardrailConfig } from '../policy/guardrails.js';
 
 export interface FormatHints {
@@ -47,8 +48,8 @@ export interface FormatHints {
 
 export type FormatResult =
   | { outcome: 'applied'; node: Node; edges: Edge[]; warnings: string[] }
-  /** Deferred to a human (ADR-0042). The target is untouched; `change` is the proposal. */
-  | { outcome: 'queued'; change: Change; reason: string; rule: string }
+  /** Deferred to a human (ADR-0042). The target is untouched; the proposal is queued. */
+  | { outcome: 'queued'; proposal: Proposal; reason: string; rule: string }
   | { outcome: 'rejected'; reason: string; rule: string };
 
 export interface FormatDeps {
@@ -147,9 +148,18 @@ export async function format(
   // guardrail that had been refusing writes began silently applying them, with
   // the whole suite green. Anything that is not an explicit `apply` stops here.
   if (verdict.outcome !== 'apply') {
-    return verdict.outcome === 'queue'
-      ? { outcome: 'queued', change: verdict.change, reason: verdict.reason, rule: verdict.rule }
-      : { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+    if (verdict.outcome === 'reject') {
+      return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+    }
+    // Persisted here rather than by the caller. A deferral the surface forgets to
+    // queue is a change that vanishes silently, which is worse than either
+    // applying or refusing it.
+    const proposal = await propose(
+      verdict.change,
+      { rule: verdict.rule, reason: verdict.reason },
+      { files: deps.files, clock: deps.clock, by: hints.by },
+    );
+    return { outcome: 'queued', proposal, reason: verdict.reason, rule: verdict.rule };
   }
 
   await deps.files.write(path, serialized);

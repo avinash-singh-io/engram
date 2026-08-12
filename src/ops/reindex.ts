@@ -9,7 +9,7 @@
 
 import type { Edge, Node } from '../core/model.js';
 import type { Clock, FileStore } from '../core/ports.js';
-import { DEFAULT_GUARDRAILS } from './doctor.js';
+import { loadGuardrails } from '../policy/config.js';
 import { readNode } from '../format/registry.js';
 import { generateAgentsMd } from '../surface/agents-md.js';
 import { generateAll } from '../views/generate.js';
@@ -47,7 +47,11 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   // AGENTS.md is generated but NOT gitignored — see the phase history. It is the
   // entry contract, and an agent arriving at a fresh clone needs it before it can
   // run anything, including `reindex`.
-  await files.write('/AGENTS.md', generateAgentsMd(DEFAULT_GUARDRAILS));
+  // The contract must describe the rules actually in force. Rendering the
+  // built-in defaults meant AGENTS.md never mentioned a vault's propose-only
+  // paths — which read as "there are none" rather than "engram cannot see them".
+  const { config: guardrails } = await loadGuardrails(files);
+  await files.write('/AGENTS.md', generateAgentsMd(guardrails));
   written.push('/AGENTS.md');
 
   return {

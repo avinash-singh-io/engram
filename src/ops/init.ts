@@ -11,6 +11,7 @@
 
 import { DERIVED_GITIGNORE, ROOT_MARKER } from '../core/paths.js';
 import type { Clock, FileStore } from '../core/ports.js';
+import { GUARDRAILS_PATH, scaffoldGuardrails } from '../policy/config.js';
 import { writePointers } from '../surface/adapters.js';
 import { reindex } from './reindex.js';
 
@@ -31,6 +32,9 @@ const SCAFFOLD: Record<string, string> = {
   '/sources/.gitkeep': '',
   '/projects/.gitkeep': '',
   [`/${ROOT_MARKER}/config.json`]: `${JSON.stringify({ structure: 'default' }, null, 2)}\n`,
+  // What an agent may do to this vault. Scaffolded so the mechanism is
+  // discoverable; `proposeOnly` ships empty so a fresh vault defers nothing.
+  [GUARDRAILS_PATH]: `${scaffoldGuardrails()}\n`,
 };
 
 export interface InitResult {

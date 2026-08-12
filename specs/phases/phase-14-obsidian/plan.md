@@ -71,7 +71,8 @@ survives engram being uninstalled, and the queue must not be the exception.
 - **list / show** — read-only; `show` renders what would change.
 - **approve** — recompute `basis`; **refuse on mismatch**, naming the drift. On
   match, apply the change **through the gate** (with the queueing rule satisfied),
-  never around it. Then remove the entry.
+  never around it. Then mark the entry `approved` — resolved proposals are **kept**,
+  not deleted (ADR-0042 §5).
 - **reject** — discard, recording why. Target untouched.
 - `crypto.subtle`, not `node:crypto` — this code runs on Obsidian mobile.
 - `OPERATIONS` is **not** extended. A test asserts it still has six entries.

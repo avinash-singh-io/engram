@@ -17,12 +17,14 @@
 
 import type { Clock, Detector, FileStore } from '../core/ports.js';
 import { capture } from '../ops/capture.js';
-import { doctor, formatReport, DEFAULT_GUARDRAILS } from '../ops/doctor.js';
+import { doctor, formatReport } from '../ops/doctor.js';
+import { loadGuardrails } from '../policy/config.js';
 import { format } from '../ops/format.js';
 import { init } from '../ops/init.js';
 import { link } from '../ops/link.js';
 import { reindex } from '../ops/reindex.js';
 import { discoverSkills } from '../policy/skills.js';
+import { listProposals, showProposal } from '../ops/queue.js';
 
 export const PROTOCOL_VERSION = '2025-06-18';
 
@@ -103,7 +105,41 @@ export const TOOLS = [
     description: 'Scaffold a vault. Non-destructive; never overwrites.',
     inputSchema: { type: 'object', properties: {} },
   },
+  /**
+   * The queue is **readable** here and nowhere near approvable (ADR-0042).
+   *
+   * Reading matters: an agent that cannot see its own pending proposal retries the
+   * write and queues a duplicate. Acting does not belong here at all — approval is
+   * the human's half of a deferral addressed to them, so it exists only on the CLI
+   * and in the Obsidian panel.
+   */
+  {
+    name: 'engram_queue_list',
+    description:
+      'Proposals awaiting human review. Read-only. You cannot approve or reject — that is the human half of a propose-only deferral, and no tool for it exists.',
+    inputSchema: {
+      type: 'object',
+      properties: { all: { type: 'boolean', description: 'Include resolved proposals.' } },
+    },
+  },
+  {
+    name: 'engram_queue_show',
+    description: 'One pending proposal in full, including what it would write. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: { id: S('Proposal id, from engram_queue_list.') },
+      required: ['id'],
+    },
+  },
 ] as const;
+
+/**
+ * The verbs that must never appear as tools. Asserted by test over the real tool
+ * list — the cheapest way to lose ADR-0042's guarantee is for someone to add the
+ * obvious missing tool in six months, and a name check catches that where a
+ * design document does not.
+ */
+export const HUMAN_ONLY_ACTIONS = ['approve', 'reject'] as const;
 
 const text = (s: string) => ({ content: [{ type: 'text', text: s }] });
 
@@ -154,7 +190,7 @@ async function callTool(
           sources: arr(args.sources),
           generated: true,
         },
-        { files, clock, guardrails: DEFAULT_GUARDRAILS },
+        { files, clock, guardrails: (await loadGuardrails(files)).config },
       );
       if (r.outcome === 'rejected') {
         return { ...text(`rejected [${r.rule}]: ${r.reason}`), isError: true };
@@ -179,6 +215,25 @@ async function callTool(
       return text(
         `${counts.nodes} node(s), ${counts.edges} edge(s) -> ${written.length} derived file(s)`,
       );
+    }
+    case 'engram_queue_list': {
+      const proposals = await listProposals(files, { all: args.all === true });
+      return text(
+        proposals.length === 0
+          ? 'nothing pending'
+          : proposals
+              .map((p) => `${p.id}  ${p.target}  [${p.status}]  held by ${p.rule}: ${p.reason}`)
+              .join('\n'),
+      );
+    }
+    case 'engram_queue_show': {
+      const p = await showProposal(files, str(args.id) ?? '');
+      return p === null
+        ? { ...text(`no such proposal: ${str(args.id) ?? ''}`), isError: true }
+        : text(
+            `${p.id}\ntarget: ${p.target}\nheld by: ${p.rule} — ${p.reason}\n` +
+              `status: ${p.status}\nby: ${p.by} at ${p.at}\n\n${p.content}`,
+          );
     }
     case 'engram_doctor':
       return text(formatReport(await doctor(files, detect)));

@@ -7,7 +7,10 @@
  * skills and MCP in Phase 15.
  */
 import { capture } from './ops/capture.js';
-import { doctor, DEFAULT_GUARDRAILS, formatReport } from './ops/doctor.js';
+import { doctor, formatReport } from './ops/doctor.js';
+import { loadGuardrails } from './policy/config.js';
+import { approve, basisOf, listProposals, rejectProposal, showProposal } from './ops/queue.js';
+import { renderDiff } from './surface/diff.js';
 import { format } from './ops/format.js';
 import { init } from './ops/init.js';
 import { link } from './ops/link.js';
@@ -25,6 +28,7 @@ usage:
   engram link <file> <to> <kind> assert a typed relation (supersedes | sources | part-of)
   engram reindex                 regenerate derived state (index.md, views/)
   engram doctor                  health and integrity report; read-only
+  engram queue                   proposals awaiting your review (approve is human-only)
   engram skill new <name>        scaffold a skill; skill list shows what is loaded
   engram mcp                     MCP server over stdio (no socket, nothing listens)
 
@@ -40,6 +44,12 @@ format options (the agent supplies the structure; engram does not infer it):
   --supersedes <id>   repeatable
   --sources <id>      repeatable
   --generated         mark as agent-authored rather than human
+
+queue commands (ADR-0042 — approving is a human action; there is no MCP tool):
+  engram queue list [--all]      pending proposals; --all includes resolved ones
+  engram queue show <id>         a git-style review of what would change
+  engram queue approve <id>      apply it, if the target has not changed since
+  engram queue reject <id> [why] discard it, recording why
 
 mcp options:
   --http              OPT-IN: also listen on HTTP. Opens a socket anything with
@@ -169,6 +179,8 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     }
     case 'format': {
       const content = rest.length > 0 ? rest.join(' ') : await readStdin();
+      const { config: guardrails, warnings: configWarnings } = await loadGuardrails(files);
+      for (const w of configWarnings) process.stderr.write(`warning: ${w}\n`);
       const result = await format(
         content,
         {
@@ -181,7 +193,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
           sources: multiFlag(argv, 'sources'),
           generated: argv.includes('--generated'),
         },
-        { files, clock, guardrails: DEFAULT_GUARDRAILS },
+        { files, clock, guardrails },
       );
       if (result.outcome === 'rejected') {
         process.stderr.write(`rejected [${result.rule}]: ${result.reason}\n`);
@@ -198,6 +210,102 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
           `\n`,
       );
       return 0;
+    }
+    /**
+     * The human half of ADR-0042. `approve` and `reject` live here and in the
+     * Obsidian panel and **nowhere else** — there is deliberately no MCP tool for
+     * either, because an agent that can approve its own proposal has turned a
+     * refusal into a retry.
+     */
+    case 'queue': {
+      const [sub, id, ...note] = rest;
+      const { config: guardrails } = await loadGuardrails(files);
+
+      if (sub === undefined || sub === 'list') {
+        const all = argv.includes('--all');
+        const proposals = await listProposals(files, { all });
+        if (proposals.length === 0) {
+          process.stdout.write(all ? 'no proposals\n' : 'nothing pending\n');
+          return 0;
+        }
+        for (const p of proposals) {
+          const state = p.status === 'pending' ? '' : `  [${p.status}]`;
+          process.stdout.write(`${p.id}  ${p.target}  ${p.rule}  ${p.by}  ${p.at}${state}\n`);
+        }
+        return 0;
+      }
+
+      if (id === undefined) {
+        process.stderr.write(`usage: engram queue ${sub} <id>\n`);
+        return 2;
+      }
+
+      switch (sub) {
+        case 'show': {
+          const p = await showProposal(files, id);
+          if (p === null) {
+            process.stderr.write(`no such proposal: ${id}\n`);
+            return 1;
+          }
+          const current = await files.read(p.target);
+          const drift = (await basisOf(files, p.target)) !== p.basis;
+          process.stdout.write(
+            [
+              `proposal ${p.id}`,
+              `target   ${p.target}${current === null ? '  (new file)' : ''}`,
+              `held by  ${p.rule} — ${p.reason}`,
+              `by       ${p.by} at ${p.at}`,
+              `status   ${p.status}${drift ? '  ⚠ the target changed since this was proposed' : ''}`,
+              '',
+              renderDiff(current ?? '', p.content),
+              '',
+            ].join('\n'),
+          );
+          return 0;
+        }
+        case 'approve': {
+          const r = await approve(id, guardrails, { files, clock, by });
+          switch (r.outcome) {
+            case 'applied':
+              process.stdout.write(`applied ${r.proposal.target}\n`);
+              return 0;
+            case 'stale':
+              process.stderr.write(
+                `refusing: ${r.proposal.target} changed since this was proposed.\n` +
+                  `  Engram will not merge. Review the file, then re-run the change.\n` +
+                  `  engram queue show ${id}\n`,
+              );
+              return 1;
+            case 'rejected':
+              process.stderr.write(`rejected [${r.rule}]: ${r.reason}\n`);
+              return 1;
+            case 'resolved':
+              process.stderr.write(`${id} is already ${r.proposal.status}\n`);
+              return 1;
+            default:
+              process.stderr.write(`no such proposal: ${id}\n`);
+              return 1;
+          }
+        }
+        case 'reject': {
+          const r = await rejectProposal(id, note.join(' '), { files, clock, by });
+          if (r.outcome === 'missing') {
+            process.stderr.write(`no such proposal: ${id}\n`);
+            return 1;
+          }
+          if (r.outcome === 'resolved') {
+            process.stderr.write(`${id} is already ${r.proposal.status}\n`);
+            return 1;
+          }
+          process.stdout.write(`rejected ${r.proposal.target}\n`);
+          return 0;
+        }
+        default:
+          process.stderr.write(
+            'usage: engram queue [list [--all]] | show <id> | approve <id> | reject <id> [why]\n',
+          );
+          return 2;
+      }
     }
     case 'skill': {
       const [sub, name] = rest;

@@ -122,6 +122,22 @@ Obsidian keep working. A queue in a database or a binary format would be the sin
 exception, and it would be the exception precisely where someone most needs to see
 what an agent wanted to do.
 
+### 5. Resolved proposals are kept, not deleted
+
+An approved or rejected entry stays in `.engram/queue/`, marked with its status, who
+resolved it and when. `list` shows pending ones; `--all` shows the history.
+
+Two reasons, and the second is the load-bearing one. First, the queue becomes the
+record of what an agent wanted to do and what a human decided — the only place that
+exists, since a rejected proposal leaves no other trace anywhere. Second, deleting
+would require a `delete` method on the `FileStore` port, which has four methods and
+deliberately not that one. Adding it for the queue would hand every future consumer
+a capability the `no-delete` guardrail exists to discourage, in a system whose
+governing instinct is deprecate-never-remove.
+
+The cost is that the directory grows. Pruning it is `rm`, and the decision to prune
+is the human's, like everything else in a vault they own.
+
 ### What this does NOT solve
 
 **Nothing authenticates the human.** Anyone with filesystem access can approve a
