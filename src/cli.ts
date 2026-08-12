@@ -48,6 +48,16 @@ mcp options:
   --host <h>          HTTP host (default 127.0.0.1)
 `;
 
+/**
+ * A held change is neither success nor failure, and a script must be able to tell.
+ * `0` would let a caller conclude the write happened; `1` conflates it with a
+ * refusal, which is the distinction ADR-0042 exists to draw.
+ */
+const EXIT_QUEUED = 3;
+
+const reportQueued = (rule: string, reason: string): string =>
+  `queued [${rule}]: ${reason}\n` + `  not written — review it with: engram queue list\n`;
+
 function flag(argv: string[], name: string, fallback: string): string {
   const i = argv.indexOf(`--${name}`);
   return i === -1 || argv[i + 1] === undefined ? fallback : argv[i + 1]!;
@@ -177,6 +187,10 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         process.stderr.write(`rejected [${result.rule}]: ${result.reason}\n`);
         return 1;
       }
+      if (result.outcome === 'queued') {
+        process.stderr.write(reportQueued(result.rule, result.reason));
+        return EXIT_QUEUED;
+      }
       for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
       process.stdout.write(
         `${result.node.id} -> ${result.node.path}` +
@@ -238,6 +252,10 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
       if (result.outcome === 'rejected') {
         process.stderr.write(`rejected [${result.rule}]: ${result.reason}\n`);
         return 1;
+      }
+      if (result.outcome === 'queued') {
+        process.stderr.write(reportQueued(result.rule, result.reason));
+        return EXIT_QUEUED;
       }
       for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
       process.stdout.write(`${result.edge.from} --${result.edge.kind}--> ${result.edge.to}\n`);

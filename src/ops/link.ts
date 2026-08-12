@@ -21,6 +21,8 @@ export interface LinkDeps {
 
 export type LinkResult =
   | { outcome: 'applied'; edge: Edge; warnings: string[] }
+  /** Deferred to a human (ADR-0042). The target is untouched; `change` is the proposal. */
+  | { outcome: 'queued'; change: Change; reason: string; rule: string }
   | { outcome: 'rejected'; reason: string; rule: string };
 
 export async function link(
@@ -40,8 +42,13 @@ export async function link(
   const change: Change = { path: fromPath, node, edges: all, content };
 
   const verdict = validate(change);
-  if (verdict.outcome === 'reject') {
-    return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+  // Fail closed, as in `format`. `link` wires no guardrails today, so `queue` is
+  // unreachable here — but the branch that assumes that is exactly the branch
+  // that writes the file, so it is not left to the assumption.
+  if (verdict.outcome !== 'apply') {
+    return verdict.outcome === 'queue'
+      ? { outcome: 'queued', change: verdict.change, reason: verdict.reason, rule: verdict.rule }
+      : { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
   }
 
   await deps.files.write(fromPath, content);

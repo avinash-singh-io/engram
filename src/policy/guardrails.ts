@@ -29,13 +29,28 @@ export interface GuardrailContext {
   writtenThisRun: number;
 }
 
+/** What a firing rule does to the change. ADR-0042. */
+export type Disposition = 'reject' | 'queue';
+
 export interface Guardrail {
   name: string;
   /** What goes wrong without it. Shown when it fires and in AGENTS.md. */
   prevents: string;
   /**
-   * Preventive half. Returns a reason when the change must be refused.
-   * `null` means allow.
+   * What happens when this rule fires. **Declared by the rule, never inferred by
+   * the gate.**
+   *
+   * `reject` refuses the change outright; `queue` defers it to a human
+   * (ADR-0042). The gate maps this to an outcome and never names a rule — a
+   * name check would work today and break silently the first time a second rule
+   * wanted to defer, by rejecting instead.
+   *
+   * Defaults to `reject`, which is what every rule but `propose-only` means.
+   */
+  disposition?: Disposition;
+  /**
+   * Preventive half. Returns a reason when the change must not be applied as-is.
+   * `null` means allow. What "not as-is" means is `disposition`'s job.
    */
   check(change: Change, ctx: GuardrailContext, config: GuardrailConfig): string | null;
   /**
@@ -130,9 +145,13 @@ registerGuardrail({
 registerGuardrail({
   name: 'propose-only',
   prevents: 'autonomous writes where the stakes are highest',
+  // The only rule that defers rather than refuses. Until ADR-0042 it refused
+  // while its message promised review, which made it the harshest guardrail in
+  // the set: no path forward except turning it off.
+  disposition: 'queue',
   check(change, _ctx, config) {
     return under(change.path, config.proposeOnly ?? [])
-      ? `${change.path} is propose-only — this change needs human review before it applies`
+      ? `${change.path} is propose-only — held for human review before it applies`
       : null;
   },
   detect(nodes, _edges, config) {
@@ -186,21 +205,34 @@ registerGuardrail({
 /**
  * Run every enabled rule's preventive half.
  *
- * Returns the first refusal, naming the rule — a rejection that does not say which
- * rule fired is not actionable.
+ * Returns the rule that stopped the change, naming it — a refusal that does not
+ * say which rule fired is not actionable.
+ *
+ * **A refusal wins over a deferral, whatever the order in `enabled`.** A change can
+ * trip both `propose-only` and, say, `path-scope`; queueing it would put a proposal
+ * in front of a human that the gate refuses anyway on replay. So a `queue` hit is
+ * held, not returned, until every remaining rule has had its say. Refusals still
+ * short-circuit, because nothing after one can change the answer.
  */
 export function checkAll(
   change: Change,
   ctx: GuardrailContext,
   config: GuardrailConfig,
-): { rule: string; reason: string } | null {
+): { rule: string; reason: string; disposition: Disposition } | null {
+  let deferred: { rule: string; reason: string; disposition: Disposition } | null = null;
+
   for (const name of config.enabled) {
     const rule = REGISTRY.get(name);
     if (rule === undefined) continue;
     const reason = rule.check(change, ctx, config);
-    if (reason !== null) return { rule: name, reason };
+    if (reason === null) continue;
+
+    const disposition = rule.disposition ?? 'reject';
+    if (disposition === 'reject') return { rule: name, reason, disposition };
+    deferred ??= { rule: name, reason, disposition };
   }
-  return null;
+
+  return deferred;
 }
 
 /** Run every enabled rule's detective half. */

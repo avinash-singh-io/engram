@@ -47,6 +47,8 @@ export interface FormatHints {
 
 export type FormatResult =
   | { outcome: 'applied'; node: Node; edges: Edge[]; warnings: string[] }
+  /** Deferred to a human (ADR-0042). The target is untouched; `change` is the proposal. */
+  | { outcome: 'queued'; change: Change; reason: string; rule: string }
   | { outcome: 'rejected'; reason: string; rule: string };
 
 export interface FormatDeps {
@@ -140,8 +142,14 @@ export async function format(
           },
         },
   );
-  if (verdict.outcome === 'reject') {
-    return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+  // **Fail closed.** This was `if (verdict.outcome === 'reject')` until Phase 14
+  // added a third outcome, and that shape wrote the file for the new one — a
+  // guardrail that had been refusing writes began silently applying them, with
+  // the whole suite green. Anything that is not an explicit `apply` stops here.
+  if (verdict.outcome !== 'apply') {
+    return verdict.outcome === 'queue'
+      ? { outcome: 'queued', change: verdict.change, reason: verdict.reason, rule: verdict.rule }
+      : { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
   }
 
   await deps.files.write(path, serialized);

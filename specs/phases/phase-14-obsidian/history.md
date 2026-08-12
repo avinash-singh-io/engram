@@ -81,3 +81,19 @@ Affects-specs: specs/decisions/README.md
 Detail: The index table in `specs/decisions/README.md` stops at ADR-0017 (2026-07-03). ADRs 0018–0042 exist as files with no rows, so the index reads as a complete list while omitting 25 entries — misleading rather than merely incomplete. `impact-map.json` stayed current throughout, so `/sync-docs` was never affected; only the human-facing index rotted. Filed as TD-007 and left for `/sync-docs` at completion rather than edited mid-phase (Rule 9).
 
 ---
+
+### [DISCOVERY] 2026-08-13 — Guardrail configuration has been unreachable since Phase 10
+Topics: guardrails, approval-queue, write-gate
+Affects-phases: phase-14-obsidian, phase-10
+Affects-specs: none
+Detail: No code path loads a `GuardrailConfig` from a vault. Every caller passes `DEFAULT_GUARDRAILS` = `{ enabled: guardrailNames() }`, which sets no `proposeOnly`, `pathScope` or `rateLimit` — and those three rules read only from config, so their preventive halves have been inert since Phase 10. Found by smoke-testing the new QUEUE outcome against the built binary rather than the suite: `format` into a would-be propose-only path applied cleanly, because no path can be propose-only. Filed as BUG-003 (P1) and taken into this phase's scope, since a queue nothing can feed is not a queue. The failure mode is the one this project keeps re-encountering — Phase 10's tests construct configs directly and never ask where a real one comes from.
+
+---
+
+### [SCOPE_CHANGE] 2026-08-13 — Vault guardrail configuration added to Group 2
+Topics: guardrails, approval-queue, config
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: `.engram/guardrails.md` — frontmatter over the existing `parseFrontmatter`, prose body, absent means today's defaults so no vault changes behaviour on upgrade. Scaffolded by `init` with the fields present and `proposeOnly` empty, so the mechanism is discoverable without silently making writes require review. Consistent with skills, which already use markdown-plus-frontmatter and travel with a `git clone`.
+
+---

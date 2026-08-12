@@ -107,6 +107,26 @@ export const TOOLS = [
 
 const text = (s: string) => ({ content: [{ type: 'text', text: s }] });
 
+/**
+ * A deferred write, reported to the agent that attempted it (ADR-0042).
+ *
+ * `isError: true` is deliberate and is the conservative reading. The call did not
+ * do what was asked — nothing was written — and an agent that treats a deferral as
+ * a success reports "done" to a human for a change still sitting unreviewed. The
+ * text carries the correction, including the part the agent cannot act on: **it
+ * cannot approve this itself.** No tool for that exists, and saying so here saves
+ * it from hunting for one.
+ */
+const queued = (rule: string, reason: string) => ({
+  ...text(
+    `queued [${rule}]: ${reason}\n` +
+      'NOT written. It is held for human review — engram_queue_list and ' +
+      'engram_queue_show will report it. Approving is a human action, on the CLI ' +
+      'or in Obsidian; there is no tool for it and you should not look for one.',
+  ),
+  isError: true,
+});
+
 async function callTool(
   name: string,
   args: Record<string, unknown>,
@@ -136,9 +156,11 @@ async function callTool(
         },
         { files, clock, guardrails: DEFAULT_GUARDRAILS },
       );
-      return r.outcome === 'rejected'
-        ? { ...text(`rejected [${r.rule}]: ${r.reason}`), isError: true }
-        : text(`${r.node.id} -> ${r.node.path} (${r.edges.length} relation(s))`);
+      if (r.outcome === 'rejected') {
+        return { ...text(`rejected [${r.rule}]: ${r.reason}`), isError: true };
+      }
+      if (r.outcome === 'queued') return queued(r.rule, r.reason);
+      return text(`${r.node.id} -> ${r.node.path} (${r.edges.length} relation(s))`);
     }
     case 'engram_link': {
       const r = await link(str(args.file) ?? '', str(args.to) ?? '', str(args.kind) ?? '', {
@@ -146,9 +168,11 @@ async function callTool(
         clock,
         by,
       });
-      return r.outcome === 'rejected'
-        ? { ...text(`rejected [${r.rule}]: ${r.reason}`), isError: true }
-        : text(`${r.edge.from} --${r.edge.kind}--> ${r.edge.to}`);
+      if (r.outcome === 'rejected') {
+        return { ...text(`rejected [${r.rule}]: ${r.reason}`), isError: true };
+      }
+      if (r.outcome === 'queued') return queued(r.rule, r.reason);
+      return text(`${r.edge.from} --${r.edge.kind}--> ${r.edge.to}`);
     }
     case 'engram_reindex': {
       const { written, counts } = await reindex(files, clock);
