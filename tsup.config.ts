@@ -1,4 +1,4 @@
-import { copyFileSync } from 'node:fs';
+import { copyFileSync, writeFileSync } from 'node:fs';
 import { defineConfig } from 'tsup';
 
 /**
@@ -45,6 +45,12 @@ export default defineConfig([
     async onSuccess() {
       copyFileSync('plugin/manifest.json', 'dist/obsidian/manifest.json');
       copyFileSync('plugin/styles.css', 'dist/obsidian/styles.css');
+      // This repo is `"type": "module"`, which makes a CommonJS `main.js`
+      // ambiguous under Node's own rules — it inherits ESM from the root package
+      // and fails to load. Obsidian's loader does not care either way, but an
+      // artifact that only works because one particular loader is lenient is not
+      // one anybody can verify. Six bytes buys `require()` working everywhere.
+      writeFileSync('dist/obsidian/package.json', `${JSON.stringify({ type: 'commonjs' })}\n`);
     },
   },
 ]);

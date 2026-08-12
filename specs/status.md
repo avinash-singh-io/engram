@@ -59,7 +59,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 14 — Obsidian surface | `phase-14-obsidian` | In progress | Groups 0-1 of 6 — QUEUE in the gate |
+| Phase 14 — Obsidian surface | `phase-14-obsidian` | In progress | Groups 0-6 done; **manual Obsidian gate outstanding** |
 
 ## Upcoming Phases — the v2 line
 

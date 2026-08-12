@@ -106,10 +106,19 @@
 
 ## Group 6 — Verification
 
-- [ ] Full `npm run check` — fresh output, exit 0
-- [ ] Acceptance sweep against `overview.md`
-- [ ] Deliberate import violation re-proves the architecture rules
-- [ ] Built-binary smoke: queue round-trip and the staleness refusal
-- [ ] **Manual gate, recorded as manual** — plugin loads in a real Obsidian vault;
-      capture, format, one approve round-trip
-- [ ] `retrospective.md` with `## Verification Evidence`
+- [x] Full `npm run check` — exit 0, **34 files / 586 tests**, both builds clean
+- [x] Acceptance sweep against `overview.md` — A1–A8 all PASS on the built binary
+- [x] Deliberate import violation re-proves **all three** architecture rules
+- [x] Built-binary smoke: queue round-trip **and** the staleness refusal, with a
+      hand edit surviving an approve
+- [x] **`npm run smoke:plugin`** — loads the BUILT bundle against a stubbed
+      Obsidian: externals, no node builtins, `onload()`, every command and the view
+- [x] **Found by that smoke test**: the repo is `"type": "module"`, so a CommonJS
+      `main.js` failed to `require`. Build now emits `dist/obsidian/package.json`
+- [x] `smoke:plugin` added to `npm run check`, so the artifact is verified every run
+- [ ] **MANUAL GATE — OUTSTANDING.** The plugin has not been loaded in a real
+      Obsidian vault. Loading and wiring are proven; **rendering and button
+      behaviour are not**, and cannot be automated from here. A prepared vault with
+      the plugin installed and two proposals waiting (one clean, one stale) is at
+      `scratchpad/engram-plugin-test`. **Must pass before v0.11.0 is tagged.**
+- [x] `retrospective.md` with `## Verification Evidence`
