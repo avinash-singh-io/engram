@@ -71,7 +71,7 @@ nobody should cite it as if it were.
 `npm run check` — 40 test files, 265 tests, typecheck, lint, format, build. Green on
 the final commit.
 
-## Verification Evidence (Rule 12)
+## Verification Evidence
 
 Captured fresh on 2026-08-10 from `main` at the merge commit `1d810d5`.
 All four commands run in this session; exit codes and output are verbatim.
