@@ -93,3 +93,24 @@ architecture rests on the tool being disposable (ADR-0039) and the vault dependi
 nothing above a directory of files. Filed and closed as TD-005.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — The shorthand guardrail form silently produced no guardrails
+Topics: skills, guardrails, parsing, security
+Affects-phases: phase-15-surfaces
+Affects-specs: none
+Detail: `guardrails: [require-sources]` — the exact shorthand v2-overview §6's own
+example uses — parsed to *nothing*. `Array.isArray` is also `typeof 'object'`, so
+testing for an object first swallowed the list form and returned a config with no
+`enabled` key. A skill asking to be constrained would have run unconstrained.
+
+That is the worst shape this bug could take: **silent loosening**. A skill that fails
+to load is visible; a skill that loads with its safety declarations quietly dropped is
+not, and the whole point of `tighten()` is that a downloaded skill cannot widen its
+own permissions. Caught by writing the test from §6's example rather than from the
+implementation. A second, smaller version of the same problem followed: `rateLimit: 3`
+arrived as the string `'3'`, because the Phase 8 YAML subset deliberately does not
+coerce numbers — it cannot, since `okf_version: 0.2` must stay a string or
+`detectVersion` stops recognising it. Coerced at the consumer instead of widening the
+parser and breaking the format layer.
+
+---

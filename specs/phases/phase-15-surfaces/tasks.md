@@ -22,16 +22,22 @@
 
 ## Group 1 — Skills: discover, validate, expose
 
-- [ ] Tests first
-- [ ] Discover built-ins + `.engram/skills/*.md`
-- [ ] **Vault-local wins** on a name collision
-- [ ] Reject a skill whose `uses:` names an operation that does not exist, **naming
-      the offending operation**
-- [ ] Reject a skill whose `guardrails:` would **loosen**; accept one that tightens
-- [ ] A tightened guardrail actually applies when the skill is in force
-- [ ] Reject a malformed skill loudly — never skip it silently
-- [ ] List discovered skills in `AGENTS.md`
-- [ ] Verify: `npx vitest run tests/policy/skills.test.ts`
+- [x] Tests first (26 tests)
+- [x] Discover built-ins + `.engram/skills/*.md`; two built-ins shipped
+- [x] **Vault-local wins** on a name collision
+- [x] Reject a skill whose `uses:` names an operation that does not exist, naming
+      the offending one **and** listing what engram actually has
+- [x] Reject a skill whose `guardrails:` would **loosen**; accept one that tightens
+- [x] A tightened guardrail actually applies when the skill is in force
+- [x] Reject a malformed skill loudly, with its path — never skip it silently
+- [x] Test that every shipped built-in is itself valid, and every guardrail it
+      names actually exists
+- [x] **Fixed: the shorthand `guardrails: [x]` form silently produced NO guardrails**
+      — `Array.isArray` is `typeof 'object'`, so the object branch swallowed it
+- [x] **Fixed: numeric fields arrived as strings** — coerced consumer-side, because
+      the YAML subset must not coerce `okf_version: 0.2` into a number
+- [ ] List discovered skills in `AGENTS.md` — Group 4, with the adapters
+- [x] Verify: `npx vitest run tests/policy/` — 56 passed
 
 ## Group 2 — MCP over stdio — parallel with 3
 
