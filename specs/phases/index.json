@@ -102,7 +102,7 @@
     },
     "phase-9-structure": {
       "name": "Structure, views & health",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-9-structure",
       "topics": [
         "structure",
