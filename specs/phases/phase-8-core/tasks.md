@@ -51,15 +51,21 @@
 
 ## Group 3 — `format/` codecs and registry — parallel with 2, 4
 
-- [ ] Tests first
-- [ ] `okf-v0_1.ts` — reader + writer
-- [ ] `okf-v0_2.ts` — reader + writer
-- [ ] `registry.ts` — detect `okf_version` → select codec
-- [ ] Normalise into `model.ts`; nothing above the codec sees OKF-shaped data
-- [ ] Lossy-warning path when a codec cannot express what the model holds
-- [ ] **BUG-001 percent-encoding specs go green**
-- [ ] Open/closed test: adding a stub codec changes no existing file
-- [ ] Verify: `npx vitest run tests/format/`
+- [x] Tests first
+- [x] `format/links.ts` — the rescued BUG-001 matrix, 17 specs **unskipped and green**
+- [x] `okf-v0_1.ts` — reader + writer
+- [x] `okf-v0_2.ts` — reader + writer (relations, aliases, `stale_after`)
+- [x] `registry.ts` — detect `okf_version` → select codec; unknown version falls
+      back rather than failing, so a future-written vault stays readable
+- [x] `parseFrontmatter` total — CRLF · BOM · absent · unterminated · bad YAML
+- [x] Normalise into `model.ts`; nothing above the codec sees OKF-shaped data
+- [x] Lossy-warning path — downgrading to v0.1 names each dropped capability
+- [x] `readNode` total: no frontmatter, bad YAML, empty file all yield a Node
+- [x] Missing id → path-as-identity + warning (ADR-0021)
+- [x] v0.1 → model → v0.2 round-trip proven lossless
+- [x] Open/closed test: registering a stub codec changes no existing code path
+- [x] Verify: `npx vitest run tests/format/` — 35 passed
+- [x] Verify: `npm run check` exits 0 — 113 passed, no skips remain
 
 ## Group 4 — `core/graph.ts` + `core/relations.ts` — parallel with 2, 3
 

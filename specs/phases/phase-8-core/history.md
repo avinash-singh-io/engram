@@ -171,3 +171,45 @@ storage-only consumer takes a `FileStore` and nothing else. If either ever needs
 more, the segregation ADR-0032 required has been lost and a test says so.
 
 ---
+
+### [DECISION] 2026-08-12 — A YAML subset, not a YAML dependency
+Topics: format, codecs, dependencies
+Affects-phases: phase-8-core
+Affects-specs: none
+Detail: `parseFrontmatter` implements a deliberately small YAML subset — scalars,
+inline lists, inline maps, quoted strings — rather than pulling in a full engine.
+OKF frontmatter is flat by design (ADR-0020), so a general parser would carry far
+more surface than the format uses, and every byte of that surface is something a
+malformed vault could reach. Anything outside the subset raises internally and is
+converted to a `yamlError`, so the totality contract holds regardless. If OKF ever
+needs nested structures this becomes a real dependency decision; until then it is
+about 40 lines.
+
+---
+
+### [DECISION] 2026-08-12 — An unknown okf_version degrades rather than fails
+Topics: format, codecs, degradation
+Affects-phases: phase-8-core
+Affects-specs: specs/architecture/v2-overview.md#12-degradation
+Detail: `detectVersion` falls back to the default codec when a file declares a
+version no codec speaks — including a *newer* one. The alternative, refusing to
+read, means a vault touched by a future engram becomes unreadable by the copy in
+front of you, which is the opposite of "depends on nothing above a directory of
+files". Reading it degraded and saying so is strictly better than refusing. Writing
+is the asymmetric case and does throw: silently emitting the wrong version would
+corrupt a vault, where refusing merely inconveniences the caller.
+
+---
+
+### [ARCH_CHANGE] 2026-08-12 — Open/closed is now a test, not a claim
+Topics: architecture, codecs, open-closed
+Affects-phases: phase-8-core
+Affects-specs: specs/architecture/v2-overview.md#2-modules-ports-and-codecs
+Detail: ADR-0032 asserts "adding a spec version is adding a file. No existing code
+changes." That is now asserted by a test which registers a stub codec at runtime and
+proves dispatch, write and version-listing all pick it up while the existing versions
+are unaffected. The registry holds a `Map` populated by `registerCodec`, so neither
+`registry.ts` nor either codec has a branch naming a version. A design property that
+is only claimed in prose drifts; one with a test does not.
+
+---

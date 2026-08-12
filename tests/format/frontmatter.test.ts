@@ -11,7 +11,7 @@ import * as registry from '../../src/format/registry.js';
  *
  * SKIPPED DELIBERATELY — UNSKIP IN GROUP 3. Group 7 verifies none survive.
  */
-describe.skip('frontmatter parsing is total, never throwing — UNSKIP IN GROUP 3', () => {
+describe('frontmatter parsing is total, never throwing', () => {
   it('parses a well-formed block', () => {
     const p = registry.parseFrontmatter('---\ntype: Concept\ntitle: X\n---\n# Body\n');
     expect(p.hasFrontmatter).toBe(true);

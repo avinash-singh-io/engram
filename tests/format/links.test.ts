@@ -12,7 +12,7 @@ import * as links from '../../src/format/links.js';
  * SKIPPED DELIBERATELY — UNSKIP IN GROUP 3, where format/links.ts is written
  * test-first. Group 7 verifies no `describe.skip` survives the phase.
  */
-describe.skip('encodeLinkTarget (BUG-001) — UNSKIP IN GROUP 3', () => {
+describe('encodeLinkTarget (BUG-001)', () => {
   // Only the CommonMark-breaking characters are encoded; `&`, `+` and `—` stay
   // readable, because a destination humans cannot read is its own defect.
   it.each([
@@ -71,7 +71,7 @@ describe.skip('encodeLinkTarget (BUG-001) — UNSKIP IN GROUP 3', () => {
   });
 });
 
-describe.skip('decodeLinkTarget (BUG-001) — UNSKIP IN GROUP 3', () => {
+describe('decodeLinkTarget (BUG-001)', () => {
   it('round-trips: decode(encode(p)) === p', () => {
     for (const raw of [
       '/dir/Five Dimensions.md',
@@ -96,7 +96,7 @@ describe.skip('decodeLinkTarget (BUG-001) — UNSKIP IN GROUP 3', () => {
   });
 });
 
-describe.skip('extractMarkdownLinks decodes targets for matching — UNSKIP IN GROUP 3', () => {
+describe('extractMarkdownLinks decodes targets for matching', () => {
   it('returns filesystem-true (decoded) targets', () => {
     const found = links.extractMarkdownLinks(
       'See [X](/dir/My%20File.md) and [Y](/dir/no-spaces.md).',
