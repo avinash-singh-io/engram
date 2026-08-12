@@ -119,7 +119,7 @@
     },
     "phase-10-agent-surface": {
       "name": "Agent surface (write path)",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-10-agent-surface",
       "topics": [
         "format",

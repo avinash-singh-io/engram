@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-08-10
-> **Current Phase**: **Phase 10 — Agent surface (write path)** (branch `phase-10-agent-surface`, target v0.9.0). **GATE 2 — edge accuracy; can stop the graph.**
+> **Current Phase**: **Phase 10 complete (v0.9.0)**. **GATE 2 is instrumented but unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on the verdict.
 > **Latest Release**: **v0.8.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, reopened P0). GitHub tags and releases are current; the registry is five releases behind.
 > **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
 
@@ -35,6 +35,7 @@ is rewritten clean-room rather than patched.
 | 7 | Evidence & Observation (Gate 1) | Complete | — |
 | 8 | Core | Complete | v0.7.0 |
 | 9 | Structure, views & health | Complete | v0.8.0 |
+| 10 | Agent surface (write path) | Complete | v0.9.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -57,7 +58,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 10 — Agent surface | `phase-10-agent-surface` | In Progress | Group 0 |
+| _(none — Phase 10 landed; Phase 11 gated on Gate 2)_ | | | |
 
 ## Upcoming Phases — the v2 line
 
@@ -66,11 +67,12 @@ is rewritten clean-room rather than patched.
 | ~~Phase 7~~ | ~~Evidence & Observation~~ | **complete** | Gate 1 answered 2026-08-10: **PROCEED**. 88.9% structural, 95% CI [74.7%, 95.6%], n=36 of 400 sampled from 1066 real prompts. Classifier validation waived — see [report](phases/phase-7-evidence/gate-1-report.md) |
 | ~~Phase 8~~ | ~~Core~~ | **complete (v0.7.0)** | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
 | ~~Phase 9~~ | ~~Structure, views \& health~~ | **complete (v0.8.0)** | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
-| Phase 10 | Agent surface (write path) | **in progress** | `format(content, hints)` — no capture prerequisite (ADR-0033); write-time extraction; write gate + guardrails; skills; adapters; MCP. **GATE 2 — edge accuracy** |
-| Phase 11 | Retrieval | planned | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
+| ~~Phase 10~~ | ~~Agent surface (write path)~~ | **complete (v0.9.0)** | `format(content, hints)`; guardrails preventive **and** detective; generated `AGENTS.md`; Gate 2 instrument. **GATE 2 awaits 48 blind edge judgements** |
+| Phase 11 | Retrieval | **blocked on Gate 2** | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
 | Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
 | Phase 13 | Intelligence II | **parked** (ADR-0038) | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
 | Phase 14 | Obsidian surface | planned | Community plugin; agent inside Obsidian. **Independent lane — can move earlier** |
+| Phase 15 | Surfaces — skills, MCP, adapters | **next, and NOT gated on Gate 2** | Skills sequence the seven ops; MCP exposes them as typed tools; agent adapters. All work over `capture`/`format`/`link`/`reindex`/`doctor`, none of which Gate 2 affects |
 | ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
 
 Post-v2 (Tier-2, no debt created by waiting): engram's own agent, engram's own UI,
@@ -92,16 +94,18 @@ productivity suite, and is deliberately kept out of the core. See
 
 ## Next Actions
 
-1. **Start Phase 10 — Agent surface.** `format(content, hints)` (ADR-0033);
-   write-time relation extraction; write gate + guardrails; skills; AGENTS.md;
-   adapters; MCP server. **GATE 2 — edge accuracy; threshold must be fixed before
-   sampling begins.** Also unblocks `views/by-tag.md`, which needs tag extraction.
-2. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
+1. **Adjudicate Gate 2** — 48 blind edge judgements in `.gate2/adjudication.md`,
+   then `node tools/gate2/report.js`. **Phase 11 is gated on this verdict**, and its
+   scope depends on it: pass → traversal, validity filter, trust weighting; fail →
+   ADR-0031's fallback of nodes plus untyped links.
+2. **Or start Phase 15 — Surfaces** (skills, MCP, adapters), which is **not** gated
+   on Gate 2: it sequences and exposes operations Gate 2 does not affect.
+3. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
    and machine labels are preserved in `.gate1/`. Completable at any time without
    redoing work.
-3. Phase 11 Group 0 must author the answer key for the 32 real structural
+4. Phase 11 Group 0 must author the answer key for the 32 real structural
    questions extracted in Phase 7 — the baseline Phase 11 has to beat.
-4. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the
+5. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the
    automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
 
 ## Key Decisions Made
