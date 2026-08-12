@@ -17,6 +17,7 @@
 - [x] File **TD-006** — ADR-0015's `EditorAdapter` layer absent from v2
 - [x] File the ADR-0028 doctor gap; close it in Group 5
 - [x] Also filed **TD-007** — ADR index stale since 0017
+- [x] Also filed **TD-007** — ADR index stale since 0017
 
 ## Group 1 — QUEUE in the gate
 
@@ -41,52 +42,67 @@
 
 ## Group 2 — The queue store, and a config that can feed it
 
-- [ ] Tests first
-- [ ] **BUG-003** — `.engram/guardrails.md`, so a vault can declare `proposeOnly`,
+- [x] Tests first
+- [x] **BUG-003** — `.engram/guardrails.md`, so a vault can declare `proposeOnly`,
       `pathScope` and `rateLimit` at all. Absent means today's defaults, so no
       existing vault changes behaviour; `init` scaffolds it with the fields
       present and `proposeOnly` empty
-- [ ] `AGENTS.md` renders the loaded config rather than `DEFAULT_GUARDRAILS`
-- [ ] `.engram/queue/<id>.md` — plain readable markdown (§12)
-- [ ] `propose` records `basis` = SHA-256 of the target now, or the absent-marker
-- [ ] `list` / `show` are read-only; `show` renders what would change
-- [ ] `approve` recomputes `basis` and **refuses on mismatch**, naming the drift
-- [ ] `approve` applies **through the gate**, never around it, then clears the entry
-- [ ] `reject` discards with a reason; target untouched either way
-- [ ] `crypto.subtle`, not `node:crypto` — this runs on Obsidian mobile
-- [ ] Assert `OPERATIONS` still has **six** entries — the queue added no operation
-- [ ] Verify: `npx vitest run tests/ops/queue.test.ts`
+- [x] `AGENTS.md` renders the loaded config rather than `DEFAULT_GUARDRAILS`
+- [x] `.engram/queue/<id>.md` — plain readable markdown (§12)
+- [x] `propose` records `basis` = SHA-256 of the target now, or the absent-marker
+- [x] `list` / `show` are read-only; `show` renders what would change
+- [x] `approve` recomputes `basis` and **refuses on mismatch**, naming the drift
+- [x] `approve` applies **through the gate**, never around it, then clears the entry
+- [x] `reject` discards with a reason; target untouched either way
+- [x] `crypto.subtle`, not `node:crypto` — this runs on Obsidian mobile
+- [x] Assert `OPERATIONS` still has **six** entries — the queue added no operation
+- [x] Resolved proposals are **kept**, not deleted — ADR-0042 §5, amended
+      mid-group when deleting turned out to need a `delete` on the FileStore port
+- [x] `format`/`link` persist their own proposals, so a surface cannot forget
+- [x] Verify: `npx vitest run tests/ops/queue.test.ts` — 25 passed
 
 ## Group 3 — CLI and MCP
 
-- [ ] Tests first
-- [ ] `engram queue list | show <id> | approve <id> | reject <id> [why]`
-- [ ] `show` prints the `git`-style review §11 names
-- [ ] MCP gains `engram_queue_list` and `engram_queue_show` — read-only
-- [ ] **Assert no MCP tool can approve or reject**, over the real tool list
-- [ ] `format` / `link` report queued distinctly from rejected on both surfaces
-- [ ] Verify: `npx vitest run tests/surface/ tests/cli.test.ts`
+- [x] Tests first
+- [x] `engram queue list | show <id> | approve <id> | reject <id> [why]`
+- [x] `show` prints the `git`-style review §11 names
+- [x] MCP gains `engram_queue_list` and `engram_queue_show` — read-only
+- [x] **Assert no MCP tool can approve or reject**, over the real tool list
+- [x] `format` / `link` report queued distinctly from rejected on both surfaces
+- [x] `surface/diff.ts` — LCS line diff with collapsed context, so `show` is a
+      review rather than a dump
+- [x] e2e through `main()` on a real temp vault: defer, approve, stale-refuse,
+      reject, and AGENTS.md carrying the vault's own propose-only paths
+- [x] Verify: `npm run check` — 532 tests at this point
 
 ## Group 4 — Plugin build target and the port
 
-- [ ] Tests first
-- [ ] `plugin/` as a second tsup entry → `main.js` + `manifest.json`
-- [ ] `obsidian` is a **dev** dependency and an external — runtime deps stay zero
-- [ ] `obsidianFileStore(vault)` over `app.vault.adapter`
-- [ ] **One port contract suite, three implementations** — memory, node, and
+- [x] Tests first
+- [x] `plugin/` as a second tsup entry → `main.js` + `manifest.json`
+- [x] `obsidian` is a **dev** dependency and an external — runtime deps stay zero
+- [x] `obsidianFileStore(vault)` over `app.vault.adapter`
+- [x] **One port contract suite, three implementations** — memory, node, and
       Obsidian-against-a-fake-adapter, same assertions
-- [ ] Verify: the contract suite passes for all three; `npm run build` emits the
-      plugin bundle
+- [x] **Fixed a real divergence the contract found**: `memoryFileStore` listed in
+      insertion order while the other two sorted — a test could pass on an
+      ordering production never produces
+- [x] **Architecture rule 3** — `plugin/**` may not import node builtins or
+      `substrate/index`, which re-exports `nodeFileStore` and would pull
+      `node:fs` into the mobile bundle. Proven by deliberate violation
+- [x] Verify: contract suite green for all three (39 tests); `npm run build`
+      emits `main.js` + `manifest.json` + `styles.css`, `obsidian` external,
+      **zero node builtins in the bundle**
 
 ## Group 5 — Commands, panel, and doctor's drift warning
 
-- [ ] Tests first
-- [ ] Capture command (never rejects) and Format command, deps injected
-- [ ] Queue panel — `ItemView` listing proposals with approve / reject
-- [ ] `doctor` reads `.obsidian/app.json` and warns when `newLinkFormat` /
+- [x] Tests first
+- [x] Capture command (never rejects) and Format command, deps injected
+- [x] Queue panel — `ItemView` listing proposals with approve / reject
+- [x] `doctor` reads `.obsidian/app.json` and warns when `newLinkFormat` /
       `useMarkdownLinks` disagree with the vault's actual links (ADR-0028)
-- [ ] doctor still rewrites nothing — detection only (ADR-0025, ADR-0028)
-- [ ] Verify: `npx vitest run tests/plugin/ tests/ops/doctor.test.ts`
+- [x] doctor still rewrites nothing — detection only (ADR-0025, ADR-0028)
+- [x] Manifest drift guard — plugin version must equal package version
+- [x] Verify: `npx vitest run tests/plugin tests/ops/doctor.test.ts` — 40 passed
 
 ## Group 6 — Verification
 

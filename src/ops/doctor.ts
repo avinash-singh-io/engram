@@ -17,6 +17,7 @@ import { isDerived } from '../core/paths.js';
 import type { Detector, FileStore } from '../core/ports.js';
 import { getRelation, relationKinds } from '../core/relations.js';
 import { detectAll, guardrailNames, type GuardrailConfig } from '../policy/guardrails.js';
+import { linkSettingWarnings, OBSIDIAN_APP_JSON, readLinkSettings } from './obsidian-settings.js';
 import { walk, type WalkFinding } from './walk.js';
 import { readNode } from '../format/registry.js';
 
@@ -83,11 +84,21 @@ export async function doctor(
 
   // Detection over configuration (ADR-0025). Obsidian owns link rewriting; engram
   // only reports a mismatch (ADR-0028).
+  //
+  // Until Phase 14 this emitted one fixed line telling the human to go check a
+  // setting, and never opened `app.json` — so it said the same thing to a
+  // correctly configured vault and a misconfigured one, which is the same as
+  // saying nothing. ADR-0028 asked for the settings to be *read*.
   if (await detect.has('obsidian')) {
-    warnings.push(
-      `[obsidian] Obsidian detected. Links must be set to absolute + markdown ` +
-        `(Settings → Files & Links). Engram never rewrites link targets — Obsidian owns that (ADR-0028).`,
-    );
+    const settings = await readLinkSettings(files);
+    if (settings === null) {
+      warnings.push(
+        `[obsidian] Obsidian detected but ${OBSIDIAN_APP_JSON} is unreadable, so this device's ` +
+          `link settings could not be checked. Links must be markdown + absolute (ADR-0003).`,
+      );
+    } else {
+      warnings.push(...linkSettingWarnings(settings));
+    }
   }
 
   const detectives = relationKinds().map((relation) => {

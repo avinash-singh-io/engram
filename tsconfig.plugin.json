@@ -1,0 +1,16 @@
+{
+  "// Why a second tsconfig": [
+    "The plugin runs in a browser context and needs the DOM lib; src/ must NOT.",
+    "Adding DOM to the base config would let document and window compile inside",
+    "engram's core, where nothing should reach for them. Two configs keeps the",
+    "capability where it belongs and out of everywhere else."
+  ],
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true
+  },
+  "include": ["plugin", "src"]
+}

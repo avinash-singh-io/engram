@@ -77,6 +77,40 @@ export default tseslint.config(
     },
   },
 
+  /**
+   * ARCHITECTURE RULE 3 (Phase 14) — the Obsidian plugin must stay mobile-safe.
+   *
+   * Obsidian mobile has no `node:fs`. The plugin runs `obsidianFileStore` over
+   * `app.vault.adapter` precisely so every operation above it works on a phone —
+   * and one import of `substrate/index.js`, which re-exports `nodeFileStore`,
+   * pulls `node:fs` into the bundle and breaks that on a device no test runs on.
+   *
+   * `substrate/clock.js` and `substrate/obsidian.js` are imported by path for this
+   * reason. It is far too subtle to leave to whoever edits the file next.
+   */
+  {
+    files: ['plugin/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['node:*', 'fs', 'path', 'os', 'crypto', 'child_process'],
+              message:
+                'The plugin runs on Obsidian mobile, which has no node builtins. Use a port; obsidianFileStore implements FileStore over the vault adapter.',
+            },
+            {
+              group: ['**/substrate/index*', '**/substrate/fs*'],
+              message:
+                'substrate/index.js re-exports nodeFileStore, which imports node:fs and breaks the mobile bundle. Import substrate/obsidian.js and substrate/clock.js directly.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   /** Test files may reach into any module under test. */
   {
     files: ['tests/**/*.ts'],
