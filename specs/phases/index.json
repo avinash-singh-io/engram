@@ -84,7 +84,7 @@
     },
     "phase-8-core": {
       "name": "Core",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-8-core",
       "topics": [
         "core-model",

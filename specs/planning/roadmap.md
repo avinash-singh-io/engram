@@ -44,7 +44,7 @@ users makes this free.
 | Version | Phase | Key deliverables | Gate |
 |---------|-------|-----------------|------|
 | _(none)_ | **Phase 7 — Evidence & Observation** | ✅ **Complete 2026-08-10.** Gate 1 measured retrospectively over 1066 real prompts from stored transcripts; locked evaluator `gate1-v2` in `tests/benchmarks/` (Rule 11). No product code. | **GATE 1 — PROCEED** |
-| v0.7.0 | **Phase 8 — Core** | Clean-room `src/`. `core/model.ts` (Node + Edge, version-free) + `format/` codec registry (ADR-0032); narrow ports (`FileStore`, `Detector`, `Clock`); identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
+| v0.7.0 | ✅ **Phase 8 — Core** (2026-08-12) | Clean-room `src/`. `core/model.ts` (Node + Edge, version-free) + `format/` codec registry (ADR-0032); narrow ports (`FileStore`, `Detector`, `Clock`); identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
 | v0.8.0 | **Phase 9 — Structure, views & health** | `init --structure=<x>` scaffolds; view generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian link-format detection | — |
 | v0.9.0 | **Phase 10 — Agent surface** | `format(content, hints)` — content from anywhere, no capture prerequisite (ADR-0033); write-time relation extraction; write gate + guardrails; skills; AGENTS.md; adapters; MCP server | **GATE 2 — edge accuracy** |
 | v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; validity filter (drop superseded/expired); trust weighting (`verified` > `generated`); must beat the Phase 7 baseline on the locked evaluator | — |
