@@ -184,3 +184,25 @@ works by finding `.engram/` markers, and a store that hid them would leave the
 disclosure guard reporting clean while doing nothing.
 
 ---
+
+### [NOTE] 2026-08-12 — TD-004 resolved; Phase 9 acceptance swept
+Topics: td-004, verification, rule-12, acceptance
+Affects-phases: phase-9-structure
+Affects-specs: specs/backlog/backlog.md
+Detail: TD-004 is closed in the backlog. The disclosure path was verified end to end
+rather than only unit-tested: a real vault with a nested private root, reindexed by
+the **built** binary, then grepped to prove nothing private reached the generated
+index. All 12 acceptance criteria evidenced with fresh output — `npm run check` exit
+0 (19 files, 262 tests), both architecture lint rules re-proven by deliberate
+violation, no `describe.skip` surviving, `core/` free of non-core imports, and
+ADR-0029's delete-and-rebuild claim confirmed byte-identical three ways (in memory,
+on a real filesystem, and through the binary at sha256 `d686efbb…`).
+
+Worth recording what this phase says about the previous one: **both defects found
+here were in Phase 8 code, with passing tests, exposed only by Phase 9 using them.**
+The codec's hardcoded relation list and `nodeFileStore.list()` never walking the disk
+were each invisible until something needed the behaviour for real. Coverage of a
+claim is not coverage of its sites, and a port with two implementations exercised
+only through the convenient one is not a tested port.
+
+---

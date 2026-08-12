@@ -1,6 +1,6 @@
 # Phase 9 — Structure, views & health
 
-> **Status**: planned
+> **Status**: **complete** (2026-08-12) — all 7 groups verified
 > **Branch**: `phase-9-structure`
 > **Target release**: v0.8.0
 
@@ -68,19 +68,21 @@ points, and `doctor` reports integrity **without repairing anything**.
 
 ## Acceptance (Rule 12)
 
-- [ ] `npm run check` exits 0 with fresh output
-- [ ] `init` on an empty directory produces a vault `reindex` and `doctor` both accept
-- [ ] `reindex` is **idempotent** — running it twice changes nothing
-- [ ] **Deleting all derived state and re-running `reindex` restores it byte-identical**
-- [ ] A nested vault root is skipped, and named in both `reindex` and `doctor` output
-- [ ] Reserved files are never treated as authored content, at any depth
-- [ ] Concept counting enumerates structure without reading bodies
-- [ ] `doctor` exits non-zero only on integrity **failures**, never on warnings
-- [ ] Every registered relation's detective form runs and is reported
-- [ ] `views/` is gitignored by `init`, and `doctor` says "regenerate, never merge"
-      when a derived file is found committed and conflicted
-- [ ] e2e on a real temp vault, plus a smoke test of the built binary
-- [ ] `retrospective.md` carries a `## Verification Evidence` section
+- [x] `npm run check` exits 0 with fresh output — 19 files, 262 tests, build clean
+- [x] `init` on an empty directory produces a vault `reindex` and `doctor` both accept
+- [x] `reindex` is **idempotent** — twice, and with a clock 73 years later
+- [x] **Deleting all derived state and re-running `reindex` restores it
+      byte-identical** — verified in-memory, on a real filesystem, and via the
+      built binary (sha256 `d686efbb…`)
+- [x] A nested vault root is skipped, and named in both `reindex` and `doctor` output
+- [x] Reserved files are never treated as authored content, at any depth
+- [x] Concept counting enumerates structure without reading bodies
+- [x] `doctor` exits non-zero only on integrity **failures** — exit 0 with a
+      dangling-edge warning, confirmed against the built binary
+- [x] Every registered relation's detective form runs and is reported by name
+- [x] `views/` gitignored by `init`; `doctor` cites "regenerate, never merge"
+- [x] e2e on a real temp vault (15 tests) plus a built-binary smoke test
+- [x] `retrospective.md` carries a `## Verification Evidence` section
 
 ## Risks
 
