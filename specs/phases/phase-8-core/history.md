@@ -213,3 +213,31 @@ are unaffected. The registry holds a `Map` populated by `registerCodec`, so neit
 is only claimed in prose drifts; one with a test does not.
 
 ---
+
+### [DECISION] 2026-08-12 — A relation type must bring a detective form, not just semantics
+Topics: relations, guardrails, architecture
+Affects-phases: phase-8-core, phase-9-structure, phase-13-intelligence
+Affects-specs: specs/architecture/v2-overview.md#7-guardrails
+Detail: `RelationKind` requires four things: name, `invalidatesTarget`, a meaning,
+and a **detective** description — what `doctor` scans for to find violations after
+the fact. This makes ADR-0024's rule concrete at the type level: engram mediates
+only some writes, since Obsidian and any agent with a shell write directly, so a
+relation whose semantics can only be enforced at the gate is advisory rather than
+enforced. A test asserts every registered type carries a non-empty detective form,
+which means `contradicts` cannot land in Phase 13 without one.
+
+---
+
+### [DECISION] 2026-08-12 — An unregistered relation kind never invalidates
+Topics: relations, validity, degradation
+Affects-phases: phase-8-core, phase-11-retrieval
+Affects-specs: none
+Detail: `isValid` consults the registry, so an edge whose kind has no code behind it
+is free association and carries no power to invalidate anything. This is ADR-0022's
+"no code, no closed type" made operational rather than declarative: a user or agent
+inventing `blocks:` or `vibes-with:` in frontmatter gets a recorded, readable,
+Obsidian-visible edge that changes nothing about retrieval until someone registers
+semantics for it. The failure mode this avoids is a hallucinated relation kind
+silently invalidating a live decision.
+
+---

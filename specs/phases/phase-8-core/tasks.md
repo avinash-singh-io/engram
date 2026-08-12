@@ -69,15 +69,20 @@
 
 ## Group 4 — `core/graph.ts` + `core/relations.ts` — parallel with 2, 3
 
-- [ ] Tests first
-- [ ] Identity: slug in frontmatter; path is the address
-- [ ] `aliases:` written to the moved file itself — never a central ledger
-- [ ] Slug collision → **warning**, both nodes survive
-- [ ] Missing slug → path-as-identity fallback + warning, never an error
-- [ ] Relation registry: a type registers validity semantics + detective form
-- [ ] Prove a new relation type needs no edit to `gate.ts`
-- [ ] Validity primitives (traversal retrieval is Phase 11)
-- [ ] Verify: `npx vitest run tests/core/graph.test.ts`
+- [x] Tests first (17 tests)
+- [x] Identity: `resolve` by slug, then path, then alias — the fast path stays
+- [x] `aliases:` read from the node itself — never a central ledger
+- [x] Slug collision → **warning**, both nodes survive
+- [x] Missing slug → path-as-identity fallback + warning, never an error
+- [x] Dangling edge → warning; an edge to an unwritten node is a forward
+      reference, not a break (ADR-0019: a node may be empty)
+- [x] Relation registry: every type carries validity semantics **and** a
+      detective form — asserted for all registered types
+- [x] `isValid` — supersession invalidates, `sources` does not, expiry does
+- [x] An **unregistered** kind never invalidates (ADR-0022: no code, no closed type)
+- [x] Prove a new relation type needs no edit to `gate.ts` or `graph.ts` —
+      registering `contradicts` at runtime is picked up by `isValid`
+- [x] Verify: `npx vitest run tests/core/graph.test.ts` — 17 passed
 
 ## Group 5 — `ops/capture.ts`, `ops/link.ts`, minimal `gate.ts`
 
