@@ -116,6 +116,22 @@
         "nested-roots",
         "obsidian"
       ]
+    },
+    "phase-10-agent-surface": {
+      "name": "Agent surface (write path)",
+      "status": "complete",
+      "directory": "phase-10-agent-surface",
+      "topics": [
+        "format",
+        "guardrails",
+        "gate-2",
+        "write-gate",
+        "agents-md",
+        "extraction",
+        "edge-accuracy",
+        "policy",
+        "evaluator"
+      ]
     }
   }
 }

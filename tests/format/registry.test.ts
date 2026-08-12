@@ -161,3 +161,44 @@ describe('open/closed — adding a version is adding a file (ADR-0032)', () => {
     expect(CURRENT_VERSION).toBe('0.2');
   });
 });
+
+describe('every serialized file ends with exactly one newline', () => {
+  const node = makeNode({ id: 'x', path: '/x.md', stamp: stamp(), body: '# Body' });
+
+  it.each(['0.1', '0.2'])('okf %s', (version) => {
+    const { content } = writeNode(node, [], version);
+    expect(content.endsWith('\n')).toBe(true);
+    expect(content.endsWith('\n\n')).toBe(false);
+  });
+
+  it('does not add a second newline to a body that already ends with one', () => {
+    const withNl = makeNode({ id: 'x', path: '/x.md', stamp: stamp(), body: '# Body\n' });
+    expect(writeNode(withNl, [], '0.2').content.endsWith('\n\n')).toBe(false);
+  });
+
+  it('an empty node still ends with a newline', () => {
+    const empty = makeNode({ id: 'x', path: '/x.md', stamp: stamp() });
+    expect(writeNode(empty, [], '0.2').content.endsWith('\n')).toBe(true);
+  });
+});
+
+describe('the trailing newline is a file convention, not body content', () => {
+  it('read(write(node)) preserves the body exactly', () => {
+    const node = makeNode({ id: 'x', path: '/x.md', stamp: stamp(), body: '# Body\n\nTwo paras.' });
+    const { content } = writeNode(node, [], '0.2');
+    expect(readNode(content, '/x.md').node.body).toBe(node.body);
+  });
+
+  it('does not grow a newline per round-trip cycle', () => {
+    let content = writeNode(
+      makeNode({ id: 'x', path: '/x.md', stamp: stamp(), body: '# Body' }),
+      [],
+      '0.2',
+    ).content;
+    for (let i = 0; i < 5; i++) {
+      const { node, edges } = readNode(content, '/x.md');
+      content = writeNode(node, edges, '0.2').content;
+    }
+    expect(readNode(content, '/x.md').node.body).toBe('# Body');
+  });
+});

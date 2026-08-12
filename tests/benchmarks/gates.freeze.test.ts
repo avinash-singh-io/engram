@@ -28,12 +28,15 @@ function readManifest(dir: string): Map<string, string> {
   return entries;
 }
 
-/** Every version stays locked — a superseded evaluator is still the record of what was run. */
+/**
+ * Every locked evaluator, every version. A superseded evaluator is still the record
+ * of what was actually run, so it stays frozen rather than being deleted.
+ */
 const VERSIONS = readdirSync(__dirname)
-  .filter((name) => /^gate1-v\d+$/.test(name))
+  .filter((name) => /^gate\d+-v\d+$/.test(name))
   .sort();
 
-describe('gate1 evaluators are frozen (Rule 11)', () => {
+describe('gate evaluators are frozen (Rule 11)', () => {
   it('finds at least one locked version', () => {
     expect(VERSIONS.length).toBeGreaterThan(0);
   });
@@ -59,9 +62,18 @@ describe('gate1 evaluators are frozen (Rule 11)', () => {
   });
 });
 
-describe('the rubric is identical across versions', () => {
+describe('gate1: the rubric is identical across versions', () => {
   it('v2 bumped the protocol only — no classification result can change', () => {
-    const hashes = VERSIONS.map((v) => sha256(join(__dirname, v, 'rubric.md')));
+    const gate1 = VERSIONS.filter((v) => v.startsWith('gate1-'));
+    const hashes = gate1.map((v) => sha256(join(__dirname, v, 'rubric.md')));
     expect(new Set(hashes).size).toBe(1);
+  });
+});
+
+describe('every locked evaluator carries both a rubric and a protocol', () => {
+  it.each(VERSIONS)('%s', (version) => {
+    const files = readdirSync(join(__dirname, version));
+    expect(files).toContain('rubric.md');
+    expect(files).toContain('protocol.md');
   });
 });

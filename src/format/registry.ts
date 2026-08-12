@@ -76,7 +76,7 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
   const lines = text.split('\n');
 
   if (lines[0] === undefined || !DELIM.test(lines[0])) {
-    return { hasFrontmatter: false, frontmatter: null, body: text };
+    return { hasFrontmatter: false, frontmatter: null, body: withoutTrailingNewline(text) };
   }
 
   const close = lines.findIndex((l, i) => i > 0 && DELIM.test(l));
@@ -91,7 +91,7 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
   }
 
   const yaml = lines.slice(1, close).join('\n');
-  const body = lines.slice(close + 1).join('\n');
+  const body = withoutTrailingNewline(lines.slice(close + 1).join('\n'));
 
   try {
     const parsed = parseSimpleYaml(yaml);
@@ -155,6 +155,29 @@ function parseScalar(v: string): unknown {
   if (v === 'false') return false;
   if (v === 'null' || v === '~') return null;
   return v;
+}
+
+/**
+ * Every serialized file ends with exactly one newline.
+ *
+ * POSIX text files end with one, git reports "\ No newline at end of file" without
+ * it, and an editor appending one turns a no-op into a diff. Centralised here so no
+ * codec can forget.
+ */
+export function withTrailingNewline(content: string): string {
+  return content.endsWith('\n') ? content : `${content}\n`;
+}
+
+/**
+ * Strip the single trailing newline the writer adds.
+ *
+ * The invariant: a body is held **without** a trailing newline, the writer appends
+ * exactly one, and the reader removes exactly one. Without this, `read(write(x))`
+ * grows a newline per cycle and the round-trip is no longer exact — which would
+ * make every reindex a diff.
+ */
+function withoutTrailingNewline(body: string): string {
+  return body.endsWith('\n') ? body.slice(0, -1) : body;
 }
 
 /** Which codec speaks for this file. Unknown or absent falls back, never throws. */

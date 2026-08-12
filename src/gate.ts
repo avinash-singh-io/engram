@@ -15,6 +15,7 @@
  */
 
 import type { Edge, Node } from './core/model.js';
+import { checkAll, type GuardrailConfig, type GuardrailContext } from './policy/guardrails.js';
 
 export interface Change {
   path: string;
@@ -28,8 +29,17 @@ export type GateResult =
   | { outcome: 'apply'; change: Change; warnings: string[] }
   | { outcome: 'reject'; reason: string; rule: string };
 
-/** Validation the core can state without touching a filesystem. */
-export function validate(change: Change): GateResult {
+/**
+ * Validation the core can state without touching a filesystem.
+ *
+ * When a guardrail configuration is supplied, the preventive halves run here too —
+ * this is the single choke point (v2-overview §5), and a guardrail checked anywhere
+ * else would be a second place for policy to be missed.
+ */
+export function validate(
+  change: Change,
+  guardrails?: { config: GuardrailConfig; ctx: GuardrailContext },
+): GateResult {
   if (change.path.trim() === '') {
     return { outcome: 'reject', reason: 'a change must name a path', rule: 'path-required' };
   }
@@ -44,5 +54,12 @@ export function validate(change: Change): GateResult {
       rule: 'no-self-relation',
     };
   }
+  if (guardrails !== undefined) {
+    const refusal = checkAll(change, guardrails.ctx, guardrails.config);
+    if (refusal !== null) {
+      return { outcome: 'reject', reason: refusal.reason, rule: refusal.rule };
+    }
+  }
+
   return { outcome: 'apply', change, warnings: [] };
 }

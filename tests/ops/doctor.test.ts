@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { relationKinds } from '../../src/core/relations.js';
+import { guardrailNames } from '../../src/policy/guardrails.js';
 import { doctor, formatReport } from '../../src/ops/doctor.js';
 import { memoryFileStore, staticDetector } from '../../src/substrate/index.js';
 
@@ -146,5 +147,43 @@ describe('Obsidian is detected, not configured (ADR-0025/0028)', () => {
   it('says nothing about Obsidian when it is absent', async () => {
     const r = await doctor(memoryFileStore({ '/a.md': note('a') }), noObsidian);
     expect(r.warnings.join(' ')).not.toMatch(/Obsidian/);
+  });
+});
+
+describe('guardrail detectives run in doctor (v2-overview §7)', () => {
+  it('reports one check per guardrail in force, by name', async () => {
+    const r = await doctor(memoryFileStore({ '/a.md': note('a') }), noObsidian);
+    expect(r.guardrails.map((g) => g.rule)).toEqual(guardrailNames());
+    for (const g of r.guardrails) expect(g.prevents.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * The point of the detective half: this note was never written through the gate.
+   * It is what an Obsidian edit or an agent shell write looks like from doctor's
+   * side, and the preventive half could never have seen it.
+   */
+  it('catches an uncited synthesis that never passed the gate', async () => {
+    const r = await doctor(memoryFileStore({ '/synthesis-x.md': note('synthesis-x') }), noObsidian);
+    const hits = r.guardrails.find((g) => g.rule === 'require-sources')!.hits;
+    expect(hits.join(' ')).toMatch(/no sources/);
+    expect(r.warnings.join(' ')).toMatch(/\[guardrail:require-sources\]/);
+  });
+
+  it('a guardrail hit is a warning, not a failure', async () => {
+    const r = await doctor(memoryFileStore({ '/synthesis-x.md': note('synthesis-x') }), noObsidian);
+    expect(r.failures).toEqual([]);
+  });
+
+  it('honours a narrowed configuration', async () => {
+    const r = await doctor(memoryFileStore({ '/a.md': note('a') }), noObsidian, {
+      enabled: ['require-sources'],
+    });
+    expect(r.guardrails.map((g) => g.rule)).toEqual(['require-sources']);
+  });
+
+  it('formats guardrail results, saying what each prevents', async () => {
+    const out = formatReport(await doctor(memoryFileStore({ '/a.md': note('a') }), noObsidian));
+    expect(out).toMatch(/guardrail detectives \(6 in force\)/);
+    expect(out).toMatch(/writes the gate never saw/);
   });
 });

@@ -7,7 +7,12 @@
  * therefore lossy, and says so — a codec-level warning, never a core change.
  */
 import { makeNode, type Edge, type Node } from '../core/model.js';
-import type { Codec, ParsedFrontmatter, ReadResult } from './registry.js';
+import {
+  withTrailingNewline,
+  type Codec,
+  type ParsedFrontmatter,
+  type ReadResult,
+} from './registry.js';
 
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 
@@ -54,6 +59,6 @@ export const OKF_V0_1: Codec = {
       `author: ${node.stamp.by}`,
       '---',
     ].join('\n');
-    return { content: `${fm}\n${node.body ?? ''}`, warnings };
+    return { content: withTrailingNewline(`${fm}\n${node.body ?? ''}`), warnings };
   },
 };

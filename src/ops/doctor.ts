@@ -16,6 +16,7 @@ import type { Edge, Node } from '../core/model.js';
 import { isDerived } from '../core/paths.js';
 import type { Detector, FileStore } from '../core/ports.js';
 import { getRelation, relationKinds } from '../core/relations.js';
+import { detectAll, guardrailNames, type GuardrailConfig } from '../policy/guardrails.js';
 import { walk, type WalkFinding } from './walk.js';
 import { readNode } from '../format/registry.js';
 
@@ -26,12 +27,27 @@ export interface DoctorReport {
   failures: string[];
   /** The detective form of every registered relation, run and reported by name. */
   detectives: { relation: string; check: string; hits: string[] }[];
+  /**
+   * The detective half of every enabled guardrail.
+   *
+   * This is the half that catches writes the gate never saw — Obsidian edits and
+   * agent shell writes (v2-overview §1). Without it, every guardrail would be
+   * advisory rather than enforced.
+   */
+  guardrails: { rule: string; prevents: string; hits: string[] }[];
   counts: { nodes: number; edges: number };
 }
 
+/** Rules in force when a vault declares none. */
+export const DEFAULT_GUARDRAILS: GuardrailConfig = { enabled: guardrailNames() };
+
 const say = (f: Finding | WalkFinding): string => `[${f.code}] ${f.message}`;
 
-export async function doctor(files: FileStore, detect: Detector): Promise<DoctorReport> {
+export async function doctor(
+  files: FileStore,
+  detect: Detector,
+  guardrailConfig: GuardrailConfig = DEFAULT_GUARDRAILS,
+): Promise<DoctorReport> {
   const warnings: string[] = [];
   const failures: string[] = [];
 
@@ -83,7 +99,18 @@ export async function doctor(files: FileStore, detect: Detector): Promise<Doctor
     return { relation, check: kind.detective, hits };
   });
 
-  return { warnings, failures, detectives, counts: { nodes: nodes.length, edges: edges.length } };
+  const guardrails = detectAll(nodes, edges, guardrailConfig);
+  for (const g of guardrails) {
+    for (const hit of g.hits) warnings.push(`[guardrail:${g.rule}] ${hit}`);
+  }
+
+  return {
+    warnings,
+    failures,
+    detectives,
+    guardrails,
+    counts: { nodes: nodes.length, edges: edges.length },
+  };
 }
 
 /** Format a report for a terminal. Exit code is `failures.length === 0 ? 0 : 1`. */
@@ -101,11 +128,19 @@ export function formatReport(r: DoctorReport): string {
     );
   }
 
-  lines.push(`detective checks (${r.detectives.length} registered relations)`);
+  lines.push(`relation detectives (${r.detectives.length} registered)`);
   for (const d of r.detectives) {
     lines.push(`  ${d.relation}: ${d.check}`);
     for (const h of d.hits) lines.push(`    • ${h}`);
     if (d.hits.length === 0) lines.push(`    clean`);
+  }
+
+  lines.push(``, `guardrail detectives (${r.guardrails.length} in force)`);
+  lines.push(`  these catch writes the gate never saw — Obsidian and shell edits`);
+  for (const g of r.guardrails) {
+    lines.push(`  ${g.rule}: prevents ${g.prevents}`);
+    for (const h of g.hits) lines.push(`    • ${h}`);
+    if (g.hits.length === 0) lines.push(`    clean`);
   }
 
   if (r.failures.length === 0 && r.warnings.length === 0) lines.push(``, `no problems found`);
