@@ -241,3 +241,36 @@ semantics for it. The failure mode this avoids is a hallucinated relation kind
 silently invalidating a live decision.
 
 ---
+
+### [DECISION] 2026-08-12 — "Never rejects" is proven adversarially, not by example
+Topics: capture, testing, adr-0026
+Affects-phases: phase-8-core
+Affects-specs: none
+Detail: ADR-0026 says capture never rejects. "Never" is a strong claim and a handful
+of happy-path examples would not support it, so `capture` is tested against a
+15-case adversarial set: empty and whitespace-only input, malformed and unterminated
+frontmatter, null bytes, a lone surrogate, control characters, right-to-left text,
+emoji with ZWJ sequences, CRLF, a leading BOM, and a 100,000-character single line.
+Every case must round-trip byte-identical, because capture persists and does not
+transform. One design consequence surfaced while writing it: a frozen clock makes
+same-instant collisions the *normal* case in tests, so the inbox filename falls back
+to a counter rather than erroring — which is also the right behaviour for a real
+burst of captures.
+
+---
+
+### [DECISION] 2026-08-12 — capture skips the gate; link passes it
+Topics: gate, capture, link, operations
+Affects-phases: phase-8-core, phase-10-agent-surface
+Affects-specs: specs/architecture/v2-overview.md#5-the-write-gate
+Detail: The split follows what each operation asserts. `capture` claims nothing
+about the vault — it is durability, and the inbox is a buffer rather than a stage
+(ADR-0033), so there is nothing to validate against and no reason to risk losing a
+thought. `link` claims something structural, and a wrong edge degrades retrieval for
+everything downstream (ADR-0027: a graph that lies confidently is worse than no
+graph), so it goes through validation. Phase 8's gate carries validation only; a
+rejection already names the rule that fired, which is the shape Phase 10's guardrails
+and approval queue will extend. Proven by test: a rejected change leaves the file
+byte-identical, because the gate validates a proposed diff rather than a write.
+
+---

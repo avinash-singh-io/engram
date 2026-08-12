@@ -86,12 +86,19 @@
 
 ## Group 5 — `ops/capture.ts`, `ops/link.ts`, minimal `gate.ts`
 
-- [ ] Tests first
-- [ ] `capture` — never validates, never fails; does **not** pass the gate
-- [ ] Property test: empty, huge, invalid UTF-8, binary — none rejected
-- [ ] `gate.ts` — a change is a proposed diff, not a file write; validation only
-- [ ] `link` — assert a typed relation through the registry, via the gate
-- [ ] Verify: `npx vitest run tests/ops/`
+- [x] Tests first (31 tests)
+- [x] `capture` — never validates, never fails; does **not** pass the gate
+- [x] 15-case adversarial set: empty, whitespace, malformed and unterminated
+      frontmatter, null bytes, lone surrogate, control chars, RTL text, emoji
+      with ZWJ, CRLF, BOM, 100k single line — none rejected, all byte-identical
+- [x] Same-instant collisions get a counter, never an error
+- [x] `gate.ts` — a change is a proposed diff, not a file write; validation only
+- [x] Rejections name the rule that fired (`path-required`, `id-required`,
+      `no-self-relation`) and leave the file untouched
+- [x] `link` — assert a typed relation through the registry, via the gate
+- [x] `link` on a file that does not exist yet succeeds rather than failing
+- [x] An unregistered kind warns but is not refused (ADR-0022)
+- [x] Verify: `npx vitest run tests/ops/` — 31 passed
 
 ## Group 6 — CLI wiring, library exports, e2e
 
