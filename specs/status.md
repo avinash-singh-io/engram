@@ -1,9 +1,9 @@
 # Project Status
 
 > **Last Updated**: 2026-08-10
-> **Current Phase**: **Phase 7 complete — GATE 1 PASSED (validation waived).** Next: Phase 8 — Core. v1 line closed at v0.6.8.
-> **Latest Release**: v0.6.8 (BUG-002 — OIDC trusted-publishing release; no functional change)
-> **Health**: On Track — Gate 1 cleared; v2 implementation unblocked
+> **Current Phase**: **Phase 8 complete (v0.7.0)** — v2 core shipped. Next: Phase 9 — Structure, views & health.
+> **Latest Release**: v0.7.0 (Phase 8 — Core; **breaking**: v1 CLI and library surface removed)
+> **Health**: On Track — v2 core shipped; the Phase 8 unreleasable window closed in Group 6
 
 ## Summary
 
@@ -32,6 +32,8 @@ is rewritten clean-room rather than patched.
 | 4 | Ecosystem | Complete | v0.4.0 |
 | 3 | Sync + Multi-Device | Complete | v0.5.0 |
 | 6 | Onboarding & OKF Migration | Complete | v0.6.0 |
+| 7 | Evidence & Observation (Gate 1) | Complete | — |
+| 8 | Core | Complete | v0.7.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -54,15 +56,15 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 7 — Evidence & Observation | `phase-7-evidence` | **Complete** — Gate 1: PROCEED | Groups 0–5 closed |
+| _(none — Phase 8 landed; Phase 9 not yet started)_ | | | |
 
 ## Upcoming Phases — the v2 line
 
 | Phase | Name | Status | Key Deliverables |
 |-------|------|--------|-----------------|
 | ~~Phase 7~~ | ~~Evidence & Observation~~ | **complete** | Gate 1 answered 2026-08-10: **PROCEED**. 88.9% structural, 95% CI [74.7%, 95.6%], n=36 of 400 sampled from 1066 real prompts. Classifier validation waived — see [report](phases/phase-7-evidence/gate-1-report.md) |
-| Phase 8 | Core | **next** | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
-| Phase 9 | Structure, views & health | planned | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
+| ~~Phase 8~~ | ~~Core~~ | **complete (v0.7.0)** | Clean-room `src/`: `core/model.ts` + `format/` codec registry (ADR-0032); narrow ports; identity; relations in frontmatter; capture never rejected |
+| Phase 9 | Structure, views & health | **next** | `init --structure=<x>`; view generation; derived state gitignored; `doctor` + Obsidian link-format detection |
 | Phase 10 | Agent surface | planned | `format(content, hints)` — no capture prerequisite (ADR-0033); write-time extraction; write gate + guardrails; skills; adapters; MCP. **GATE 2 — edge accuracy** |
 | Phase 11 | Retrieval | planned | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
 | Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
@@ -89,9 +91,11 @@ productivity suite, and is deliberately kept out of the core. See
 
 ## Next Actions
 
-1. **Start Phase 8 — Core.** Clean-room `src/`: `core/model.ts` (Node + Edge,
-   version-free) + `format/` codec registry (ADR-0032); narrow ports; identity
-   (slug · path · `aliases`); relations in frontmatter; capture never rejected.
+1. **Start Phase 9 — Structure, views & health.** `init --structure=<x>`; view
+   generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian
+   link-format detection. Also carries TD-004 (walker must refuse to descend into
+   a nested vault root) and the reserved-file / enumeration behaviours found in
+   the Phase 8 sweep.
 2. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
    and machine labels are preserved in `.gate1/`. Completable at any time without
    redoing work.
