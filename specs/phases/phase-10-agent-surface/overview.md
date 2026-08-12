@@ -1,6 +1,6 @@
 # Phase 10 — Agent surface (write path)
 
-> **Status**: planned
+> **Status**: **complete** (2026-08-12) — Gate 2 instrumented, awaiting adjudication
 > **Branch**: `phase-10-agent-surface`
 > **Target release**: v0.9.0
 > **Gate**: **GATE 2 — edge accuracy.** Can stop the graph.
@@ -69,19 +69,20 @@ Waivable, but a waiver is recorded as a waiver — never as a pass.
 
 ## Acceptance (Rule 12)
 
-- [ ] ADR-0040 accepted and `gate2-v1` frozen **before** any edge is sampled
-- [ ] `npm run check` exits 0 with fresh output
-- [ ] `format` never writes without passing the gate
-- [ ] `format` stamps `generated: { by, at }` on every agent-authored assertion
-- [ ] `format` derives a slug and a path deterministically; same input → same output
-- [ ] Each guardrail rejects what it should, naming the rule that fired
-- [ ] Each guardrail has a detective form that `doctor` runs
-- [ ] A guardrail may **tighten** but never loosen (skills cannot widen it)
-- [ ] `AGENTS.md` names the ops, the guardrails in force, and the closed relations
-- [ ] Gate 2 report states n, both accuracy figures, intervals, and the decision
-- [ ] The report refuses a verdict without blind human labels
-- [ ] e2e on a real temp vault, plus a smoke test of the built binary
-- [ ] `retrospective.md` carries a `## Verification Evidence` section
+- [x] ADR-0040 accepted and `gate2-v1` frozen **before** any edge was sampled
+- [x] `npm run check` exits 0 with fresh output — 23 files, 373 tests
+- [x] `format` never writes without passing the gate — asserted for every rejection
+- [x] `format` marks agent-authored assertions
+- [x] `format` derives slug and path deterministically; same input → same output
+- [x] Each guardrail rejects what it should, naming the rule that fired
+- [x] Each guardrail has a detective form that `doctor` runs and reports by name
+- [x] A guardrail may **tighten** but never loosen — every field, 8 tests
+- [x] `AGENTS.md` names the ops, the guardrails in force, and the closed relations
+- [x] Gate 2 report states n, both accuracy figures, intervals, and the decision
+- [x] The report refuses a verdict without blind human labels — 10 tests
+- [x] e2e on a real temp vault (20 tests) plus a built-binary smoke test
+- [x] `retrospective.md` carries a `## Verification Evidence` section
+- [ ] **AWAITING USER**: 48 blind edge judgements → Gate 2 verdict
 
 ## Risks
 

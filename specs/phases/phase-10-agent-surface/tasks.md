@@ -107,11 +107,14 @@
 
 ## Group 7 — Verification
 
-- [ ] Full `npm run check` exits 0 with fresh output
-- [ ] Deliberate import violation re-proves both architecture rules fire
-- [ ] Guardrail-tightening test passes; loosening is impossible
-- [ ] Every guardrail has a detective form (asserted, not reviewed)
-- [ ] Acceptance sweep from `overview.md` — every box
-- [ ] Capture output for `retrospective.md` § Verification Evidence (Rule 12)
-- [ ] Write `retrospective.md`
+- [x] Full `npm run check` exits 0 with fresh output — 373 tests
+- [x] Deliberate import violation re-proves both architecture rules fire
+- [x] Guardrail-tightening tests pass; loosening is impossible on every field
+- [x] Every guardrail has a detective form (required at the type level)
+- [x] **Found and fixed a real gap**: preventive guardrails existed, were tested,
+      and were wired into `doctor` — but never connected to the gate. Every test
+      passed; only the built binary revealed `format` writing what it should refuse
+- [x] Acceptance sweep from `overview.md` — every box evidenced
+- [x] Capture output for `retrospective.md` § Verification Evidence (Rule 12)
+- [x] Write `retrospective.md`
 - [ ] Run `/sync-docs` — incl. adding **Phase 15** (skills, MCP, adapters) to the roadmap

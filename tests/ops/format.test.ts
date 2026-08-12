@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { makeNode } from '../../src/core/model.js';
+import { guardrailNames } from '../../src/policy/guardrails.js';
 import { format, slugify } from '../../src/ops/format.js';
 import { readNode } from '../../src/format/registry.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
@@ -142,5 +144,58 @@ describe('agent-authored assertions are marked (ADR-0027 mitigation 2)', () => {
   it('does not mark a human assertion', async () => {
     const r = await format('# X', { by: 'avinash' }, deps());
     if (r.outcome === 'applied') expect(r.warnings.join(' ')).not.toMatch(/agent-authored/);
+  });
+});
+
+describe('preventive guardrails run at the gate, not only in doctor', () => {
+  const guardrails = { enabled: guardrailNames() };
+
+  it('refuses an uncited synthesis and writes nothing', async () => {
+    const d = { ...deps(), guardrails };
+    const r = await format('# Synthesis of everything', { by: 'a', id: 'synthesis-x' }, d);
+    expect(r.outcome).toBe('rejected');
+    if (r.outcome === 'rejected') expect(r.rule).toBe('require-sources');
+    expect(await d.files.list()).toEqual([]);
+  });
+
+  it('allows the same node once it cites a source', async () => {
+    const d = { ...deps(), guardrails };
+    const r = await format(
+      '# Synthesis of everything',
+      { by: 'a', id: 'synthesis-x', sources: ['paper'] },
+      d,
+    );
+    expect(r.outcome).toBe('applied');
+  });
+
+  it('refuses a write outside the permitted path scope', async () => {
+    const d = { ...deps(), guardrails: { ...guardrails, pathScope: ['/concepts/'] } };
+    const r = await format('# X', { by: 'a', container: 'elsewhere' }, d);
+    expect(r.outcome).toBe('rejected');
+    if (r.outcome === 'rejected') expect(r.rule).toBe('path-scope');
+  });
+
+  it('refuses superseding a human assertion unattended', async () => {
+    const human = makeNode({
+      id: 'human-note',
+      path: '/human-note.md',
+      stamp: { by: 'avinash', at: AT, until: null },
+    });
+    const d = { ...deps(), guardrails, existing: [human] };
+    const r = await format('# X', { by: 'agent', supersedes: ['human-note'] }, d);
+    expect(r.outcome).toBe('rejected');
+    if (r.outcome === 'rejected') expect(r.rule).toBe('no-supersede-verified');
+  });
+
+  it('refuses once the run rate limit is reached', async () => {
+    const d = { ...deps(), guardrails: { ...guardrails, rateLimit: 5 }, writtenThisRun: 5 };
+    const r = await format('# X', { by: 'a' }, d);
+    expect(r.outcome).toBe('rejected');
+    if (r.outcome === 'rejected') expect(r.rule).toBe('rate-limit');
+  });
+
+  it('applies normally when no guardrails are configured', async () => {
+    const r = await format('# Synthesis of everything', { by: 'a', id: 'synthesis-x' }, deps());
+    expect(r.outcome).toBe('applied');
   });
 });

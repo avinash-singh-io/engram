@@ -219,3 +219,39 @@ shipped write path. `.gate2/` is gitignored, and the synthetic-trigger limitatio
 printed on every report run rather than living only in the protocol.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — Half a feature passed a full test suite
+Topics: guardrails, gate, testing, wiring
+Affects-phases: phase-10-agent-surface
+Affects-specs: none
+Detail: The preventive guardrails were implemented, unit-tested from both sides, and
+wired into `doctor` for detection — and **nothing called them at the write gate**.
+`format` cheerfully wrote the uncited synthesis node `require-sources` exists to
+refuse. Every test passed: the policy tests proved each rule works in isolation, the
+doctor tests proved detection works, and the gap between them was invisible because
+no test crossed it. Only smoke-testing the built binary made it visible.
+
+Fixed by giving `gate.ts` an optional guardrail check, so the rules run at the single
+choke point v2-overview §5 describes rather than in a second place that could be
+missed. Six new tests exercise `format` *through* the gate with guardrails in force.
+This is the same lesson Phase 9 recorded about the codec's relation list and the
+port's `list()`, in a third shape: coverage of a claim is not coverage of its
+**wiring**, and the only thing that reliably catches a wiring gap is running the
+thing end to end.
+
+---
+
+### [NOTE] 2026-08-12 — Phase 10 acceptance swept; Gate 2 awaits adjudication
+Topics: verification, rule-12, gate-2, acceptance
+Affects-phases: phase-10-agent-surface, phase-11-retrieval
+Affects-specs: none
+Detail: Twelve of thirteen acceptance criteria evidenced with fresh output —
+`npm run check` exit 0 (23 files, 373 tests), both architecture lint rules re-proven
+by deliberate violation, guardrail tightening asserted on every field, and the built
+binary exercised through init → format → doctor including both halves of a guardrail
+firing on the same violation. The thirteenth is **not** met and cannot be by engram:
+Gate 2 has 48 edges sampled and no verdict, because only a human can say whether an
+arrow points the right way. The report prints `PROVISIONAL` and will keep doing so.
+Phase 11 is gated on that verdict, not on this phase's code.
+
+---

@@ -20,6 +20,7 @@ import type { Clock, FileStore } from '../core/ports.js';
 import { isClosedRelation } from '../core/relations.js';
 import { writeNode } from '../format/registry.js';
 import { validate, type Change } from '../gate.js';
+import type { GuardrailConfig } from '../policy/guardrails.js';
 
 export interface FormatHints {
   /** Human-readable title. The slug is derived from it when `id` is absent. */
@@ -51,6 +52,16 @@ export type FormatResult =
 export interface FormatDeps {
   files: FileStore;
   clock: Clock;
+  /**
+   * Guardrails in force. Omitted means none — `format` is usable without policy,
+   * but a vault that configures rules gets them enforced at the gate rather than
+   * only reported afterwards by `doctor`.
+   */
+  guardrails?: GuardrailConfig;
+  /** Nodes already present, for rules that must look at what exists. */
+  existing?: Node[];
+  /** Nodes written so far this run, for rate limiting. */
+  writtenThisRun?: number;
 }
 
 /**
@@ -116,7 +127,19 @@ export async function format(
   const { content: serialized, warnings } = writeNode(node, edges);
   const change: Change = { path, node, edges, content: serialized };
 
-  const verdict = validate(change);
+  const verdict = validate(
+    change,
+    deps.guardrails === undefined
+      ? undefined
+      : {
+          config: deps.guardrails,
+          ctx: {
+            existing: deps.existing ?? [],
+            edges: [],
+            writtenThisRun: deps.writtenThisRun ?? 0,
+          },
+        },
+  );
   if (verdict.outcome === 'reject') {
     return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
   }

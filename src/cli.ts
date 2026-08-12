@@ -7,7 +7,7 @@
  * skills and MCP in Phase 15.
  */
 import { capture } from './ops/capture.js';
-import { doctor, formatReport } from './ops/doctor.js';
+import { doctor, DEFAULT_GUARDRAILS, formatReport } from './ops/doctor.js';
 import { format } from './ops/format.js';
 import { init } from './ops/init.js';
 import { link } from './ops/link.js';
@@ -133,7 +133,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
           sources: multiFlag(argv, 'sources'),
           generated: argv.includes('--generated'),
         },
-        { files, clock },
+        { files, clock, guardrails: DEFAULT_GUARDRAILS },
       );
       if (result.outcome === 'rejected') {
         process.stderr.write(`rejected [${result.rule}]: ${result.reason}\n`);
