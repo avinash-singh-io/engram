@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * engram CLI — Phase 8 ships `capture` and `link` (roadmap, v0.7.0).
+ * engram CLI.
  *
- * `format` is Phase 10 (ADR-0033), `recall` is Phase 11, `reindex` and `doctor`
- * are Phase 9. Each surface is a thin translation of the same operations, which
- * is the test that ADR-0024's tiering is real rather than decorative.
+ * Each surface is a thin translation of the same operations — the test that
+ * ADR-0024's tiering is real rather than decorative. `recall` arrives in Phase 11;
+ * skills and MCP in Phase 15.
  */
 import { capture } from './ops/capture.js';
 import { doctor, formatReport } from './ops/doctor.js';
+import { format } from './ops/format.js';
 import { init } from './ops/init.js';
 import { link } from './ops/link.js';
 import { reindex } from './ops/reindex.js';
@@ -18,6 +19,7 @@ const USAGE = `engram — a notes system where the organizing work is done by an
 usage:
   engram init                    scaffold a vault; non-destructive
   engram capture [text]          persist raw content to the inbox; never rejects
+  engram format [text]           content + your structure -> a validated node
   engram link <file> <to> <kind> assert a typed relation (supersedes | sources | part-of)
   engram reindex                 regenerate derived state (index.md, views/)
   engram doctor                  health and integrity report; read-only
@@ -26,11 +28,34 @@ options:
   --vault <dir>       vault root (default: cwd)
   --by <who>          who is asserting (default: $USER)
   --structure <name>  init only; engram ships "default"
+
+format options (the agent supplies the structure; engram does not infer it):
+  --title <t>         title; the slug is derived from it
+  --id <slug>         explicit slug, wins over the title
+  --container <c>     files it there, and records a part-of edge
+  --supersedes <id>   repeatable
+  --sources <id>      repeatable
+  --generated         mark as agent-authored rather than human
 `;
 
 function flag(argv: string[], name: string, fallback: string): string {
   const i = argv.indexOf(`--${name}`);
   return i === -1 || argv[i + 1] === undefined ? fallback : argv[i + 1]!;
+}
+
+/** A flag's value, or undefined when absent — distinct from a default. */
+function flagOrUndef(argv: string[], name: string): string | undefined {
+  const i = argv.indexOf(`--${name}`);
+  return i === -1 ? undefined : argv[i + 1];
+}
+
+/** Every occurrence of a repeatable flag. */
+function multiFlag(argv: string[], name: string): string[] {
+  const out: string[] = [];
+  argv.forEach((a, i) => {
+    if (a === `--${name}` && argv[i + 1] !== undefined) out.push(argv[i + 1]!);
+  });
+  return out;
 }
 
 const stripFlags = (argv: string[]): string[] => {
@@ -93,6 +118,34 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
       // Warnings never fail: ADR-0021 makes collisions and missing slugs warnings,
       // and a doctor that failed on them would make that decision meaningless.
       return report.failures.length === 0 ? 0 : 1;
+    }
+    case 'format': {
+      const content = rest.length > 0 ? rest.join(' ') : await readStdin();
+      const result = await format(
+        content,
+        {
+          by,
+          title: flagOrUndef(argv, 'title'),
+          id: flagOrUndef(argv, 'id'),
+          container: flagOrUndef(argv, 'container'),
+          path: flagOrUndef(argv, 'path'),
+          supersedes: multiFlag(argv, 'supersedes'),
+          sources: multiFlag(argv, 'sources'),
+          generated: argv.includes('--generated'),
+        },
+        { files, clock },
+      );
+      if (result.outcome === 'rejected') {
+        process.stderr.write(`rejected [${result.rule}]: ${result.reason}\n`);
+        return 1;
+      }
+      for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
+      process.stdout.write(
+        `${result.node.id} -> ${result.node.path}` +
+          (result.edges.length > 0 ? ` (${result.edges.length} relation(s))` : '') +
+          `\n`,
+      );
+      return 0;
     }
     case 'capture': {
       const content = rest.length > 0 ? rest.join(' ') : await readStdin();

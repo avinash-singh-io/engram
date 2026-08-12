@@ -78,10 +78,14 @@
 
 ## Group 5 — CLI wiring and e2e
 
-- [ ] `engram format` joins init · capture · link · reindex · doctor
-- [ ] e2e on a real temp vault
-- [ ] Smoke-test the **built** binary
-- [ ] Verify: `npx vitest run tests/e2e/`
+- [x] `engram format` joins init · capture · link · reindex · doctor
+- [x] Repeatable `--supersedes` / `--sources`; `--generated` marks agent authorship
+- [x] e2e on a real temp vault — 20 tests
+- [x] Smoke-test the **built** binary: format → reindex → doctor
+- [x] **Fixed a defect the smoke test exposed**: serialized files had no trailing
+      newline. Fixed at the codec seam, then fixed again properly — stripping one
+      on read, since the writer adds one and the round-trip must stay exact
+- [x] Verify: `npx vitest run tests/e2e/` — 20 passed
 
 ## Group 6 — Gate 2 measurement
 

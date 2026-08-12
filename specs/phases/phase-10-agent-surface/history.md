@@ -177,3 +177,24 @@ which is the failure Phase 9 hit with the codec's hardcoded relation list: prose
 confidently describes behaviour the code does not have.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — Serialized files had no trailing newline, and the fix had a second half
+Topics: format, codecs, round-trip, serialization
+Affects-phases: phase-10-agent-surface, phase-8-core
+Affects-specs: none
+Detail: Smoke-testing the built binary made it visible: `reindex`'s output ran onto
+the same line as the file it had just written, because no serialized file ended with
+a newline. Shipped in Phase 8 and unnoticed through Phase 9 — POSIX text files end
+with one, git reports "\\ No newline at end of file" without it, and any editor that
+appends one turns a no-op into a diff.
+
+Adding it broke the v0.1 → v0.2 round-trip test, which was the useful part. With the
+writer appending a newline and the reader keeping it, `read(write(x))` grew a newline
+per cycle and the body was no longer preserved exactly — every reindex would have
+become a diff, which is precisely what ADR-0029's "regenerate, never merge" depends on
+*not* happening. The complete fix is an invariant, not a patch: **a body is held
+without a trailing newline, the writer appends exactly one, the reader strips exactly
+one.** Both halves live in `format/registry.ts` so no codec can implement only one,
+and a test runs five write/read cycles to prove the body does not drift.
+
+---

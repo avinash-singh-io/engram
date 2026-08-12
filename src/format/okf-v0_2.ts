@@ -6,7 +6,12 @@
  */
 import { makeEdge, makeNode, type Edge, type Node } from '../core/model.js';
 import { relationKinds } from '../core/relations.js';
-import type { Codec, ParsedFrontmatter, ReadResult } from './registry.js';
+import {
+  withTrailingNewline,
+  type Codec,
+  type ParsedFrontmatter,
+  type ReadResult,
+} from './registry.js';
 
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const list = (v: unknown): string[] =>
@@ -80,6 +85,6 @@ export const OKF_V0_2: Codec = {
       );
     }
     lines.push('---');
-    return { content: `${lines.join('\n')}\n${node.body ?? ''}`, warnings };
+    return { content: withTrailingNewline(`${lines.join('\n')}\n${node.body ?? ''}`), warnings };
   },
 };
