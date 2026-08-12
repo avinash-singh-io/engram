@@ -1,8 +1,8 @@
 # Project Status
 
-> **Last Updated**: 2026-08-10
+> **Last Updated**: 2026-08-12
 > **Current Phase**: **Phase 15 complete (v0.10.0)**. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.8.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, reopened P0). GitHub tags and releases are current; the registry is five releases behind.
+> **Latest Release**: **v0.10.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, P0). GitHub tags and releases are current; the registry is six releases behind.
 > **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
 
 ## Summary
@@ -91,7 +91,7 @@ productivity suite, and is deliberately kept out of the core. See
 
 | ID | Type | Description |
 |----|------|-------------|
-| BUG-002 | Bug | **npm publish broken since v0.6.5.** OIDC trusted publishing fails `ENEEDAUTH` on every tag. Workflow config verified correct; the remaining cause is the trusted-publisher registration on npmjs.com, which needs the package owner. Five tags point at nothing. |
+| BUG-002 | Bug | **npm publish broken since v0.6.5.** OIDC trusted publishing fails `ENEEDAUTH` on every tag. Workflow config re-verified correct (`id-token: write`, npm 12.0.2, no `registry-url`); the remaining cause is the trusted-publisher registration on npmjs.com, which needs the package owner. **Six tags point at nothing** — v0.6.6, v0.6.7, v0.6.8, v0.7.0, v0.8.0, v0.9.0, and v0.10.0 will be the seventh. |
 
 ## Next Actions
 
@@ -99,14 +99,17 @@ productivity suite, and is deliberately kept out of the core. See
    then `node tools/gate2/report.js`. **Phase 11 is gated on this verdict**, and its
    scope depends on it: pass → traversal, validity filter, trust weighting; fail →
    ADR-0031's fallback of nodes plus untyped links.
-2. **Or start Phase 15 — Surfaces** (skills, MCP, adapters), which is **not** gated
-   on Gate 2: it sequences and exposes operations Gate 2 does not affect.
-3. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
+2. **Fix BUG-002.** Seven tags now point at nothing. The workflow is correct; the
+   remaining variable is the npmjs.com Trusted Publisher record — check the workflow
+   filename field reads `publish.yml`, not `.github/workflows/publish.yml`.
+3. **Phase 14 — Obsidian surface** is the only unblocked phase left, and ADR-0011
+   already calls it an independent lane.
+4. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
    and machine labels are preserved in `.gate1/`. Completable at any time without
    redoing work.
-4. Phase 11 Group 0 must author the answer key for the 32 real structural
+5. Phase 11 Group 0 must author the answer key for the 32 real structural
    questions extracted in Phase 7 — the baseline Phase 11 has to beat.
-5. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the
+6. Capture M5 real-device Android round-trip evidence (Phase 3 shipped the
    automated proof; device screenshots pending — see `phase-3-sync/evidence/`).
 
 ## Key Decisions Made
