@@ -10,6 +10,7 @@
 | 6 | Onboarding & OKF Migration | Complete (v0.6.0) | `phase-6-onboarding/` |
 | 7 | Evidence & Observation | Complete — Gate 1: PROCEED | `phase-7-evidence/` |
 | 8 | Core | Complete (v0.7.0) | `phase-8-core/` |
+| 9 | Structure, views & health | Complete (v0.8.0) | `phase-9-structure/` |
 
 ## Phase Structure
 
