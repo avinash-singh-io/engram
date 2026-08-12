@@ -99,6 +99,23 @@
         "tdd",
         "clean-room"
       ]
+    },
+    "phase-9-structure": {
+      "name": "Structure, views & health",
+      "status": "in-progress",
+      "directory": "phase-9-structure",
+      "topics": [
+        "structure",
+        "views",
+        "reindex",
+        "doctor",
+        "init",
+        "part-of",
+        "derived-state",
+        "walker",
+        "nested-roots",
+        "obsidian"
+      ]
     }
   }
 }
