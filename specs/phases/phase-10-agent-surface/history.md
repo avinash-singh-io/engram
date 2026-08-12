@@ -122,3 +122,36 @@ satisfy, eroding capture-never-rejects at the edges; keeping `format`'s own reje
 surface to a single case is the guard against that.
 
 ---
+
+### [ARCH_CHANGE] 2026-08-12 — Guardrails require both halves at the type level
+Topics: guardrails, architecture, doctor, type-safety
+Affects-phases: phase-10-agent-surface
+Affects-specs: specs/architecture/v2-overview.md#7-guardrails
+Detail: The `Guardrail` interface requires `check` (preventive) **and** `detect`
+(detective) as mandatory members, so a preventive-only rule does not compile. That is
+stronger than the relation registry's equivalent, which requires a detective
+*description* and relies on a test to assert it is non-empty — a rule can carry a
+sentence and still do nothing. Guardrails carry executable detection instead, which
+matters more here: v2-overview §1 says engram mediates two of the four write paths,
+so for guardrails the detective half is not a supplement but the only half that sees
+an Obsidian edit or an agent shell write. All six rules are tested from both sides —
+the preventive test refuses a change, and the detective test finds the same violation
+in a vault where the change was never gated.
+
+---
+
+### [DECISION] 2026-08-12 — `tighten` intersects scopes and takes the minimum limit
+Topics: guardrails, skills, security
+Affects-phases: phase-10-agent-surface, phase-15-surfaces
+Affects-specs: none
+Detail: "Tighten but never loosen" needed a concrete meaning per field, and the naïve
+implementation — merge everything — silently loosens. `enabled` unions, so rules can
+be added but never removed. `pathScope` **intersects**, so a skill requesting a wider
+scope gets nothing new; a union there would let a downloaded skill grant itself the
+filesystem. `rateLimit` takes the **minimum**, so a request for a higher cap is
+ignored. `proposeOnly` unions, since more propose-only paths is stricter. Eight tests
+cover it, including one that asks to loosen every field at once and gets refused on
+all of them. This is settled now rather than when skills land in Phase 15, because a
+constraint added after the thing it constrains is not a constraint.
+
+---

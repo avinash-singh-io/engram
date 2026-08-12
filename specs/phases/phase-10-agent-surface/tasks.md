@@ -39,22 +39,27 @@
 
 ## Group 2 — Preventive guardrails — parallel with 3
 
-- [ ] Tests first
-- [ ] `no-delete` · `require-sources` · `no-supersede-verified`
-- [ ] `propose-only` (path-scoped) · `path-scope` · `rate-limit`
-- [ ] Declarative, loaded from the vault
-- [ ] **A guardrail may tighten but never loosen** — asserted by test
-- [ ] Every rejection names the rule
-- [ ] Verify: `npx vitest run tests/policy/guardrails.test.ts`
+- [x] Tests first (30 tests)
+- [x] `no-delete` · `require-sources` · `no-supersede-verified`
+- [x] `propose-only` (path-scoped) · `path-scope` · `rate-limit`
+- [x] Declarative `GuardrailConfig`; a rule not enabled does not run
+- [x] **A guardrail may tighten but never loosen** — 8 tests, incl. that a request
+      loosening everything at once still cannot. `pathScope` intersects rather than
+      unions; `rateLimit` takes the minimum; `enabled` cannot shrink
+- [x] Every rejection names the rule that fired
+- [x] Verify: `npx vitest run tests/policy/` — 30 passed
 
 ## Group 3 — Detective guardrail checks — parallel with 2
 
-- [ ] Tests first
-- [ ] One detective check per preventive rule
-- [ ] Registered, so a rule **cannot ship preventive-only**
-- [ ] Test that every registered guardrail has a non-empty detective form
-- [ ] `doctor` runs and reports them by name
-- [ ] Verify: `npx vitest run tests/ops/doctor.test.ts`
+- [x] Tests first
+- [x] One detective check per preventive rule — all six
+- [x] `Guardrail` requires both halves at the type level, so a rule **cannot ship
+      preventive-only**
+- [x] Test that every registered guardrail has both halves and a `prevents` string
+- [x] `doctor` runs and reports them by name, saying what each prevents
+- [x] Detective hits are **warnings, not failures** (ADR-0021 consistency)
+- [x] `doctor` honours a narrowed configuration
+- [x] Verify: `npx vitest run tests/ops/doctor.test.ts` — 19 passed
 
 ## Group 4 — `AGENTS.md` entry contract
 
