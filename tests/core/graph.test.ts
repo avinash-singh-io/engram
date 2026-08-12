@@ -125,8 +125,10 @@ describe('validity — the thing grep cannot do', () => {
 });
 
 describe('the relation registry — no code, no closed type (ADR-0022)', () => {
-  it('ships exactly the two types that have code behind them', () => {
-    expect(relationKinds()).toEqual(['sources', 'supersedes']);
+  it('ships exactly the three types that have code behind them', () => {
+    // This test exists to make relation additions VISIBLE rather than incidental.
+    // Changing it is the intended cost of adding one (ADR-0022).
+    expect(relationKinds()).toEqual(['part-of', 'sources', 'supersedes']);
   });
 
   it('every closed type carries validity semantics AND a detective form', () => {

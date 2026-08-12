@@ -6,14 +6,15 @@
 
 ## Group 0 — Register `part-of`, derived-state policy — blocks everything
 
-- [ ] Tests first
-- [ ] Register `part-of`: `invalidatesTarget: false`, meaning, detective form
-- [ ] Update the exactly-two-relations test to exactly-three, deliberately
-- [ ] Assert containment does **not** invalidate: being part of something says
-      nothing about whether it is still current
-- [ ] Reserved filenames and derived paths as constants, in one place
-- [ ] `.gitignore` fragment for derived state (ADR-0029)
-- [ ] Verify: `npx vitest run tests/core/relations.test.ts`
+- [x] Tests first (12 tests)
+- [x] Register `part-of`: `invalidatesTarget: false`, meaning, detective form
+- [x] Update the exactly-two-relations test to exactly-three, deliberately
+- [x] Assert containment does **not** invalidate: reorganising a tree must not
+      silently mark its contents superseded
+- [x] `core/paths.ts` — reserved filenames, derived paths, root marker, ignored
+      dirs, all in one place so walker and generators cannot drift
+- [x] `.gitignore` fragment for derived state (ADR-0029)
+- [x] Verify: `npx vitest run tests/core/` — 54 passed
 
 ## Group 1 — The walker
 

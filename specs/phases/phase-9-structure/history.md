@@ -81,3 +81,19 @@ merge" being quiet rather than a permanent source of spurious diffs. Both are
 asserted by the delete-and-rebuild byte-identical test.
 
 ---
+
+### [DECISION] 2026-08-12 — Reserved names and derived paths live in `core/paths.ts`
+Topics: paths, derived-state, walker, views
+Affects-phases: phase-9-structure
+Affects-specs: none
+Detail: Two vocabularies — what engram owns (`index.md`, `log.md`, `AGENTS.md`,
+`CLAUDE.md`) and what is derived (`index.md`, `views/**`) — are consulted by the
+walker, every generator, and `doctor`. Defining them inline in each would let them
+drift, and the specific failure that drift produces is a generator writing to a path
+the walker still treats as authored content, which would overwrite a user's file.
+One module, in Tier 1, with both directions tested (`my-index.md` and `/viewsly/x.md`
+are *not* matched). `part-of` registered here too, with `invalidatesTarget: false`
+asserted by its own test: if containment invalidated, reorganising a tree would
+silently mark everything inside it superseded.
+
+---

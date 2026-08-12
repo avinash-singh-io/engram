@@ -53,6 +53,16 @@ registerRelation({
 });
 
 registerRelation({
+  name: 'part-of',
+  // Containment says nothing about currency. A node inside a superseded parent is
+  // not itself superseded -- conflating the two would let reorganising a tree
+  // silently invalidate its contents.
+  invalidatesTarget: false,
+  meaning: 'this node is contained by the target; the structure tree is these edges',
+  detective: 'find part-of targets that are not themselves nodes (a container that does not exist)',
+});
+
+registerRelation({
   name: 'sources',
   invalidatesTarget: false,
   meaning: 'this node draws on the target as evidence',
