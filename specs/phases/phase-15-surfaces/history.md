@@ -114,3 +114,42 @@ coerce numbers — it cannot, since `okf_version: 0.2` must stay a string or
 parser and breaking the format layer.
 
 ---
+
+### [DECISION] 2026-08-12 — JSON-RPC implemented directly, keeping zero dependencies
+Topics: mcp, dependencies, protocol
+Affects-phases: phase-15-surfaces
+Affects-specs: none
+Detail: The MCP TypeScript SDK was the obvious choice and was not taken. The surface
+engram needs is five methods — `initialize`, `tools/list`, `tools/call`,
+`prompts/list`, `prompts/get` — over JSON-RPC 2.0, which is roughly 80 lines. Group 0
+had just removed `commander` and `yaml` to reach **zero runtime dependencies**, and
+adding an SDK plus its tree back in the next group to avoid writing those 80 lines
+would have been a poor trade for a tool whose pitch is that it depends on nothing.
+
+The counter-argument is real and worth recording: MCP is an evolving protocol, and a
+hand-rolled implementation can drift from it in ways an SDK would absorb. The
+mitigation is that the protocol version is a single exported constant and the whole
+surface is one `handle()` function with a test that drives a genuine client exchange
+over paired streams — so drift shows up as a failing handshake rather than a silent
+incompatibility. If the protocol moves faster than that stays cheap, taking the SDK
+is a contained change.
+
+---
+
+### [ARCH_CHANGE] 2026-08-12 — One `handle()`, two transports, and the constraints are tested
+Topics: mcp, transport, adr-0041, security
+Affects-phases: phase-15-surfaces
+Affects-specs: specs/architecture/v2-overview.md#11-surfaces
+Detail: `mcp.ts` holds the protocol and no transport; `mcp-transport.ts` holds both
+transports and no protocol. That split is what lets a test prove stdio and HTTP serve
+the same tools — a real `fetch` against a live server, compared with a real stdio
+exchange — rather than asserting it in a comment.
+
+ADR-0041's three constraints each got a test rather than a default, because a default
+can be changed by anyone quietly while a tested constraint changes visibly:
+the HTTP transport **throws** unless explicitly enabled, binds `127.0.0.1`, and emits
+a warning naming the exposed root. The refusal message itself states that engram
+listens on nothing by default and that there is no authentication — the moment
+someone is about to open the socket is the only moment that information is useful.
+
+---

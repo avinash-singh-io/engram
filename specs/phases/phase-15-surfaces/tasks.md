@@ -41,22 +41,37 @@
 
 ## Group 2 — MCP over stdio — parallel with 3
 
-- [ ] Tests first
-- [ ] Six operations as typed tools with JSON schemas
-- [ ] Skills as **prompts**, not tools — engram does not execute them
-- [ ] Every tool routes to the same operation the CLI calls (translation only)
-- [ ] A tool call that the gate rejects returns the rule that fired
-- [ ] Verify: `npx vitest run tests/surface/mcp.test.ts`
+- [x] Tests first (18 tests)
+- [x] Six operations as typed tools with JSON schemas — one per real operation,
+      asserted against `OPERATIONS` so the two cannot drift
+- [x] Skills as **prompts**, not tools; asserted that no skill appears in the
+      tool list and that every tool is an `engram_` operation
+- [x] `format`'s tool description tells the agent engram does not infer relations
+- [x] Every tool routes to the same operation the CLI calls (translation only)
+- [x] Guardrails apply to MCP calls too, not only the CLI
+- [x] `doctor` proven read-only over MCP as well
+- [x] A rejected call returns `isError` naming the rule; unknown tool/method are
+      errors rather than crashes
+- [x] **Implemented JSON-RPC directly** — five methods, and engram keeps its zero
+      runtime dependencies (TD-005)
+- [x] Verify: `npx vitest run tests/surface/mcp.test.ts` — 18 passed
 
 ## Group 3 — MCP over HTTP — parallel with 2
 
-- [ ] Tests first
-- [ ] **Refuses to start** without the explicit opt-in flag
-- [ ] Binds `127.0.0.1` by default
-- [ ] An explicit override to another host is possible but deliberate
-- [ ] **Startup warning names the exact root being exposed**
-- [ ] Same tools and prompts as stdio — one server, two transports
-- [ ] Verify: `npx vitest run tests/surface/mcp-http.test.ts`
+- [x] Tests first (12 tests, covering both transports)
+- [x] **CONSTRAINT 1 — refuses to start** without the explicit opt-in flag, and the
+      refusal explains what enabling it does (no authentication, listens on nothing
+      by default)
+- [x] **CONSTRAINT 2 — binds `127.0.0.1`** by default
+- [x] **CONSTRAINT 3 — startup warning names the exact root exposed**, because
+      ADR-0030's boundary is only as good as knowing which side of it you are on
+- [x] Same tools and prompts as stdio — one `handle()`, two transports, proven by
+      a real `fetch` against a live server
+- [x] stdio drives a **real handshake** over paired streams; a malformed line does
+      not take the session down; notifications get no reply
+- [x] Widened `serveStdio` to `NodeJS.ReadableStream`/`WritableStream` — the
+      narrowest interfaces it uses, so the exchange is testable with no process
+- [x] Verify: `npx vitest run tests/surface/` — 46 passed
 
 ## Group 4 — Adapters
 
