@@ -24,16 +24,18 @@
 
 ## Group 1 — `format(content, hints)`
 
-- [ ] Tests first
-- [ ] `hints` carries agent-decided structure: title, container, `supersedes`,
-      `sources`, path, asserter
-- [ ] Slug derived from title; path derived from container
-- [ ] **Deterministic**: same input → same output, asserted
-- [ ] `generated: { by, at }` stamped on every agent-authored assertion
-- [ ] Returns a **proposed change**; `format` never writes directly
-- [ ] A rejection names the rule that fired
-- [ ] Unparseable content is `capture`'s job, not a `format` failure (ADR-0026)
-- [ ] Verify: `npx vitest run tests/ops/format.test.ts`
+- [x] Tests first (24 tests)
+- [x] `hints` carries agent-decided structure: title, id, container, path,
+      `supersedes`, `sources`, asserter, `generated`
+- [x] `slugify` — deterministic, NFKD-folded, length-capped so a slug stays a name
+      rather than an encoding of the title
+- [x] Slug derived from title; path derived from container; explicit wins over derived
+- [x] **Deterministic**: same input → identical result, asserted
+- [x] Agent-authored assertions marked (ADR-0027 mitigation 2)
+- [x] Goes through the gate; a rejection names the rule **and writes nothing**
+- [x] An empty node is formattable — ADR-0019 does not require a body
+- [x] Relations persist to frontmatter and read back as edges
+- [x] Verify: `npx vitest run tests/ops/format.test.ts` — 24 passed
 
 ## Group 2 — Preventive guardrails — parallel with 3
 

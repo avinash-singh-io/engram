@@ -4,3 +4,4 @@ export * from './walk.js';
 export * from './doctor.js';
 export * from './reindex.js';
 export * from './init.js';
+export * from './format.js';

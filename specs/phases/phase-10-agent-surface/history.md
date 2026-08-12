@@ -106,3 +106,19 @@ freeze machinery was generalised from `gate1-v*` to `gate<N>-v<M>` and gained a 
 that every locked evaluator carries both a rubric and a protocol.
 
 ---
+
+### [DECISION] 2026-08-12 — `format` rejects only where validation gates promotion
+Topics: format, capture, adr-0026, gate
+Affects-phases: phase-10-agent-surface
+Affects-specs: none
+Detail: `format` has exactly one rejection of its own — it cannot derive an identity
+from content with no title, no id, and no usable first line — plus whatever the gate
+refuses. That is deliberate and it is the ADR-0026 boundary: **validation gates
+promotion, never capture.** Content that cannot be formatted is not lost, it belongs
+in `capture`, which cannot reject anything. Asserted by test that a rejected `format`
+writes nothing at all, since the gate validates a proposed diff rather than a write.
+The risk noted in `overview.md` was that `hints` grows into a schema the agent must
+satisfy, eroding capture-never-rejects at the edges; keeping `format`'s own rejection
+surface to a single case is the guard against that.
+
+---
