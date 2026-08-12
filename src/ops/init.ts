@@ -11,6 +11,7 @@
 
 import { DERIVED_GITIGNORE, ROOT_MARKER } from '../core/paths.js';
 import type { Clock, FileStore } from '../core/ports.js';
+import { writePointers } from '../surface/adapters.js';
 import { reindex } from './reindex.js';
 
 export const STRUCTURES = ['default'] as const;
@@ -78,6 +79,12 @@ export async function init(
   } else {
     skipped.push('/.gitignore');
   }
+
+  // Native pointers for agents that look for a filename other than AGENTS.md.
+  // Non-destructive like everything else here: an existing CLAUDE.md is left alone.
+  const pointers = await writePointers(files);
+  created.push(...pointers.written);
+  skipped.push(...pointers.skipped);
 
   const { written } = await reindex(files, clock);
   return { created: created.sort(), skipped: skipped.sort(), reindexed: written };

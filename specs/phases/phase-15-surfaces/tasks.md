@@ -75,12 +75,19 @@
 
 ## Group 4 — Adapters
 
-- [ ] Tests first
-- [ ] Descriptor-driven: a name plus a native instructions path
-- [ ] Each emits a **pointer** to `AGENTS.md`, containing no contract content
-- [ ] Adding an agent is adding a descriptor — asserted by test
-- [ ] Non-destructive: an existing native file is not overwritten
-- [ ] Verify: `npx vitest run tests/surface/adapters.test.ts`
+- [x] Tests first (13 tests, plus 2 in `init`)
+- [x] Descriptor-driven: a name, a native instructions path, and a `why`
+- [x] Each emits a **pointer** to `AGENTS.md`, containing no contract content —
+      asserted by checking four real contract claims are in `AGENTS.md` and in
+      **none** of the pointers, and that no guardrail name leaks into one
+- [x] Relative path resolves correctly from nested locations
+- [x] Adding an agent is adding a descriptor — proven by inventing one in a test
+      and getting a working pointer with no code change
+- [x] Every shipped descriptor carries a `why`, which is what stops the list
+      accumulating agents that already read `AGENTS.md` natively
+- [x] Non-destructive: a user's own `CLAUDE.md` survives untouched
+- [x] Wired into `init`; safe to run twice
+- [x] Verify: `npx vitest run tests/surface/` — 59 passed; `npm run check` — 444
 
 ## Group 5 — CLI wiring and e2e
 

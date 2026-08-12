@@ -177,3 +177,23 @@ describe('init', () => {
     expect(findings).toEqual([]);
   });
 });
+
+describe('init emits native pointers for agents that need them', () => {
+  it('writes CLAUDE.md pointing at AGENTS.md', async () => {
+    const files = memoryFileStore();
+    const { created } = await init(files, clock);
+    expect(created).toContain('/CLAUDE.md');
+    const pointer = (await files.read('/CLAUDE.md'))!;
+    expect(pointer).toContain('AGENTS.md');
+    // A pointer, not a copy: none of the contract's content appears in it.
+    expect(pointer).not.toContain('Never validates, never fails');
+  });
+
+  it("does not overwrite a user's existing CLAUDE.md", async () => {
+    const mine = '# My own notes to Claude';
+    const files = memoryFileStore({ '/CLAUDE.md': mine });
+    const { skipped } = await init(files, clock);
+    expect(skipped).toContain('/CLAUDE.md');
+    expect(await files.read('/CLAUDE.md')).toBe(mine);
+  });
+});

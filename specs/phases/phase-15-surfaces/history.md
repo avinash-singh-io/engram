@@ -153,3 +153,28 @@ listens on nothing by default and that there is no authentication — the moment
 someone is about to open the socket is the only moment that information is useful.
 
 ---
+
+### [DECISION] 2026-08-12 — A pointer's emptiness is enforced by test, and it explains itself
+Topics: adapters, agents-md, drift
+Affects-phases: phase-15-surfaces
+Affects-specs: specs/decisions/0011-adapters-converge-on-agents-md.md
+Detail: An adapter emits a file that says almost nothing: this is an engram vault,
+the contract is `AGENTS.md`, read it first. Two things make that hold rather than
+merely being the current state.
+
+First, **a test asserts the emptiness**. It takes four real claims from the generated
+contract — capture never rejects, engram cannot infer a relationship, a node may be
+empty, repair is trivial — checks each appears in `AGENTS.md`, and checks none appears
+in any pointer, along with no guardrail name. A pointer that grows content fails.
+
+Second, **the pointer says why it is empty**: "a second copy of the rules is the copy
+that goes stale." Without that line the file reads as unfinished, and the natural
+instinct on finding an almost-empty `CLAUDE.md` is to helpfully fill it in — which is
+precisely the drift the design avoids.
+
+Each descriptor also carries a `why` field explaining what makes that agent need a
+pointer at all. Codex is deliberately absent: it reads `AGENTS.md` natively, so a file
+for it would exist only to be maintained. The `why` is what stops the list quietly
+accumulating those.
+
+---
