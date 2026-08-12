@@ -71,3 +71,69 @@ aspirational; an architecture rule nobody can violate accidentally is the only k
 that survives.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — The v1 sweep found two behaviours worth rescuing, not one
+Topics: clean-room, regression, format, testing
+Affects-phases: phase-8-core, phase-9-structure
+Affects-specs: none
+Detail: BUG-001's percent-encoding was the known one — 22 cases covering the full
+CommonMark §6.3 matrix: only breaking characters encoded (`&`, `+`, `—` stay
+readable), parens balanced, literal `%` encoded, per-segment `/` preservation,
+path and `#fragment` encoded independently, external URLs untouched, no
+double-encoding, idempotent, and decode total on malformed escapes. The second was
+**frontmatter parsing robustness** — CRLF tolerated, leading BOM stripped, absent
+block flagged rather than thrown, invalid YAML captured as `null` + error rather
+than thrown. That last one is load-bearing for ADR-0026: a parser that throws makes
+"capture never rejects" impossible to honour upstream, so it is a Phase 8 concern
+rather than a nicety. Two further behaviours were found and deliberately **not**
+rescued here: reserved-file detection (`index.md`, `log.md`, `AGENTS.md` at any
+depth) and enumeration-only concept counting both belong to `reindex`/views in
+Phase 9. Noted for that phase.
+
+---
+
+### [DECISION] 2026-08-12 — Rescued specs land skipped, not failing
+Topics: testing, tdd, methodology
+Affects-phases: phase-8-core
+Affects-specs: none
+Detail: The plan said "land BUG-001 cases as failing specs". Executing it showed the
+cost: 22 known-failing tests would leave `npm run check` red from Group 0 until
+Group 3, which destroys the suite as a signal for Groups 1–2 — a genuine regression
+there would hide in the noise. The assertions are therefore preserved verbatim under
+`describe.skip` with an explicit `UNSKIP IN GROUP 3` marker in every block name, and
+Group 7's acceptance sweep verifies no `describe.skip` survives the phase. The TDD
+property that matters is that the specification precedes the implementation; whether
+it is red or skipped in the interim is a reporting choice, not a discipline one.
+
+---
+
+### [ARCH_CHANGE] 2026-08-12 — Both import rules enforced, and both proven to fire
+Topics: architecture, tiering, lint, dependency-inversion
+Affects-phases: phase-8-core
+Affects-specs: specs/architecture/v2-overview.md#2-modules-ports-and-codecs
+Detail: Rule 1 — `core/` may import only `core/` — is implemented with an addition
+the spec does not state: **node builtins are forbidden too**, because a core that
+can read a file is a core that eventually will, and `core/ports.ts` exists precisely
+so it does not have to. Rule 2 is enforced at its only observable seam: a versioned
+codec (`format/okf-*`) is importable from `format/` alone; everything else goes
+through the registry, which normalises into the internal model first. Verifying the
+rules by deliberately violating them caught a real config bug — eslint flat config is
+last-wins *per rule*, so the broad `src/**` block was silently replacing rule 1's
+patterns and leaving `core/` completely unguarded. An architecture rule nobody has
+watched fire is not a control.
+
+---
+
+### [NOTE] 2026-08-12 — recall-v1 survives as an orphaned corpus
+Topics: evaluator, rule-11, retrieval
+Affects-phases: phase-8-core, phase-11-retrieval
+Affects-specs: none
+Detail: `tests/benchmarks/recall-v1/` (126-concept vault + `eval.json`) is preserved
+per Rule 11 — a locked evaluator is never deleted, it is superseded. Its consumer
+(`tests/retrieval/recall-bounded.test.ts`) went with the v1 deletion, so the corpus
+is now orphaned until Phase 11 either adopts or version-bumps it. Phase 11 must also
+weigh it against the 32 real structural questions extracted in Phase 7: recall-v1 is
+synthetic and lookup-shaped, which is precisely what Phase 11 is *not* required to
+beat.
+
+---

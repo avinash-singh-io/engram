@@ -6,19 +6,25 @@
 
 ## Group 0 — Demolition and skeleton — blocks everything
 
-- [ ] Sweep the 229 v1 tests for behavioural assertions worth re-specifying;
-      record findings in `history.md`
-- [ ] Land BUG-001 percent-encoding cases as **failing** specs (CommonMark §6.3)
-- [ ] Land any other swept behaviour as failing specs
-- [ ] Delete v1 `src/` (40 files, ~4,212 LOC)
-- [ ] Delete the 229 v1 tests
-- [ ] Confirm preserved: `tools/gate1/`, `tests/gate1/`, `tests/benchmarks/`
-- [ ] Scaffold `src/{core,format,ops,substrate}/` per ADR-0032
-- [ ] Add eslint rule: `core/` may import only `core/`
-- [ ] Add eslint rule: nothing above `format/` may see format-shaped data
-- [ ] Minimal `src/cli.ts` + `src/index.ts` so `npm run build` stays valid
-- [ ] Verify: `npm run build` exits 0 · `npm run lint` exits 0
-- [ ] Verify: gate1 tests still pass (36)
+- [x] Sweep the 229 v1 tests for behavioural assertions worth re-specifying;
+      findings recorded in `history.md`
+- [x] Land BUG-001 percent-encoding cases as specs (CommonMark §6.3) — 22 cases
+- [x] Land the second swept behaviour: frontmatter parsing is **total**
+      (CRLF · BOM · absent · invalid YAML → never throws)
+- [x] Declare `format/links.ts` + `format/registry.ts` signatures so the rescued
+      specs typecheck; bodies are Group 3's (TDD)
+- [x] Delete v1 `src/` (40 files, ~4,212 LOC)
+- [x] Delete the 229 v1 tests
+- [x] Confirm preserved: `tools/gate1/`, `tests/gate1/`, `tests/benchmarks/`
+      (incl. both locked evaluators — Rule 11)
+- [x] Scaffold `src/{core,format,ops,substrate}/` + `gate.ts` per ADR-0032
+- [x] Add eslint rule 1: `core/` may import only `core/` — **and no node builtins**
+- [x] Add eslint rule 2: a versioned codec is importable only from `format/`
+- [x] Minimal `src/cli.ts` + `src/index.ts` so `npm run build` stays valid
+- [x] **Verify both rules FIRE** — deliberate violations produced 3 errors, then
+      reverted. Caught a real config bug: flat config is last-wins per rule, and
+      the broader block was silently clobbering rule 1
+- [x] Verify: `npm run check` exits 0 — 53 passed, 22 skipped, build clean
 
 ## Group 1 — `core/model.ts`
 

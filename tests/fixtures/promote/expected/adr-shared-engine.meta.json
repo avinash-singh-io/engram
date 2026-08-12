@@ -1,5 +1,0 @@
-{
-  "targetPath": "references/0007-vendor-shared-engine.md",
-  "ok": true,
-  "logLine": "- **Promoted** [Vendor the shared engine now, extract a library later](/references/0007-vendor-shared-engine.md) from momentum ADR-0007"
-}
