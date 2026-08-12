@@ -28,13 +28,14 @@
 
 ## Group 1 — `core/model.ts`
 
-- [ ] Tests first: Node, Edge, assertion stamp
-- [ ] `Node` — addressable; may have a body; **may be empty**
-- [ ] `Edge` — directed and typed
-- [ ] Assertion stamp — who · when · until-when, obligatory on both
-- [ ] Version-free: no field justified by OKF alone
-- [ ] Verify: `npx vitest run tests/core/model.test.ts`
-- [ ] Verify: `core/` has no import outside `core/` (lint)
+- [x] Tests first: Node, Edge, assertion stamp (14 tests written before the model)
+- [x] `Node` — addressable; may have a body; **may be empty** (incl. whitespace-only)
+- [x] `Edge` — directed and typed; may point at a node that does not exist yet
+- [x] Assertion stamp — who · when · until-when, obligatory on both
+- [x] `isExpired` with an **inclusive** boundary at `until`
+- [x] Version-free: a test asserts no `okf_version` leaks onto the model
+- [x] Verify: `npx vitest run tests/core/model.test.ts` — 14 passed
+- [x] Verify: `core/` has no import outside `core/` (lint exit 0)
 
 ## Group 2 — `core/ports.ts` + `substrate/` — parallel with 3, 4
 

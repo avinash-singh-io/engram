@@ -137,3 +137,21 @@ synthetic and lookup-shaped, which is precisely what Phase 11 is *not* required 
 beat.
 
 ---
+
+### [DECISION] 2026-08-12 — Model shape: `isEmpty` is derived, and the `until` boundary is inclusive
+Topics: core-model, node-edge, primitives
+Affects-phases: phase-8-core
+Affects-specs: none
+Detail: Two choices the ADRs leave open, settled while writing `core/model.ts`
+test-first. **`isEmpty` is derived, not stored**, and a whitespace-only body counts
+as empty — a node whose body is `"  \n "` is a name you can point at, not content,
+and storing the flag separately would let it drift from the body it describes.
+**`isExpired` treats `until` as inclusive**: an assertion valid "until 2026-12-31"
+still holds *at* that instant. Exclusive would silently invalidate a claim on the
+last day it was meant to hold, which is the kind of off-by-one that makes a validity
+filter untrustworthy. Both are asserted by tests rather than left to convention. Also
+pinned by test: no `okf_version` may appear on the model — that belongs to the codec
+(ADR-0032), and a leak there is how the core starts depending on someone else's
+schema.
+
+---
