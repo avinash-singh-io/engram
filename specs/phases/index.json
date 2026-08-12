@@ -6,37 +6,66 @@
       "name": "Foundation",
       "status": "complete",
       "directory": "phase-0-foundation",
-      "topics": ["tooling", "okf-format", "engine-primitives"]
+      "topics": [
+        "tooling",
+        "okf-format",
+        "engine-primitives"
+      ]
     },
     "phase-1-mvp-vault": {
       "name": "MVP Vault + Claude Code",
       "status": "complete",
       "directory": "phase-1-mvp-vault",
-      "topics": ["okf-format", "vault", "indexes", "tooling", "engine-primitives"]
+      "topics": [
+        "okf-format",
+        "vault",
+        "indexes",
+        "tooling",
+        "engine-primitives"
+      ]
     },
     "phase-2-retrieval": {
       "name": "Progressive-Disclosure Retrieval",
       "status": "complete",
       "directory": "phase-2-retrieval",
-      "topics": ["retrieval", "indexes", "okf-format"]
+      "topics": [
+        "retrieval",
+        "indexes",
+        "okf-format"
+      ]
     },
     "phase-4-ecosystem": {
       "name": "Ecosystem",
       "status": "complete",
       "directory": "phase-4-ecosystem",
-      "topics": ["adapters", "promote", "ecosystem", "engine-primitives"]
+      "topics": [
+        "adapters",
+        "promote",
+        "ecosystem",
+        "engine-primitives"
+      ]
     },
     "phase-3-sync": {
       "name": "Sync + Multi-Device",
       "status": "complete",
       "directory": "phase-3-sync",
-      "topics": ["sync", "okf-format", "tooling"]
+      "topics": [
+        "sync",
+        "okf-format",
+        "tooling"
+      ]
     },
     "phase-6-onboarding": {
       "name": "Onboarding & OKF Migration",
       "status": "complete",
       "directory": "phase-6-onboarding",
-      "topics": ["adapters", "migration", "onboarding", "okf-format", "tooling"]
+      "topics": [
+        "adapters",
+        "migration",
+        "onboarding",
+        "okf-format",
+        "tooling"
+      ]
     },
     "phase-7-evidence": {
       "name": "Evidence & Observation",
@@ -51,6 +80,24 @@
         "intelligence",
         "observation",
         "roadmap"
+      ]
+    },
+    "phase-8-core": {
+      "name": "Core",
+      "status": "in-progress",
+      "directory": "phase-8-core",
+      "topics": [
+        "core-model",
+        "node-edge",
+        "okf-format",
+        "codecs",
+        "ports",
+        "identity",
+        "relations",
+        "capture",
+        "link",
+        "tdd",
+        "clean-room"
       ]
     }
   }
