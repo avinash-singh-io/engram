@@ -102,12 +102,15 @@
 
 ## Group 6 — CLI wiring, library exports, e2e
 
-- [ ] `engram capture` · `engram link`
-- [ ] Public library exports (model, registry, ports)
-- [ ] e2e on a real temp vault
-- [ ] e2e: v0.1 vault → model → v0.2 write-back, no loss
-- [ ] **Unreleasable window closes** — CLI works again
-- [ ] Verify: `npx vitest run tests/e2e/`
+- [x] `engram capture` (argv or piped stdin) · `engram link <file> <to> <kind>`
+- [x] `--vault` and `--by` flags; usage text; exit codes 0 / 1 / 2
+- [x] Public library exports (model, ports, registry, ops, substrate, gate)
+- [x] e2e on a real temp vault — 10 tests
+- [x] e2e: v0.1 vault → model → v0.2 write-back, no loss, re-read identical
+- [x] **Smoke-tested the BUILT binary**, not just the source: `node dist/cli.js`
+      captured to a real inbox and wrote a real `supersedes:` relation
+- [x] **Unreleasable window CLOSED** — the CLI works again
+- [x] Verify: `npx vitest run tests/e2e/` — 10 passed
 
 ## Group 7 — Verification
 

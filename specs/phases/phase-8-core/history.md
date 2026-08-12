@@ -274,3 +274,17 @@ and approval queue will extend. Proven by test: a rejected change leaves the fil
 byte-identical, because the gate validates a proposed diff rather than a write.
 
 ---
+
+### [NOTE] 2026-08-12 — The unreleasable window is closed
+Topics: cli, releases, phasing
+Affects-phases: phase-8-core
+Affects-specs: specs/status.md
+Detail: Group 6 restores a working CLI, closing the window declared in
+`overview.md` at Group 0. `engram capture` and `engram link` run, and the check was
+made against the **built** artifact (`node dist/cli.js`) rather than only the
+TypeScript source — a build that typechecks is not the same claim as a binary that
+runs, and the acceptance criterion was about the latter. `main` is releasable again.
+Groups 0–5 spanned a single session, so the window cost far less than the plan
+budgeted for.
+
+---
