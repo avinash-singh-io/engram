@@ -62,7 +62,7 @@ forward. `capture` and `link` run against a real vault.
 | Traversal retrieval; `recall-v1` is orphaned until adopted or superseded | Phase 11 |
 | YAML subset vs a real parser, if frontmatter ever nests | unscheduled |
 
-## Verification Evidence (Rule 12)
+## Verification Evidence
 
 Captured fresh on 2026-08-12 from `phase-8-core`. Exit codes verbatim.
 
