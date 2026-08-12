@@ -1,0 +1,90 @@
+# Phase 10 — History
+
+### [DECISION] 2026-08-12 — Engram does not extract relations; the agent does
+Topics: format, extraction, architecture, security
+Affects-phases: phase-10-agent-surface
+Affects-specs: specs/decisions/0033-format-takes-content.md
+Detail: Reading ADR-0033 against ADR-0034 settles what `format` actually is and
+shrinks this phase considerably. ADR-0034 is absolute — engram never transmits, no
+network calls — so engram **cannot call a model** and therefore cannot extract
+relations itself. ADR-0019 already names who does: the agent writes the edges at the
+moment it writes the content, because it already knows the relationship. ADR-0027
+makes that the *primary* error mitigation rather than a convenience, on the grounds
+that reporting beats inferring.
+
+So `format(content, hints)` is the seam where the agent's understanding becomes a
+validated write, and engram's half is entirely deterministic: slug from title, path
+from container, serialize, validate, stamp `generated`. **There is no extractor to
+build in `src/`.** The consequence for Gate 2 is that it measures *the agent's*
+accuracy, not engram's — engram's contribution is making a wrong edge cheap to fix,
+which ADR-0027 calls load-bearing: the mitigation for imperfect extraction is that
+repair is trivial, not that extraction is perfect.
+
+---
+
+### [DECISION] 2026-08-12 — Gate 2 gets two bars: directionality ≥95%, predicate ≥90%
+Topics: gate-2, thresholds, methodology
+Affects-phases: phase-10-agent-surface, phase-11-retrieval
+Affects-specs: specs/decisions/0031-evidence-gates-before-graph.md
+Detail: ADR-0031 said Gate 2's threshold was "to be fixed before sampling begins"
+and it never was — a gate on the books with no bar. Fixed here, in Group 0, before a
+single edge exists, because a threshold chosen after seeing the numbers is not a
+threshold.
+
+Two bars rather than one, because the errors differ in cost. A **directionality**
+error inverts meaning: `A supersedes B` when B supersedes A presents a superseded
+node as current, which is precisely the failure the validity filter exists to
+prevent, so it carries the higher bar. A **predicate** error — `sources` where
+`part-of` was meant — degrades traversal without lying about currency. A single
+combined bar would let directionality errors hide behind predicate accuracy, which
+inverts the priority. Below either bar, ADR-0031's own fallback applies: stop at
+nodes plus untyped links, which is still a working product. Formalised as ADR-0040.
+
+---
+
+### [SCOPE_CHANGE] 2026-08-12 — Skills, MCP and adapters move to a new Phase 15
+Topics: scope, phasing, surfaces, roadmap
+Affects-phases: phase-10-agent-surface, phase-15-surfaces
+Affects-specs: specs/planning/roadmap.md
+Detail: As the roadmap scoped it, Phase 10 carried more than Phases 8 and 9 combined
+— `format`, extraction, guardrails, skills, `AGENTS.md`, adapters, MCP — and ended in
+a gate that can stop the project. Building the surfaces *before* that gate would risk
+wasting them: skills and MCP are thin translations over a core whose edge accuracy is
+unmeasured until this phase ends. Split so Phase 10 is the write path plus the Gate 2
+instrument, and skills, MCP server and agent adapters become **Phase 15**. Appended
+rather than renumbered, because phase numbers are referenced across ADRs, backlog rows
+and history entries, and closing a cosmetic gap costs more than the gap.
+
+---
+
+### [DECISION] 2026-08-12 — Gate 2's corpus is generated, and the report says so
+Topics: gate-2, measurement, methodology
+Affects-phases: phase-10-agent-surface
+Affects-specs: none
+Detail: Gate 2 needs real agent-authored edges. Waiting for organic usage recreates
+Phase 7's Group 5 problem — a multi-week collection window with the phase blocked
+behind it. Group 6 instead generates the corpus by formatting a set of existing
+notes: the edges are genuine agent output, and only the *trigger* is synthetic. That
+is a real limitation — edges produced in a batch over old material may differ in
+quality from edges produced in the flow of live work — and it is stated in the report
+rather than glossed. It is still closer to real use than any fixture, and it is
+measurable this phase instead of next month.
+
+---
+
+### [DECISION] 2026-08-12 — A guardrail may tighten but never loosen, and must have a detective form
+Topics: guardrails, architecture, skills
+Affects-phases: phase-10-agent-surface, phase-15-surfaces
+Affects-specs: specs/architecture/v2-overview.md#7-guardrails
+Detail: Two constraints, both asserted by test rather than left to review. **Tighten
+only**: a skill declares `guardrails:` and may narrow what it is permitted to do,
+never widen it. That is what bounds the blast radius of a careless or downloaded
+skill in Phase 15, and it has to hold before skills exist rather than after.
+**Detective form required**: v2-overview §7 is explicit that engram mediates only two
+of the four write paths, since Obsidian and any agent with a shell write files
+directly, so a rule enforceable only at the gate is advisory. Guardrails are
+registered the same way relations are, and a test asserts every registered rule
+carries a non-empty detective form. That exact mechanism caught `part-of` being
+registered but unserialized in Phase 9, which is the argument for reusing it.
+
+---
