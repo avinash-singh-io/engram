@@ -178,3 +178,39 @@ for it would exist only to be maintained. The `why` is what stops the list quiet
 accumulating those.
 
 ---
+
+### [DECISION] 2026-08-12 — The scaffold teaches the constraint rather than just the shape
+Topics: skills, cli, onboarding
+Affects-phases: phase-15-surfaces
+Affects-specs: none
+Detail: `engram skill new` produces a file whose Steps section says what a skill
+actually is: *"Engram runs none of this — you do. It only checks the operations
+exist"*, that `uses:` may name only real operations, that `guardrails:` may tighten
+and never loosen, and that every write still passes the gate so a skill cannot exceed
+what its author already may do.
+
+That is deliberate. The most likely misunderstanding about skills is that engram
+executes them, and the moment someone is authoring one is the moment that
+misunderstanding gets built in. A scaffold that showed only the shape would leave
+them to discover the constraint by having a skill not do what they expected. An e2e
+test asserts the scaffold passes its own validator and loads alongside the built-ins,
+because a scaffold that fails validation would be worse than none.
+
+---
+
+### [NOTE] 2026-08-12 — Both transports verified through the built binary
+Topics: mcp, verification, adr-0041
+Affects-phases: phase-15-surfaces
+Affects-specs: none
+Detail: Checked against `dist/`, not just the source. A real JSON-RPC handshake piped
+into `engram mcp` returned a correct `initialize` result and a `prompts/list`
+containing all three skills — including one scaffolded seconds earlier, which is the
+end-to-end proof that vault-local discovery reaches the protocol surface.
+
+Both ADR-0041 constraints observed rather than asserted: plain `engram mcp` produced
+**no warning and no socket**, and `engram mcp --http` printed the exposure warning
+naming the exact root. That distinction matters here more than elsewhere — the whole
+argument for HTTP being acceptable rests on it being opt-in, and "opt-in" is a claim
+about the built artifact rather than about the source.
+
+---

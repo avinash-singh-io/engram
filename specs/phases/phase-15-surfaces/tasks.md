@@ -91,11 +91,17 @@
 
 ## Group 5 — CLI wiring and e2e
 
-- [ ] `engram skill new <name>` scaffolds a skill that passes validation
-- [ ] `engram mcp` (stdio) · `engram mcp --http` (opt-in)
-- [ ] e2e: a **real MCP handshake** over stdio, listing tools and prompts
-- [ ] e2e: HTTP refuses to start without the flag
-- [ ] Verify: `npx vitest run tests/e2e/`
+- [x] `engram skill list` shows what is loaded, with each skill's origin and `uses`
+- [x] `engram skill new <name>` scaffolds a skill that **passes its own validator**
+      and loads cleanly alongside the built-ins — asserted, not assumed
+- [x] `engram skill list` exits non-zero when a vault skill is broken
+- [x] `engram mcp` (stdio) · `engram mcp --http --port --host` (opt-in)
+- [x] e2e: a **real MCP handshake** over stdio — initialize, tools/list,
+      prompts/list, and a `tools/call` whose capture lands on a real disk
+- [x] Smoke-tested through the **built binary**: plain `engram mcp` opens no socket
+      and emits no warning; `--http` prints the ADR-0041 warning naming the root
+- [x] Smoke-tested that a scaffolded skill appears in `prompts/list`
+- [x] Verify: `npx vitest run tests/e2e/` — 26 passed; `npm run check` — 450
 
 ## Group 6 — Verification
 
