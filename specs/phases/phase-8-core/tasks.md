@@ -39,12 +39,15 @@
 
 ## Group 2 — `core/ports.ts` + `substrate/` — parallel with 3, 4
 
-- [ ] Tests first, against stubs
-- [ ] `FileStore` · `Detector` · `Clock` — three interfaces, not one
-- [ ] In-memory `FileStore`; fixed-fact `Detector`; fixed-instant `Clock`
-- [ ] `substrate/fs.ts` · `substrate/clock.ts` · `substrate/detect.ts`
-- [ ] Prove each port is stubbable **alone** (no consumer needs all three)
-- [ ] Verify: `npx vitest run tests/core/ports.test.ts`
+- [x] Tests first, against stubs (11 tests)
+- [x] `FileStore` · `Detector` · `Clock` — three interfaces, not one
+- [x] In-memory `FileStore`; fixed-fact `Detector`; fixed-instant `Clock`
+- [x] Real implementations too: `nodeFileStore`, `systemClock`, `filesystemDetector`
+- [x] **Totality**: a missing file reads as `null`, an unknown fact as `false` —
+      neither throws, which is what makes ADR-0026 honourable upstream
+- [x] Prove each port is stubbable **alone** — a time-only consumer needs no
+      FileStore, a storage-only consumer needs no Clock
+- [x] Verify: `npx vitest run tests/core/` — 25 passed
 
 ## Group 3 — `format/` codecs and registry — parallel with 2, 4
 

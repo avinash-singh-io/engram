@@ -155,3 +155,19 @@ pinned by test: no `okf_version` may appear on the model — that belongs to the
 schema.
 
 ---
+
+### [DECISION] 2026-08-12 — Every port is total; nothing beneath the gate throws
+Topics: ports, substrate, capture, interface-segregation
+Affects-phases: phase-8-core
+Affects-specs: none
+Detail: `FileStore.read` returns `null` for a missing file and `Detector.has`
+returns `false` for an unknown fact — neither throws. This is not defensive
+programming, it is what makes ADR-0026's "capture never rejects" honourable: a
+promise made at the top cannot be kept if a layer beneath it can throw. The same
+property was rescued from v1's frontmatter parser in the Group 0 sweep, so it now
+holds consistently from the substrate up. Interface segregation is asserted by test
+rather than by convention: a time-only consumer takes a `Clock` and nothing else, a
+storage-only consumer takes a `FileStore` and nothing else. If either ever needs
+more, the segregation ADR-0032 required has been lost and a test says so.
+
+---
