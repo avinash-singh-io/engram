@@ -81,12 +81,18 @@
 
 ## Group 5 — CLI wiring and e2e
 
-- [ ] `engram init` · `engram reindex` · `engram doctor`
-- [ ] e2e: `init` on an empty dir → `reindex` → `doctor`, all clean
-- [ ] **e2e (load-bearing)**: delete every derived file, `reindex`, compare
-      byte-for-byte. This is ADR-0029's safety claim under test
-- [ ] e2e: a nested root is skipped and named in output
-- [ ] Verify: `npx vitest run tests/e2e/`
+- [x] `engram init` · `engram reindex` · `engram doctor`
+- [x] e2e: `init` on an empty dir → `reindex` → `doctor`, all clean
+- [x] e2e: `link ... part-of` surfaces the relation in the generated index
+- [x] **e2e (load-bearing)**: delete every derived file, `reindex`, compare
+      byte-for-byte on a real filesystem — ADR-0029's safety claim under test
+- [x] e2e: a nested root is skipped; its content never reaches the index
+- [x] e2e: an unknown `--structure` exits 2
+- [x] **Fixed a real Phase 8 defect this exposed**: `nodeFileStore.list()` returned
+      only paths written through that instance, so a fresh store (what every CLI
+      invocation builds) enumerated nothing. Now walks the filesystem; 6 regression
+      tests, including that `.engram/` markers stay visible for TD-004
+- [x] Verify: `npx vitest run tests/e2e/` — 15 passed
 
 ## Group 6 — Verification
 

@@ -163,3 +163,24 @@ is the same non-destructive posture as the rest of `init`: an existing `AGENTS.m
 is skipped rather than overwritten, and a test pins that a user's own file survives.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — `nodeFileStore.list()` never walked the filesystem
+Topics: substrate, ports, testing, regression
+Affects-phases: phase-9-structure, phase-8-core
+Affects-specs: none
+Detail: The real `FileStore` tracked writes in an in-process `Set` and returned that
+from `list()`, so a **fresh** store — which is exactly what every CLI invocation
+builds — enumerated nothing. `reindex` on a real vault found zero nodes and wrote an
+empty index while reporting success.
+
+Phase 8 shipped this and its tests passed, because every test wrote through the same
+store instance before listing, and nothing in Phase 8 needed to enumerate a vault it
+had not just created. The in-memory implementation was correct throughout, which is
+the trap: a port with two implementations was only ever exercised through the easy
+one. Fixed with a recursive walk, plus six regression tests — the load-bearing one
+being that a *different* store instance sees the files. One detail matters for
+TD-004: the walk deliberately does not hide dotdirs, because nested-root detection
+works by finding `.engram/` markers, and a store that hid them would leave the
+disclosure guard reporting clean while doing nothing.
+
+---
