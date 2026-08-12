@@ -2,8 +2,8 @@
 
 > **Last Updated**: 2026-08-10
 > **Current Phase**: **Phase 9 complete (v0.8.0)**. Next: Phase 10 — Agent surface (**GATE 2**).
-> **Latest Release**: v0.8.0 (Phase 9 — Structure, views & health). v0.7.0 was tagged but never published to npm; v0.8.0 is the first v2 release on the registry.
-> **Health**: On Track — v2 core shipped; the Phase 8 unreleasable window closed in Group 6
+> **Latest Release**: **v0.8.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, reopened P0). GitHub tags and releases are current; the registry is five releases behind.
+> **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
 
 ## Summary
 
@@ -88,7 +88,7 @@ productivity suite, and is deliberately kept out of the core. See
 
 | ID | Type | Description |
 |----|------|-------------|
-| _(none)_ | | |
+| BUG-002 | Bug | **npm publish broken since v0.6.5.** OIDC trusted publishing fails `ENEEDAUTH` on every tag. Workflow config verified correct; the remaining cause is the trusted-publisher registration on npmjs.com, which needs the package owner. Five tags point at nothing. |
 
 ## Next Actions
 
