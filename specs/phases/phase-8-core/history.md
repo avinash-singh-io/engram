@@ -288,3 +288,19 @@ Groups 0–5 spanned a single session, so the window cost far less than the plan
 budgeted for.
 
 ---
+
+### [NOTE] 2026-08-12 — Phase 8 acceptance swept; every criterion evidenced
+Topics: verification, rule-12, acceptance
+Affects-phases: phase-8-core
+Affects-specs: none
+Detail: All 12 acceptance criteria checked with fresh output rather than from
+memory: `npm run check` exit 0 (13 files, 171 tests, build clean); both architecture
+lint rules re-verified by deliberate violation (3 errors caught, then reverted); no
+`describe.skip` survives; `core/` has zero non-core imports; an empty node
+round-trips through the codec; slug collision and missing slug both produce warnings
+only; capture's 15-case adversarial set green; and the Rule 11 freeze intact across
+both locked evaluator versions. The built binary was smoke-tested separately from
+the source, because a build that typechecks is not the same claim as a binary that
+runs. Evidence captured in `retrospective.md` § Verification Evidence.
+
+---

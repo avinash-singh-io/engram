@@ -1,6 +1,6 @@
 # Phase 8 — Core
 
-> **Status**: planned
+> **Status**: **complete** (2026-08-12) — all 8 groups verified
 > **Branch**: `phase-8-core`
 > **Target release**: v0.7.0
 
@@ -82,18 +82,20 @@ is a known cost rather than a surprise.
 
 ## Acceptance (Rule 12)
 
-- [ ] `npm run check` exits 0 with fresh output
-- [ ] Lint proves both import rules — verified by a deliberate violation failing
-- [ ] `capture` never rejects **any** input, including empty, malformed, and binary
-- [ ] `link` round-trips through both codecs
-- [ ] A v0.1 vault reads, normalises, and writes back as v0.2 with no loss
-- [ ] BUG-001 percent-encoding cases green
-- [ ] Slug collision warns and both nodes survive
-- [ ] A node with no slug falls back to path-as-identity and warns
-- [ ] An empty node is valid and round-trips
-- [ ] Adding a hypothetical codec file requires **no** change to existing code
-- [ ] e2e on a real temp vault
-- [ ] `retrospective.md` carries a `## Verification Evidence` section
+- [x] `npm run check` exits 0 with fresh output — 13 files, 171 tests, build clean
+- [x] Lint proves both import rules — a deliberate violation produced 3 errors
+- [x] `capture` never rejects **any** input — 15-case adversarial set, plus a
+      real-disk repeat in e2e
+- [x] `link` round-trips through both codecs
+- [x] A v0.1 vault reads, normalises, and writes back as v0.2 with no loss
+- [x] BUG-001 percent-encoding cases green — 17 specs, unskipped
+- [x] Slug collision warns and both nodes survive
+- [x] A node with no slug falls back to path-as-identity and warns
+- [x] An empty node is valid and round-trips through the codec
+- [x] Adding a hypothetical codec requires **no** change to existing code —
+      proven by registering a stub at runtime
+- [x] e2e on a real temp vault — 10 tests, plus a smoke test of the built binary
+- [x] `retrospective.md` carries a `## Verification Evidence` section
 
 ## Risks
 

@@ -114,9 +114,11 @@
 
 ## Group 7 — Verification
 
-- [ ] Full `npm run check` exits 0 with fresh output
-- [ ] Deliberate import violation proves lint catches it, then revert
-- [ ] Acceptance sweep from `overview.md` — every box
-- [ ] Capture output for `retrospective.md` § Verification Evidence (Rule 12)
-- [ ] Write `retrospective.md`
-- [ ] Run `/sync-docs`
+- [x] Full `npm run check` exits 0 with fresh output — 171 tests
+- [x] Deliberate import violation proves lint catches it (3 errors), then reverted
+- [x] Confirmed no `describe.skip` / `it.skip` survives the phase
+- [x] Confirmed `core/` has zero non-core imports
+- [x] Acceptance sweep from `overview.md` — every box checked and evidenced
+- [x] Capture output for `retrospective.md` § Verification Evidence (Rule 12)
+- [x] Write `retrospective.md`
+- [ ] Run `/sync-docs` and `/complete-phase`
