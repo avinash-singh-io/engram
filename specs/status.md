@@ -59,7 +59,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 15 landed; Phase 11 gated on Gate 2)_ | | | |
+| Phase 14 — Obsidian surface | `phase-14-obsidian` | In progress | Group 0 of 6 — ADR-0042 |
 
 ## Upcoming Phases — the v2 line
 
