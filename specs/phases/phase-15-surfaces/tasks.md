@@ -6,16 +6,19 @@
 
 ## Group 0 — ADR-0041 and the skill schema — blocks everything
 
-- [ ] Write **ADR-0041** — the MCP surface amends ADR-0034's trust boundary
-- [ ] Record what actually changes: a listening socket where there was none, so the
-      security story stops being purely structural
-- [ ] Record the three constraints: opt-in, `127.0.0.1`, warned
-- [ ] Record what is **not** solved: no authentication; localhost + opt-in is the
-      whole control
-- [ ] Skill frontmatter schema: `name`, `description`, `uses`, `emits`, `guardrails`
-- [ ] Correct **FEAT-004** to `resolved` — verified against shipped code and its
+- [x] Write **ADR-0041** — the MCP surface amends ADR-0034's trust boundary
+- [x] Record what actually changes: a listening socket where there was none, so the
+      security story stops being structural and becomes configured
+- [x] Record the three constraints as **acceptance criteria, not defaults**
+- [x] Record what is **not** solved: no authentication; localhost + opt-in is the
+      whole control, and reverting restores the structural property in full
+- [x] Skill schema — `name`, `description`, `uses`, `emits`, `guardrails`, `origin`
+- [x] Correct **FEAT-004** to `resolved` — verified against shipped code and its
       30 tests, not against a document
-- [ ] Verify: `npm run check` exits 0
+- [x] **Found and removed two dead runtime dependencies** — `commander` and `yaml`,
+      unimported since Phase 8's rewrite but still shipped to every installer.
+      Engram now has **zero runtime dependencies** (TD-005)
+- [x] Verify: `npm run check` exits 0 — 373 tests, with both deps gone
 
 ## Group 1 — Skills: discover, validate, expose
 

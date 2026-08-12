@@ -73,3 +73,23 @@ status document, when the registry showed the release had never published. A bac
 row is a claim; the artifact is the evidence.
 
 ---
+
+### [DISCOVERY] 2026-08-12 — Two dead runtime dependencies were shipping to every installer
+Topics: dependencies, packaging, clean-room
+Affects-phases: phase-15-surfaces, phase-8-core
+Affects-specs: none
+Detail: `commander` and `yaml` sat in `dependencies` and were installed by everyone
+who installed engram. Neither has been imported by a single file since Phase 8's
+clean-room rewrite, which deliberately hand-rolled both the argument parsing and a
+small YAML subset — the latter recorded at the time on the grounds that OKF
+frontmatter is flat, so a full engine carried far more surface than the format uses.
+
+The rewrite deleted every consumer and never touched the manifest. Found by grepping
+`src/` at Phase 15 start rather than reading `package.json`, which is the same
+distinction that let BUG-002 stay wrong for five weeks: a manifest is a claim, the
+imports are the evidence. Removed, and engram now has **zero runtime dependencies** —
+which is worth stating as a property rather than an accident, given how much of the
+architecture rests on the tool being disposable (ADR-0039) and the vault depending on
+nothing above a directory of files. Filed and closed as TD-005.
+
+---
