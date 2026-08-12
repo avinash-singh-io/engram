@@ -6,32 +6,47 @@
 
 ## Group 0 — ADR-0042 — blocks everything
 
-- [ ] Write **ADR-0042** — the approval queue's trust boundary
-- [ ] Record **approve/reject are human-only**, and why: an agent that can approve
+- [x] Write **ADR-0042** — the approval queue's trust boundary
+- [x] Record **approve/reject are human-only**, and why: an agent that can approve
       its own proposal has converted a refusal into a retry loop
-- [ ] Record the **staleness rule** — `basis` hash at propose, recomputed at approve,
+- [x] Record the **staleness rule** — `basis` hash at propose, recomputed at approve,
       refusal on mismatch. Engram refuses; it does not merge
-- [ ] Record what is **not** solved: nothing authenticates the human. The queue
+- [x] Record what is **not** solved: nothing authenticates the human. The queue
       constrains the agent path, not the filesystem
-- [ ] Queue entry schema — `id`, `target`, `rule`, `basis`, `by`, `at`, content
-- [ ] File **TD-006** — ADR-0015's `EditorAdapter` layer absent from v2
-- [ ] File the ADR-0028 doctor gap; close it in Group 5
+- [x] Queue entry schema — `id`, `target`, `rule`, `basis`, `by`, `at`, content
+- [x] File **TD-006** — ADR-0015's `EditorAdapter` layer absent from v2
+- [x] File the ADR-0028 doctor gap; close it in Group 5
+- [x] Also filed **TD-007** — ADR index stale since 0017
 
 ## Group 1 — QUEUE in the gate
 
-- [ ] Tests first
-- [ ] `GateResult` third arm: `{ outcome: 'queue'; change; rule; reason }`
-- [ ] Guardrail rules gain `disposition: 'reject' | 'queue'`, default `reject`
-- [ ] `checkAll` returns the disposition; the gate maps it
-- [ ] **The gate never names `propose-only`** — proven by a second queueing rule
+- [x] Tests first — 17 tests in `tests/gate.test.ts`
+- [x] `GateResult` third arm: `{ outcome: 'queue'; change; rule; reason }`
+- [x] Guardrail rules gain `disposition: 'reject' | 'queue'`, default `reject`
+- [x] `checkAll` returns the disposition; the gate maps it
+- [x] **The gate never names `propose-only`** — proven by a second queueing rule
       added in test, which must queue without touching the gate
-- [ ] `propose-only`'s message becomes a deferral, not a refusal
-- [ ] A normal path still applies; a genuine violation still rejects
-- [ ] Verify: `npx vitest run tests/gate.test.ts tests/policy/`
+- [x] `propose-only`'s message becomes a deferral, not a refusal
+- [x] A normal path still applies; a genuine violation still rejects
+- [x] **Fixed a regression this change introduced**: `format` and `link` narrowed
+      with `outcome === 'reject'` and fell through to `files.write` for the new
+      outcome — `propose-only` went from refusing writes to silently applying
+      them, with all 464 tests green. Both now fail closed on anything that is
+      not `apply`, and the new assertions are on the filesystem, not the return
+      value
+- [x] Surfaces report queued distinctly — CLI exit `3`; MCP `isError` with text
+      stating the agent cannot approve it and that no such tool exists
+- [x] Verify: `npm run check` exit 0 — 28 files, **467 tests**. Regression proven
+      by reverting the fix and watching the two filesystem assertions fail
 
-## Group 2 — The queue store
+## Group 2 — The queue store, and a config that can feed it
 
 - [ ] Tests first
+- [ ] **BUG-003** — `.engram/guardrails.md`, so a vault can declare `proposeOnly`,
+      `pathScope` and `rateLimit` at all. Absent means today's defaults, so no
+      existing vault changes behaviour; `init` scaffolds it with the fields
+      present and `proposeOnly` empty
+- [ ] `AGENTS.md` renders the loaded config rather than `DEFAULT_GUARDRAILS`
 - [ ] `.engram/queue/<id>.md` — plain readable markdown (§12)
 - [ ] `propose` records `basis` = SHA-256 of the target now, or the absent-marker
 - [ ] `list` / `show` are read-only; `show` renders what would change
