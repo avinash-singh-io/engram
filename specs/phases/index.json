@@ -132,6 +132,21 @@
         "policy",
         "evaluator"
       ]
+    },
+    "phase-15-surfaces": {
+      "name": "Surfaces \u2014 skills, MCP, adapters",
+      "status": "in-progress",
+      "directory": "phase-15-surfaces",
+      "topics": [
+        "skills",
+        "mcp",
+        "adapters",
+        "surfaces",
+        "trust-boundary",
+        "transport",
+        "agents-md",
+        "tier-2"
+      ]
     }
   }
 }
