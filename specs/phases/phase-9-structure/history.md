@@ -97,3 +97,20 @@ asserted by its own test: if containment invalidated, reorganising a tree would
 silently mark everything inside it superseded.
 
 ---
+
+### [DECISION] 2026-08-12 — The vault's own sidecar is not a nested root
+Topics: walker, td-004, boundaries
+Affects-phases: phase-9-structure
+Affects-specs: none
+Detail: Detecting nested roots by searching for `/.engram/` in a path has an obvious
+false positive: the vault's *own* sidecar at `/.engram/`. Treating that as a nested
+root would make every vault skip itself entirely — the feature would appear to work
+while silently enumerating nothing. The rule is therefore that a marker at position 0
+is the vault's own, and only a marker deeper in the path denotes a nested root. Three
+negative tests pin this down alongside the positive case: an ordinary subdirectory is
+not skipped, a similarly-named directory (`engram-notes/`, `my.engram.backup/`) is not
+a marker, and the vault's own sidecar is not a nested root. For a feature whose
+failure mode is *silently dropping authored content*, the negative tests carry more
+weight than the positive one.
+
+---

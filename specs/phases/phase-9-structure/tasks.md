@@ -18,17 +18,20 @@
 
 ## Group 1 — The walker
 
-- [ ] Tests first
-- [ ] Enumerate authored content under a root, via `FileStore`
-- [ ] **TD-004**: detect a nested root on the explicit `.engram/` marker **only**
-- [ ] Skip the nested subtree entirely — nothing under it is ever enumerated
-- [ ] Return it as a reported finding, not a silent skip
-- [ ] **Negative test**: an ordinary subdirectory is NOT skipped (a misfire here is
-      worse than the disclosure it guards against)
-- [ ] Reserved-file detection at any depth: `index.md`, `log.md`, `AGENTS.md`,
-      `CLAUDE.md` — never authored content
-- [ ] Enumeration-only counting: structure without reading bodies
-- [ ] Verify: `npx vitest run tests/ops/walk.test.ts`
+- [x] Tests first (13 tests)
+- [x] Enumerate authored content under a root, via `FileStore`
+- [x] **TD-004**: detect a nested root on the explicit `.engram/` marker **only**
+- [x] Skip the nested subtree entirely — asserted that no private path leaks
+- [x] Return it as a reported finding, not a silent skip
+- [x] **Negative tests ×3**: an ordinary subdirectory is NOT skipped; a
+      similarly-named dir (`engram-notes/`, `my.engram.backup/`) is NOT a marker;
+      the vault's OWN `.engram/` sidecar is NOT a nested root
+- [x] Several nested roots at different depths all detected
+- [x] Reserved-file detection at any depth — and `my-index.md` is not excluded
+- [x] Derived state excluded from authored content
+- [x] Enumeration-only counting; sorted output so generation is deterministic
+- [x] An empty vault is not an error
+- [x] Verify: `npx vitest run tests/ops/walk.test.ts` — 13 passed
 
 ## Group 2 — View generation — parallel with 3
 
