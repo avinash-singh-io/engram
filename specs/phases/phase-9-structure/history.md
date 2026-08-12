@@ -149,3 +149,17 @@ serialization too. Worth noting that Phase 8's open/closed test passed throughou
 a property proven at two of three sites reads exactly like one proven everywhere.
 
 ---
+
+### [DECISION] 2026-08-12 — `init` appends to `.gitignore` rather than owning it
+Topics: init, gitignore, derived-state
+Affects-phases: phase-9-structure
+Affects-specs: none
+Detail: A vault is frequently an existing git repo with an existing `.gitignore` —
+`node_modules/`, `.env`, whatever the user already had. Writing engram's derived-state
+block by replacing the file would silently delete rules protecting real secrets, which
+is a far worse outcome than a duplicated line. `init` therefore appends its block and
+skips entirely if `/views/` is already present, so running it twice is a no-op. This
+is the same non-destructive posture as the rest of `init`: an existing `AGENTS.md`
+is skipped rather than overwritten, and a test pins that a user's own file survives.
+
+---

@@ -65,14 +65,19 @@
 
 ## Group 4 — `reindex` and `init`
 
-- [ ] Tests first
-- [ ] `reindex` regenerates all derived state
-- [ ] `reindex` is **idempotent** — a second run changes nothing
-- [ ] `init` scaffolds ADR-0023's reference tree
-- [ ] `init` writes the derived-state gitignore and runs a first `reindex`
-- [ ] `init` is **non-destructive** — never overwrites an existing file
-- [ ] `--structure` accepts `default` only; anything else exits 2 with the reason
-- [ ] Verify: `npx vitest run tests/ops/reindex.test.ts`
+- [x] Tests first (14 tests)
+- [x] `reindex` regenerates all derived state
+- [x] `reindex` is **idempotent** — a second run changes nothing, and a run with a
+      clock 73 years later still changes nothing
+- [x] **Delete-and-rebuild restores byte-identical** — ADR-0029's safety claim
+      under test, not asserted
+- [x] `reindex` surfaces walker findings and read warnings rather than swallowing
+- [x] `init` scaffolds ADR-0023's reference tree + AGENTS.md
+- [x] `init` writes the derived-state gitignore, **appending** rather than clobbering
+- [x] `init` is **non-destructive** — an existing AGENTS.md survives untouched
+- [x] `init` is safe to run twice
+- [x] `--structure` accepts `default` only; anything else errors naming what ships
+- [x] Verify: `npx vitest run tests/ops/reindex.test.ts` — 14 passed
 
 ## Group 5 — CLI wiring and e2e
 
