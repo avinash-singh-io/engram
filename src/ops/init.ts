@@ -16,7 +16,13 @@ import { reindex } from './reindex.js';
 export const STRUCTURES = ['default'] as const;
 export type Structure = (typeof STRUCTURES)[number];
 
-/** ADR-0023's reference tree. Illustrative, not prescribed. */
+/**
+ * ADR-0023's reference tree. Illustrative, not prescribed.
+ *
+ * `AGENTS.md` is deliberately absent: `reindex` generates it from the live
+ * registries, so a hand-written copy here would be the drift the generation exists
+ * to prevent.
+ */
 const SCAFFOLD: Record<string, string> = {
   '/inbox/.gitkeep': '',
   '/concepts/.gitkeep': '',
@@ -24,28 +30,6 @@ const SCAFFOLD: Record<string, string> = {
   '/sources/.gitkeep': '',
   '/projects/.gitkeep': '',
   [`/${ROOT_MARKER}/config.json`]: `${JSON.stringify({ structure: 'default' }, null, 2)}\n`,
-  '/AGENTS.md': [
-    '# AGENTS.md',
-    '',
-    'This is an engram vault. Content is plain markdown with OKF frontmatter.',
-    '',
-    '## Operations',
-    '',
-    '- `engram capture [text]` — persist raw content to `inbox/`. Never rejects.',
-    '- `engram link <file> <to> <kind>` — assert a typed relation.',
-    '- `engram reindex` — regenerate derived state.',
-    '- `engram doctor` — health and integrity report. Read-only.',
-    '',
-    '## Conventions',
-    '',
-    '- `index.md` and everything under `views/` are **generated**. Do not edit them;',
-    '  edits are lost on regeneration. On conflict, regenerate — never merge.',
-    '- Identity is the `id` slug in frontmatter. The path is an address; moving a',
-    '  file is cheap because `aliases` records where it used to live.',
-    '- Closed relations carry meaning: `supersedes`, `sources`, `part-of`.',
-    '  Anything else is free association and carries no validity semantics.',
-    '',
-  ].join('\n'),
 };
 
 export interface InitResult {

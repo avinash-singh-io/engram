@@ -9,7 +9,9 @@
 
 import type { Edge, Node } from '../core/model.js';
 import type { Clock, FileStore } from '../core/ports.js';
+import { DEFAULT_GUARDRAILS } from './doctor.js';
 import { readNode } from '../format/registry.js';
+import { generateAgentsMd } from '../surface/agents-md.js';
 import { generateAll } from '../views/generate.js';
 import { walk, type WalkFinding } from './walk.js';
 
@@ -41,6 +43,12 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
     await files.write(file.path, file.content);
     written.push(file.path);
   }
+
+  // AGENTS.md is generated but NOT gitignored — see the phase history. It is the
+  // entry contract, and an agent arriving at a fresh clone needs it before it can
+  // run anything, including `reindex`.
+  await files.write('/AGENTS.md', generateAgentsMd(DEFAULT_GUARDRAILS));
+  written.push('/AGENTS.md');
 
   return {
     written,

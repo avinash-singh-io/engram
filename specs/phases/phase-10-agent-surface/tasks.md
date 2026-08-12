@@ -63,12 +63,18 @@
 
 ## Group 4 — `AGENTS.md` entry contract
 
-- [ ] Tests first
-- [ ] Generated from the code: ops, guardrails **in force**, closed relations
-      read from the registry
-- [ ] Regenerating is idempotent (no embedded timestamp)
-- [ ] Test that a newly registered relation appears without editing a template
-- [ ] Verify: `npx vitest run tests/surface/agents-md.test.ts`
+- [x] Tests first (16 tests)
+- [x] Generated from the code: ops, guardrails **in force**, closed relations
+      read from the registry — including whether each invalidates its target
+- [x] Reflects a narrowed config, and says so when none are enabled
+- [x] States the load-bearing invariants: capture never rejects, engram runs no
+      model, a wrong relation is cheap to fix, an empty node is valid, a nested
+      `.engram/` is someone else's vault
+- [x] Regenerating is idempotent (no embedded timestamp)
+- [x] Test that a newly registered relation appears with **no template edit**
+- [x] Wired into `reindex`; removed from `init`'s static scaffold
+- [x] Pinned by test: `reindex` **overwrites** a hand-edited AGENTS.md
+- [x] Verify: `npx vitest run tests/surface/` — 16 passed
 
 ## Group 5 — CLI wiring and e2e
 
