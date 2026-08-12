@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-08-10
-> **Current Phase**: **Phase 15 — Surfaces** (branch `phase-15-surfaces`, target v0.10.0). Not gated on Gate 2. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Current Phase**: **Phase 15 complete (v0.10.0)**. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
 > **Latest Release**: **v0.8.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, reopened P0). GitHub tags and releases are current; the registry is five releases behind.
 > **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
 
@@ -36,6 +36,7 @@ is rewritten clean-room rather than patched.
 | 8 | Core | Complete | v0.7.0 |
 | 9 | Structure, views & health | Complete | v0.8.0 |
 | 10 | Agent surface (write path) | Complete | v0.9.0 |
+| 15 | Surfaces — skills, MCP, adapters | Complete | v0.10.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -58,7 +59,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 15 — Surfaces | `phase-15-surfaces` | In Progress | Group 0 |
+| _(none — Phase 15 landed; Phase 11 gated on Gate 2)_ | | | |
 
 ## Upcoming Phases — the v2 line
 
@@ -72,7 +73,7 @@ is rewritten clean-room rather than patched.
 | Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
 | Phase 13 | Intelligence II | **parked** (ADR-0038) | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
 | Phase 14 | Obsidian surface | planned | Community plugin; agent inside Obsidian. **Independent lane — can move earlier** |
-| Phase 15 | Surfaces — skills, MCP, adapters | **in progress** | Skills sequence the seven ops; MCP exposes them as typed tools; agent adapters. All work over `capture`/`format`/`link`/`reindex`/`doctor`, none of which Gate 2 affects |
+| ~~Phase 15~~ | ~~Surfaces — skills, MCP, adapters~~ | **complete (v0.10.0)** | Skills sequence the seven ops; MCP exposes them as typed tools; agent adapters. All work over `capture`/`format`/`link`/`reindex`/`doctor`, none of which Gate 2 affects |
 | ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
 
 Post-v2 (Tier-2, no debt created by waiting): engram's own agent, engram's own UI,

@@ -135,7 +135,7 @@
     },
     "phase-15-surfaces": {
       "name": "Surfaces \u2014 skills, MCP, adapters",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-15-surfaces",
       "topics": [
         "skills",

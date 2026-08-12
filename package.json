@@ -1,6 +1,6 @@
 {
   "name": "@avinash-singh-io/engram",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "OKF-native knowledge base that agents and humans read and write together — durable memory, sibling to momentum.",
   "type": "module",
   "license": "MIT",
