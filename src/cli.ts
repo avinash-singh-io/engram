@@ -12,6 +12,8 @@ import { format } from './ops/format.js';
 import { init } from './ops/init.js';
 import { link } from './ops/link.js';
 import { reindex } from './ops/reindex.js';
+import { discoverSkills, SKILLS_DIR } from './policy/skills.js';
+import { serveHttp, serveStdio } from './surface/mcp-transport.js';
 import { filesystemDetector, nodeFileStore, systemClock } from './substrate/index.js';
 
 const USAGE = `engram — a notes system where the organizing work is done by an agent
@@ -23,6 +25,8 @@ usage:
   engram link <file> <to> <kind> assert a typed relation (supersedes | sources | part-of)
   engram reindex                 regenerate derived state (index.md, views/)
   engram doctor                  health and integrity report; read-only
+  engram skill new <name>        scaffold a skill; skill list shows what is loaded
+  engram mcp                     MCP server over stdio (no socket, nothing listens)
 
 options:
   --vault <dir>       vault root (default: cwd)
@@ -36,6 +40,12 @@ format options (the agent supplies the structure; engram does not infer it):
   --supersedes <id>   repeatable
   --sources <id>      repeatable
   --generated         mark as agent-authored rather than human
+
+mcp options:
+  --http              OPT-IN: also listen on HTTP. Opens a socket anything with
+                      local access can reach. No authentication (ADR-0041).
+  --port <n>          HTTP port (default 7777)
+  --host <h>          HTTP host (default 127.0.0.1)
 `;
 
 function flag(argv: string[], name: string, fallback: string): string {
@@ -69,6 +79,34 @@ const stripFlags = (argv: string[]): string[] => {
   }
   return out;
 };
+
+/**
+ * A skill scaffold that passes validation on first save.
+ *
+ * Authoring a skill should not require reading the schema, and a scaffold that
+ * fails its own validator would be worse than none.
+ */
+function scaffoldSkill(name: string): string {
+  return [
+    '---',
+    `name: ${name}`,
+    'description: One line on when to reach for this.',
+    'uses: [capture, format]',
+    'guardrails: [require-sources]',
+    '---',
+    '',
+    '# When to use',
+    '',
+    'Describe the situation that should make someone pick this skill.',
+    '',
+    '# Steps',
+    '',
+    '1. Engram runs none of this — you do. It only checks the operations exist.',
+    '2. `uses:` may name only real operations; `guardrails:` may tighten, never loosen.',
+    '3. Every write still passes the gate, so this cannot exceed what you already may do.',
+    '',
+  ].join('\n');
+}
 
 /** Reads stdin when it is piped; returns '' for an interactive terminal. */
 async function readStdin(): Promise<string> {
@@ -145,6 +183,43 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
           (result.edges.length > 0 ? ` (${result.edges.length} relation(s))` : '') +
           `\n`,
       );
+      return 0;
+    }
+    case 'skill': {
+      const [sub, name] = rest;
+      const { skills, errors } = await discoverSkills(files);
+      if (sub === 'list' || sub === undefined) {
+        for (const s of skills) {
+          process.stdout.write(`${s.name}  [${s.origin}]  uses: ${s.uses.join(', ')}\n`);
+        }
+        for (const e of errors) process.stderr.write(`skipped ${e.name}: ${e.reason}\n`);
+        return errors.length === 0 ? 0 : 1;
+      }
+      if (sub !== 'new' || name === undefined) {
+        process.stderr.write('usage: engram skill [list] | engram skill new <name>\n');
+        return 2;
+      }
+      const path = `${SKILLS_DIR}/${name}.md`;
+      if (await files.exists(path)) {
+        process.stderr.write(`${path} already exists\n`);
+        return 1;
+      }
+      await files.write(path, scaffoldSkill(name));
+      process.stdout.write(`created ${path}\n`);
+      return 0;
+    }
+    case 'mcp': {
+      const deps = { files, clock, detect: filesystemDetector(root), by, root };
+      if (argv.includes('--http')) {
+        serveHttp(deps, {
+          enabled: true,
+          port: Number(flag(argv, 'port', '7777')),
+          host: flag(argv, 'host', '127.0.0.1'),
+        });
+        // Both transports: the socket is listening, and stdio still serves the
+        // client that spawned us.
+      }
+      await serveStdio(deps);
       return 0;
     }
     case 'capture': {

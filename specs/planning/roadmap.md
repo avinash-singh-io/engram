@@ -48,7 +48,7 @@ users makes this free.
 | v0.8.0 | ✅ **Phase 9 — Structure, views & health** (2026-08-12) | `init --structure=<x>` scaffolds; view generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian link-format detection | — |
 | v0.9.0 | ✅ **Phase 10 — Agent surface, write path** (2026-08-12) | `format(content, hints)` — content from anywhere, no capture prerequisite (ADR-0033); write-time relation extraction; write gate + guardrails; skills; AGENTS.md; adapters; MCP server | **GATE 2 — edge accuracy** |
 | v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; validity filter (drop superseded/expired); trust weighting (`verified` > `generated`); must beat the Phase 7 baseline on the locked evaluator | — |
-| v0.10.0 | **Phase 15 — Surfaces**: skills, MCP server, agent adapters. **Not gated on Gate 2** — they sequence and expose operations Gate 2 does not affect | — |
+| v0.10.0 | ✅ **Phase 15 — Surfaces** (2026-08-12): skills, MCP server, agent adapters. **Not gated on Gate 2** — they sequence and expose operations Gate 2 does not affect | — |
 | v0.11.0 | **Phase 14 — Obsidian surface** | Community plugin; agent inside Obsidian; approval queue panel | — |
 | **v1.0.0** | **— base product complete —** | Everything above. The knowledge system, without intelligence | — |
 
