@@ -1,7 +1,7 @@
 # Project Status
 
-> **Last Updated**: 2026-08-12
-> **Current Phase**: **Phase 15 complete (v0.10.0)**. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Last Updated**: 2026-08-17
+> **Current Phase**: **Phase 14 code complete** — the approval queue, releasing as v0.11.0. The Obsidian plugin moved to **Phase 16** so the agent surfaces get real use first. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
 > **Latest Release**: **v0.10.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, P0). GitHub tags and releases are current; the registry is six releases behind.
 > **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
 
@@ -59,7 +59,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 14 — Obsidian surface | `phase-14-obsidian` | In progress | Groups 0-6 done; **manual Obsidian gate outstanding** |
+| Phase 14 — The approval queue | `phase-14-obsidian` | In progress | Groups 0-6 done; Obsidian plugin deferred to Phase 16 |
 
 ## Upcoming Phases — the v2 line
 
@@ -72,7 +72,8 @@ is rewritten clean-room rather than patched.
 | Phase 11 | Retrieval | **blocked on Gate 2** | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
 | Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
 | Phase 13 | Intelligence II | **parked** (ADR-0038) | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
-| Phase 14 | Obsidian surface | planned | Community plugin; agent inside Obsidian. **Independent lane — can move earlier** |
+| Phase 14 | The approval queue | **code complete** | QUEUE outcome; `.engram/queue/`; `engram queue`; human-only approve; BUG-003 guardrail config. Releases as v0.11.0 |
+| Phase 16 | Obsidian surface | planned | Community plugin. **Code already written and landing inert** — this phase is the manual vault verification and the store submission. Fully independent |
 | ~~Phase 15~~ | ~~Surfaces — skills, MCP, adapters~~ | **complete (v0.10.0)** | Skills sequence the seven ops; MCP exposes them as typed tools; agent adapters. All work over `capture`/`format`/`link`/`reindex`/`doctor`, none of which Gate 2 affects |
 | ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
 
@@ -102,8 +103,10 @@ productivity suite, and is deliberately kept out of the core. See
 2. **Fix BUG-002.** Seven tags now point at nothing. The workflow is correct; the
    remaining variable is the npmjs.com Trusted Publisher record — check the workflow
    filename field reads `publish.yml`, not `.github/workflows/publish.yml`.
-3. **Phase 14 — Obsidian surface** is the only unblocked phase left, and ADR-0011
-   already calls it an independent lane.
+3. **Use it.** `docs/using-engram.md` covers install from source, adopting an
+   existing Obsidian vault, and wiring Claude Code over MCP. Four bugs that made
+   adoption impossible were fixed on 2026-08-17 (BUG-004 through BUG-007) — real use
+   is now the fastest source of the evidence Phases 12–13 are waiting on.
 4. Gate 1's classifier validation is **waived, not passed** — the blind worksheet
    and machine labels are preserved in `.gate1/`. Completable at any time without
    redoing work.

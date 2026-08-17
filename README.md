@@ -14,6 +14,9 @@
 
 ---
 
+> **Getting started:** [docs/using-engram.md](docs/using-engram.md) — install, adopt an
+> existing Obsidian vault, and wire Claude Code or Gemini over MCP.
+
 ## What is it?
 
 Engram is a small command-line tool that turns a folder of Markdown into a

@@ -1,9 +1,16 @@
-# Phase 14 — Obsidian surface: the approval queue and the plugin
+# Phase 14 — The approval queue (Obsidian plugin deferred to Phase 16)
 
 > **Status**: in progress (started 2026-08-13)
 > **Branch**: `phase-14-obsidian`
 > **Target release**: v0.11.0
 > **Not gated on Gate 2** — nothing here depends on edge accuracy.
+>
+> **SCOPE CHANGED 2026-08-17.** The owner deprioritized the Obsidian plugin in favour
+> of getting the **agent** surfaces into real use first. This phase now releases the
+> **approval queue**; the plugin's code lands inert, excluded from the npm tarball,
+> and its manual vault verification becomes **Phase 16**'s acceptance gate. The split
+> follows the tier boundary exactly — the queue is gate work, the plugin is surface
+> work — which is why it was clean.
 
 ## Goal
 

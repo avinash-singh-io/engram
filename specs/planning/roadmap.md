@@ -1,7 +1,11 @@
 # Roadmap
 
-> **Last Updated**: 2026-08-09 · v2 architecture adopted (ADR-0018 … ADR-0031)
-> **Current line**: v0.6.8 shipped on the v1 architecture. The v2 line starts at Phase 7.
+> **Last Updated**: 2026-08-17 · v2 architecture adopted (ADR-0018 … ADR-0042)
+> **Current line**: **v2.** Phases 7, 8, 9, 10 and 15 are complete (v0.10.0 tagged).
+> Phase 14's approval queue is next out as v0.11.0; the Obsidian plugin moved to
+> Phase 16 so the **agent surfaces get real use first**.
+> **Caveat**: nothing since v0.6.5 has reached npm (BUG-002). Tags are current; the
+> registry is not. Install from source until that is fixed.
 
 ## Vision
 
@@ -47,10 +51,11 @@ users makes this free.
 | v0.7.0 | ✅ **Phase 8 — Core** (2026-08-12) | Clean-room `src/`. `core/model.ts` (Node + Edge, version-free) + `format/` codec registry (ADR-0032); narrow ports (`FileStore`, `Detector`, `Clock`); identity (slug · path · `aliases`); relations in frontmatter; capture never rejected | — |
 | v0.8.0 | ✅ **Phase 9 — Structure, views & health** (2026-08-12) | `init --structure=<x>` scaffolds; view generation from `part-of`; derived state gitignored; `doctor` incl. Obsidian link-format detection | — |
 | v0.9.0 | ✅ **Phase 10 — Agent surface, write path** (2026-08-12) | `format(content, hints)` — content from anywhere, no capture prerequisite (ADR-0033); write-time relation extraction; write gate + guardrails; skills; AGENTS.md; adapters; MCP server | **GATE 2 — edge accuracy** |
-| v0.10.0 | **Phase 11 — Retrieval** | Traversal over closed relations; validity filter (drop superseded/expired); trust weighting (`verified` > `generated`); must beat the Phase 7 baseline on the locked evaluator | — |
-| v0.10.0 | ✅ **Phase 15 — Surfaces** (2026-08-12): skills, MCP server, agent adapters. **Not gated on Gate 2** — they sequence and expose operations Gate 2 does not affect | — |
-| v0.11.0 | **Phase 14 — Obsidian surface** | Community plugin; agent inside Obsidian; approval queue panel | — |
+| v0.10.0 | ✅ **Phase 15 — Surfaces** (2026-08-12) | Skills; **MCP server over stdio and HTTP**; agent adapters (Claude, Antigravity, Gemini). **Not gated on Gate 2** — they expose operations Gate 2 does not affect. This is the surface an agent uses today | — |
+| v0.11.0 | **Phase 14 — The approval queue** | The gate's third outcome, QUEUE (ADR-0042): `propose-only` defers instead of refusing; proposals held as plain markdown in `.engram/queue/`; `engram queue` review; approve refuses on drift rather than merging. **Approve and reject are human-only — never MCP tools.** Plus BUG-003: a vault can finally configure its guardrails at all | — |
+| v0.12.0 | **Phase 11 — Retrieval** | Traversal over closed relations; validity filter (drop superseded/expired); trust weighting (`verified` > `generated`); must beat the Phase 7 baseline on the locked evaluator | **blocked on GATE 2** |
 | **v1.0.0** | **— base product complete —** | Everything above. The knowledge system, without intelligence | — |
+| v1.1.0 | **Phase 16 — Obsidian surface** | Community plugin: `ObsidianFileStore` over the vault adapter (desktop **and** mobile), capture + format commands, the approval-queue panel. **Code is already written and tested and lands inert**; this phase is the manual vault verification, the community-plugin submission, and whatever the first real use demands | — |
 
 ### Parked — reopened only after v1.0 has real usage
 
@@ -93,9 +98,20 @@ See [ADR-0031](../decisions/0031-evidence-gates-before-graph.md).
 - Phase 11 depends on 10 clearing Gate 2.
 - **Phases 12–13 depend on 7 (the log) and 11 (the graph) — by *dependency*, not
   priority.** You cannot learn from usage you do not have, and there is no usage yet.
-- **Phase 14 is independent of 11–13.** It is Tier 2 *Surface* and can move earlier
-  or slip without blocking anything. That independence is the test that the tiering
-  is real rather than decorative.
+- **Phase 14 split, and the split is the proof.** It was scoped as one phase — an
+  Obsidian plugin plus "the approval queue panel". Building it showed those are two
+  different things: the queue is *gate* work (Tier 1-adjacent, surface-agnostic,
+  rendered identically by the CLI), and the plugin is *surface* work. The queue
+  ships as v0.11.0; the plugin became **Phase 16**. A phase that can be cut in half
+  along the tier boundary is evidence the boundary is real.
+- **Phase 16 is independent of 11–13** and of everything else. It is pure Tier 2
+  *Surface* and can move at will without blocking anything, which is the same test
+  in its stronger form: the plugin was deprioritized *after being written* and
+  nothing else had to change.
+- **Deliberate ordering: agent surfaces before the human one.** MCP and the
+  adapters (Phase 15) already let Claude Code, Antigravity and Gemini drive a vault,
+  so the fastest path to real usage is an agent, not a plugin. Real usage is also
+  what Phases 12–13 are waiting on, so this ordering shortens the parked path too.
 
 ### Why the intelligence layer is possible here and not elsewhere
 
@@ -118,10 +134,14 @@ These are **Agency** and **Surface** concerns ([ADR-0024](../decisions/0024-thre
 They add affordances over a core that does not know about them, which is why they
 can wait without creating debt.
 
+**Two items left this table by shipping**, which is the tiering working as designed
+— both were added over an unchanged core. **Skills** shipped in Phase 15 (discovered,
+validated and exposed; engram never runs one). **Guardrails** shipped in Phase 10,
+each with a preventive half at the write gate and a detective half in `doctor`, and
+became configurable per-vault in Phase 14.
+
 | Item | Dimension | Notes |
 |---|---|---|
-| **Skills** — packaged instruction sets for KB operations (literature review, connect-the-dots, weekly digest, PRD-from-sources) | Agency | Composable, user-authorable, shipped as vault-local files so they travel with the vault |
-| **Guardrails** — constraints on agent behavior (propose-don't-write, never delete, require `verified` before X, rate limits on autonomous filing) | Agency | The counterweight to write-time autonomy ([ADR-0027](../decisions/0027-write-time-extraction-only.md)) |
 | **Engram's own agent** | Agency | Optional — the vault must stay usable by any external agent |
 | **Engram's own UI** | Surface | Only after Obsidian proves the surface layer is genuinely swappable |
 | **Connectors** — calendar, events, external feeds | Surface / Derivation | ⚠️ **This is where engram becomes a productivity suite** competing with much larger incumbents. Worth doing eventually; worth not doing *accidentally*. Inference item 6 in [ADR-0036](../decisions/0036-intelligence-loop.md) — ranked last because it demos best |
