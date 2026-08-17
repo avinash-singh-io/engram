@@ -50,9 +50,10 @@
     "lint": "eslint src tests plugin",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build && npm run smoke:plugin",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build && npm run smoke:cli && npm run smoke:plugin",
     "prepublishOnly": "npm run check",
-    "smoke:plugin": "node scripts/smoke-plugin.mjs"
+    "smoke:plugin": "node scripts/smoke-plugin.mjs",
+    "smoke:cli": "node scripts/smoke-cli.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

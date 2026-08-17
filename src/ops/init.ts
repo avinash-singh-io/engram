@@ -9,38 +9,66 @@
  * kept so adding one later is additive rather than a CLI break.
  */
 
-import { DERIVED_GITIGNORE, ROOT_MARKER } from '../core/paths.js';
+import { DERIVED_GITIGNORE, isDerived, RESERVED_FILES, ROOT_MARKER } from '../core/paths.js';
 import type { Clock, FileStore } from '../core/ports.js';
 import { GUARDRAILS_PATH, scaffoldGuardrails } from '../policy/config.js';
-import { writePointers } from '../surface/adapters.js';
+import { AGENTS, writePointers } from '../surface/adapters.js';
 import { reindex } from './reindex.js';
 
 export const STRUCTURES = ['default'] as const;
 export type Structure = (typeof STRUCTURES)[number];
 
 /**
- * ADR-0023's reference tree. Illustrative, not prescribed.
+ * The reference tree. **Only ever written into an empty vault** (BUG-005).
  *
- * `AGENTS.md` is deliberately absent: `reindex` generates it from the live
- * registries, so a hand-written copy here would be the drift the generation exists
- * to prevent.
+ * ADR-0023 says engram has no opinion about the shape, and writing these into a
+ * vault that already has folders is an opinion. It is also actively messy: on a
+ * case-insensitive filesystem `projects/` resolves into an existing `Projects/`,
+ * dropping a `.gitkeep` beside someone's real notes, and on a case-sensitive one it
+ * produces two siblings differing only in case.
  */
-const SCAFFOLD: Record<string, string> = {
+const TREE: Record<string, string> = {
   '/inbox/.gitkeep': '',
   '/concepts/.gitkeep': '',
   '/decisions/.gitkeep': '',
   '/sources/.gitkeep': '',
   '/projects/.gitkeep': '',
+};
+
+/** What every vault needs, whatever shape it already has. */
+const ESSENTIAL: Record<string, string> = {
   [`/${ROOT_MARKER}/config.json`]: `${JSON.stringify({ structure: 'default' }, null, 2)}\n`,
   // What an agent may do to this vault. Scaffolded so the mechanism is
   // discoverable; `proposeOnly` ships empty so a fresh vault defers nothing.
   [GUARDRAILS_PATH]: `${scaffoldGuardrails()}\n`,
 };
 
+/**
+ * Does this vault already hold notes someone wrote?
+ *
+ * Reserved and derived paths do not count — a vault that has only `index.md` and
+ * `views/` from a previous `reindex` is still empty of authored content.
+ */
+async function hasAuthoredNotes(files: FileStore): Promise<boolean> {
+  for (const path of await files.list()) {
+    if (!path.endsWith('.md')) continue;
+    if (path.startsWith(`/${ROOT_MARKER}/`) || isDerived(path)) continue;
+    if (RESERVED_FILES.includes(path.replace(/^\//, ''))) continue;
+    if (AGENTS.some((a) => a.instructionsPath === path)) continue;
+    return true;
+  }
+  return false;
+}
+
 export interface InitResult {
   created: string[];
   skipped: string[];
   reindexed: string[];
+  /**
+   * Things the user needs to know that are neither a created file nor a skipped
+   * one — an adopted vault keeping its own shape, or an agent left unrouted.
+   */
+  notes: string[];
 }
 
 /**
@@ -62,8 +90,20 @@ export async function init(
 
   const created: string[] = [];
   const skipped: string[] = [];
+  const notes: string[] = [];
 
-  for (const [path, content] of Object.entries(SCAFFOLD)) {
+  // An existing vault already has a shape, and ADR-0023 says engram does not get
+  // an opinion about it. Only an empty vault gets the reference tree.
+  const adopting = await hasAuthoredNotes(files);
+  const scaffold = adopting ? ESSENTIAL : { ...TREE, ...ESSENTIAL };
+  if (adopting) {
+    notes.push(
+      'this vault already has notes, so the reference tree was not created — engram ' +
+        'has no opinion about your folders (ADR-0023). File notes wherever you already do.',
+    );
+  }
+
+  for (const [path, content] of Object.entries(scaffold)) {
     if (await files.exists(path)) {
       skipped.push(path);
       continue;
@@ -90,6 +130,28 @@ export async function init(
   created.push(...pointers.written);
   skipped.push(...pointers.skipped);
 
+  // BUG-006. Leaving the file alone is right — it may carry instructions engram
+  // knows nothing about — but the pointer's only job is to route the agent, so a
+  // skip means the agent is never routed. Saying "left alone" does not convey that,
+  // and the most common adoption path is precisely a vault that already has a
+  // CLAUDE.md. Name the line to add.
+  for (const path of pointers.skipped) {
+    const agent = AGENTS.find((a) => a.instructionsPath === path);
+    if (agent === undefined) continue;
+    const existing = (await files.read(path)) ?? '';
+    if (existing.includes('AGENTS.md')) continue;
+    notes.push(
+      `${path} is yours and was left alone — so ${agent.name} will NOT find the ` +
+        `contract. Add this line to it:\n    ${pointerLine(agent.instructionsPath)}`,
+    );
+  }
+
   const { written } = await reindex(files, clock);
-  return { created: created.sort(), skipped: skipped.sort(), reindexed: written };
+  return { created: created.sort(), skipped: skipped.sort(), reindexed: written, notes };
+}
+
+/** The single line a hand-written instructions file needs. */
+export function pointerLine(instructionsPath: string): string {
+  const depth = instructionsPath.split('/').filter(Boolean).length - 1;
+  return `This is an engram vault. The contract is [AGENTS.md](${'../'.repeat(depth)}AGENTS.md) — read it first.`;
 }

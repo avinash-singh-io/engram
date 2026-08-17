@@ -121,3 +121,35 @@ Affects-specs: none
 Detail: §11 calls the CLI half of the queue "a `git`-style review". Printing the proposed file whole would satisfy the words and miss the point — on a replacement, what a human needs is the three lines that change inside a hundred. `surface/diff.ts` is an LCS line diff with collapsed context, capped at 2000 lines per side, presentation only.
 
 ---
+
+### [DISCOVERY] 2026-08-17 — The installed CLI binary has never run
+Topics: tooling, cli, release
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: `src/cli.ts` guarded its entry with `argv[1]?.endsWith('cli.js')`, which is true for `node dist/cli.js` and false for every real install — npm puts a bin symlink named `engram` on the PATH, so the guard failed and the process exited 0 having done nothing. Every command was a silent no-op from Phase 8 onward. Two things hid it: the suite imports `main()` directly and never invokes the binary, and BUG-002 kept every version since v0.6.5 off npm, so nobody could install it and find out. Found by `npm link`-ing engram to try the MCP surface with Claude Code. Filed as BUG-004 (P0) and fixed here with `scripts/smoke-cli.mjs` guarding it — the fifth wiring bug in this project that only running the artifact could catch.
+
+---
+
+### [FEATURE] 2026-08-17 — Gemini adapter descriptor
+Topics: adapters, surfaces
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: The Gemini CLI looks for `GEMINI.md`, so it needs a pointer like Claude Code's `CLAUDE.md`. One descriptor, no code, no template — which is ADR-0011's claim tested rather than asserted. Antigravity already had one. Prompted by the owner wanting to drive engram from Claude Code and Gemini-family agents before the Obsidian plugin exists.
+
+---
+
+### [SCOPE_CHANGE] 2026-08-17 — Agent surfaces before Obsidian; adoption bugs taken into scope
+Topics: surfaces, adapters, mcp, adoption
+Affects-phases: phase-14-obsidian
+Affects-specs: specs/planning/roadmap.md
+Detail: Owner redirected: the Obsidian plugin moves later in the roadmap, and the near-term goal is driving engram from Claude Code and Gemini-family agents, which the Phase 15 MCP surface already supports. Trying that immediately surfaced four bugs that made engram unusable outside a freshly-created vault, all now fixed here: BUG-004 (the installed binary was a silent no-op), BUG-005 (`init` imposed its reference tree on vaults that already had a shape), BUG-006 (a skipped agent pointer left the agent unrouted without saying so), BUG-007 (`--container` slugified the directory, giving every existing folder a twin). Plugin code lands inert and excluded from the npm tarball; the manual Obsidian gate becomes the acceptance criterion for the later phase that releases it.
+
+---
+
+### [DISCOVERY] 2026-08-17 — Three adoption bugs, all invisible to the suite
+Topics: adoption, cli, format
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: BUG-005, BUG-006 and BUG-007 were all found within minutes of adopting an existing Obsidian-shaped vault, and none was visible to 587 passing tests, because every test creates its vault from nothing and calls functions directly. The pattern is now unmistakable: this project's defects live in the gap between "the function works" and "a person can use it". `scripts/smoke-cli.mjs` and `scripts/smoke-plugin.mjs` exist to close it and both run in `npm run check`.
+
+---

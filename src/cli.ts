@@ -6,6 +6,8 @@
  * ADR-0024's tiering is real rather than decorative. `recall` arrives in Phase 11;
  * skills and MCP in Phase 15.
  */
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { capture } from './ops/capture.js';
 import { doctor, formatReport } from './ops/doctor.js';
 import { loadGuardrails } from './policy/config.js';
@@ -147,7 +149,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   switch (command) {
     case 'init': {
       try {
-        const { created, skipped, reindexed } = await init(
+        const { created, skipped, reindexed, notes } = await init(
           files,
           clock,
           flag(argv, 'structure', 'default'),
@@ -155,6 +157,9 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         for (const p of created) process.stdout.write(`created ${p}\n`);
         for (const p of skipped) process.stderr.write(`exists, left alone: ${p}\n`);
         process.stdout.write(`regenerated ${reindexed.length} derived file(s)\n`);
+        // Notes are the difference between "init succeeded" and "init succeeded
+        // and here is what you still have to do" (BUG-005, BUG-006).
+        for (const n of notes) process.stdout.write(`\nnote: ${n}\n`);
         return 0;
       } catch (e) {
         process.stderr.write(`${e instanceof Error ? e.message : String(e)}\n`);
@@ -380,7 +385,32 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   }
 }
 
-// Run only when invoked directly, so tests can import `main` freely.
-if (process.argv[1]?.endsWith('cli.js') === true) {
+/**
+ * Run only when invoked directly, so tests can import `main` freely.
+ *
+ * This was `argv[1]?.endsWith('cli.js')`, which is true when you run
+ * `node dist/cli.js` and **false for every real installation**: npm puts a `bin`
+ * symlink named `engram` on the PATH, so `argv[1]` is `.../bin/engram` and the
+ * guard silently skipped `main()`. The installed CLI did nothing and exited 0.
+ *
+ * It went unnoticed because BUG-002 has kept every version since v0.6.5 off npm —
+ * nobody could install it, so nobody could discover that installing it produced a
+ * no-op. Found in Phase 14 by `npm link`-ing it to try the MCP surface.
+ *
+ * The real question is "is this module the process entry point", so ask that:
+ * compare the resolved entry path with this module's own path. `realpathSync`
+ * matters — without it the symlink and the target never compare equal.
+ */
+function isEntryPoint(): boolean {
+  const entry = process.argv[1];
+  if (entry === undefined) return false;
+  try {
+    return realpathSync(entry) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint()) {
   main().then((code) => process.exit(code));
 }

@@ -108,7 +108,15 @@ export async function format(
     };
   }
 
-  const dir = hints.container === undefined ? '' : `/${slugify(hints.container)}`;
+  // The container names a **directory**, so it is used verbatim; only the `part-of`
+  // edge below gets slugified, because that names an *identity*. ADR-0021 draws
+  // exactly this line — slug is identity, path is address — and slugifying the
+  // directory conflated them: a vault with `Daily Notes/` and `Reading List/` got a
+  // slugified twin of every folder it already had, and on a case-insensitive
+  // filesystem `Projects` silently resolved into the existing `Projects/` while
+  // engram reported `/projects/`. Link targets are percent-encoded on write
+  // (BUG-001), so a space in a real folder name is already handled.
+  const dir = hints.container === undefined ? '' : `/${hints.container.replace(/^\/+|\/+$/g, '')}`;
   const path = hints.path ?? `${dir}/${id}.md`;
 
   const at = deps.clock.now();

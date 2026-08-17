@@ -43,6 +43,11 @@ export const AGENTS: AgentDescriptor[] = [
     instructionsPath: '/.antigravity/AGENTS.md',
     why: 'Antigravity reads instructions from its own directory',
   },
+  {
+    name: 'gemini',
+    instructionsPath: '/GEMINI.md',
+    why: 'the Gemini CLI looks for GEMINI.md and would not otherwise find the contract',
+  },
 ];
 
 /**
