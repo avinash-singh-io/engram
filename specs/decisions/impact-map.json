@@ -92,6 +92,7 @@
     ],
     "structure-views": [
       "specs/decisions/0023-structure-tree-plus-views.md",
+      "specs/decisions/0043-vault-declares-a-filing-convention.md",
       "specs/architecture/v2-overview.md"
     ],
     "architecture-tiers": [

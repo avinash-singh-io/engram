@@ -1,5 +1,7 @@
 # Phase 14 — Tasks
 
+> **Released as v0.11.0.** Scope changed mid-phase: Obsidian → Phase 16.
+
 > Legend: `[ ]` todo · `[/]` in progress · `[x]` done
 > Execution: Group 0 → 1 → 2 → 3 → 4 → 5 → 6 (sequential)
 > **TDD is on** (Rule 13) — the failing test comes first in every group.
@@ -116,9 +118,10 @@
 - [x] **Found by that smoke test**: the repo is `"type": "module"`, so a CommonJS
       `main.js` failed to `require`. Build now emits `dist/obsidian/package.json`
 - [x] `smoke:plugin` added to `npm run check`, so the artifact is verified every run
-- [ ] **MANUAL GATE — OUTSTANDING.** The plugin has not been loaded in a real
-      Obsidian vault. Loading and wiring are proven; **rendering and button
-      behaviour are not**, and cannot be automated from here. A prepared vault with
-      the plugin installed and two proposals waiting (one clean, one stale) is at
-      `scratchpad/engram-plugin-test`. **Must pass before v0.11.0 is tagged.**
+- [x] **Manual Obsidian gate moved to Phase 16.** The plugin lands inert and is
+      excluded from the npm tarball, so v0.11.0 ships nothing unverified a user can
+      run. Phase 16 owns loading it in a real vault
+- [x] **ADR-0043** — a vault declares a filing convention; engram prefers none
+- [x] Four structures with guides, rendered into `AGENTS.md`
+- [x] **BUG-008** — reindex idempotence restored, guarded by an invariant test
 - [x] `retrospective.md` with `## Verification Evidence`

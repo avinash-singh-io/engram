@@ -1,9 +1,9 @@
 # Project Status
 
-> **Last Updated**: 2026-08-17
-> **Current Phase**: **Phase 14 code complete** — the approval queue, releasing as v0.11.0. The Obsidian plugin moved to **Phase 16** so the agent surfaces get real use first. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.10.0 tagged, NOT published.** npm `latest` is **v0.6.5** — every tag since has failed to publish (BUG-002, P0). GitHub tags and releases are current; the registry is six releases behind.
-> **Health**: At Risk — the code is fine and the suite is green, but **nothing has reached npm since v0.6.5** (BUG-002, P0)
+> **Last Updated**: 2026-08-22
+> **Current Phase**: **Phase 14 complete, released as v0.11.0.** The Obsidian plugin moved to **Phase 16** so the agent surfaces get real use first. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Latest Release**: **v0.11.0** — the approval queue, guardrail configuration, and the vault's filing convention. Publish verified against the registry, not the workflow log.
+> **Health**: Good — 627 tests, both smoke checks green, and the six adoption bugs that made engram unusable outside a fresh vault are fixed.
 
 ## Summary
 
@@ -37,6 +37,7 @@ is rewritten clean-room rather than patched.
 | 9 | Structure, views & health | Complete | v0.8.0 |
 | 10 | Agent surface (write path) | Complete | v0.9.0 |
 | 15 | Surfaces — skills, MCP, adapters | Complete | v0.10.0 |
+| 14 | Approval queue, guardrail config, structures | Complete | v0.11.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -59,7 +60,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| Phase 14 — The approval queue | `phase-14-obsidian` | In progress | Groups 0-6 done; Obsidian plugin deferred to Phase 16 |
+| _(none — Phase 14 released as v0.11.0)_ | | | |
 
 ## Upcoming Phases — the v2 line
 
@@ -72,7 +73,7 @@ is rewritten clean-room rather than patched.
 | Phase 11 | Retrieval | **blocked on Gate 2** | Traversal; validity filter; trust weighting. Must beat the Phase 7 baseline on the locked evaluator |
 | Phase 12 | Intelligence I | **parked** (ADR-0038) | Distillation: events → proposed patterns; **gaps** and **re-derivation** — the two that need a log, not a model |
 | Phase 13 | Intelligence II | **parked** (ADR-0038) | `contradicts`; staleness × intent; dead weight; proactive surfacing — opt-in, evidence-cited, rate-limited |
-| Phase 14 | The approval queue | **code complete** | QUEUE outcome; `.engram/queue/`; `engram queue`; human-only approve; BUG-003 guardrail config. Releases as v0.11.0 |
+| ~~Phase 14~~ | ~~The approval queue~~ | **complete (v0.11.0)** | QUEUE outcome; `.engram/queue/`; `engram queue`; human-only approve; BUG-003 guardrail config. Releases as v0.11.0 |
 | Phase 16 | Obsidian surface | planned | Community plugin. **Code already written and landing inert** — this phase is the manual vault verification and the store submission. Fully independent |
 | ~~Phase 15~~ | ~~Surfaces — skills, MCP, adapters~~ | **complete (v0.10.0)** | Skills sequence the seven ops; MCP exposes them as typed tools; agent adapters. All work over `capture`/`format`/`link`/`reindex`/`doctor`, none of which Gate 2 affects |
 | ~~Phase 5~~ | ~~Semantic Layer~~ | **cancelled** | Superseded by Phase 11; revisit only if structural traversal proves insufficient |
@@ -100,9 +101,8 @@ productivity suite, and is deliberately kept out of the core. See
    then `node tools/gate2/report.js`. **Phase 11 is gated on this verdict**, and its
    scope depends on it: pass → traversal, validity filter, trust weighting; fail →
    ADR-0031's fallback of nodes plus untyped links.
-2. **Fix BUG-002.** Seven tags now point at nothing. The workflow is correct; the
-   remaining variable is the npmjs.com Trusted Publisher record — check the workflow
-   filename field reads `publish.yml`, not `.github/workflows/publish.yml`.
+2. **Phase 16 — the Obsidian plugin.** Code is written, tested and landed inert.
+   What remains is loading it in a real vault, then the community-plugin submission.
 3. **Use it.** `docs/using-engram.md` covers install from source, adopting an
    existing Obsidian vault, and wiring Claude Code over MCP. Four bugs that made
    adoption impossible were fixed on 2026-08-17 (BUG-004 through BUG-007) — real use

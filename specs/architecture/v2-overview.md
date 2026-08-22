@@ -426,8 +426,8 @@ the tiering is real rather than decorative.
 |---|---|---|---|
 | CLI | human, any agent with a shell | all seven ops | 8 |
 | `AGENTS.md` | any agent — the entry contract | ops, guardrails, available skills | 10 |
-| MCP server | agents that speak MCP | ops as typed tools; skills as tools | 10 |
-| Obsidian plugin | human, agent inside the editor | `format`, `recall`, skills, approval queue | 14 — independent lane |
+| MCP server | agents that speak MCP | ops as typed tools; skills as **prompts** — engram does not execute a skill | 15 |
+| Obsidian plugin | human | `capture`, `format`, the approval queue panel | 16 — independent lane. The *agent* half of this row is served by MCP |
 | Engram's own UI | human | whatever proves necessary | post-v2, only if needed |
 
 The **approval queue**: `propose-only` produces diffs needing a human. On the CLI
