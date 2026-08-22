@@ -39,9 +39,16 @@ export function generateIndex(nodes: Node[], edges: Edge[]): GeneratedFile {
   const loose: Node[] = [];
 
   for (const n of nodes) {
-    const parent = edges.find((e) => e.from === n.id && e.kind === 'part-of')?.to;
-    if (parent === undefined) loose.push(n);
-    else containers.set(parent, [...(containers.get(parent) ?? []), n]);
+    // **Every** parent, not the first. ADR-0023 promises views that provide "the
+    // *other* arrangements", and the format has always allowed
+    // `part-of: [concepts, consensus]` — but `.find()` here silently kept one and
+    // discarded the rest, so a note could never appear in two groupings. The
+    // model permitted it; the projection threw it away.
+    const parents = [
+      ...new Set(edges.filter((e) => e.from === n.id && e.kind === 'part-of').map((e) => e.to)),
+    ];
+    if (parents.length === 0) loose.push(n);
+    else for (const p of parents) containers.set(p, [...(containers.get(p) ?? []), n]);
   }
 
   const lines = [HEADER('Index', 'The structure tree, projected from `part-of` edges.')];

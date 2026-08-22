@@ -1,0 +1,167 @@
+# Using engram — install, adopt a vault, wire an agent
+
+The three things worth understanding up front:
+
+1. **Engram is installed once on your machine, never into a vault.** A vault is a
+   directory of markdown. Engram is a CLI you point at one.
+2. **A vault can be any directory** — a new one, or an Obsidian vault you have used
+   for years. `init` is non-destructive and does not impose a folder structure on a
+   vault that already has one.
+3. **The agent is how you use it.** Engram ships no agent and no UI. Claude Code,
+   Antigravity, Gemini or anything that speaks MCP does the organizing work; engram
+   validates, files, and refuses.
+
+---
+
+## 1. Install
+
+Engram is **not on npm** right now — every release since v0.6.5 failed to publish
+(BUG-002). Until that is fixed, install from source:
+
+```bash
+git clone git@github.com:avinash-singh-io/engram.git && cd engram && npm install && npm run build && npm link
+```
+
+That puts `engram` on your PATH. Verify it actually runs — this is worth doing, since
+the installed binary was a silent no-op until BUG-004:
+
+```bash
+engram --help
+```
+
+Nothing is installed into any vault. There is no per-vault dependency, no
+`node_modules` in your notes, and uninstalling engram leaves every file readable.
+
+## 2. Point it at a vault
+
+**A new vault:**
+
+```bash
+mkdir ~/my-vault && cd ~/my-vault && engram init
+```
+
+You get a reference tree (`inbox/ concepts/ decisions/ sources/ projects/`), which is
+illustrative and yours to delete — [ADR-0023](../specs/decisions/0023-derived-views-from-part-of.md)
+is explicit that engram has no opinion about the shape.
+
+**An Obsidian vault you already use:**
+
+```bash
+cd ~/path/to/your/vault && engram init
+```
+
+It detects that you already have notes and **does not create its folder tree** — you
+already have a structure, and imposing a second one is an opinion engram does not
+hold. It adds only:
+
+| Path | What it is |
+|---|---|
+| `.engram/config.json` | Which structure this vault declares |
+| `.engram/guardrails.md` | **What an agent may do here.** Edit this |
+| `AGENTS.md` | The generated contract every agent reads |
+| `CLAUDE.md`, `GEMINI.md`, `.antigravity/AGENTS.md` | One-line pointers to `AGENTS.md` |
+| `index.md`, `views/` | Derived. Gitignored; rebuilt by `engram reindex` |
+
+**If you already have a `CLAUDE.md`**, engram leaves it alone — it may carry
+instructions engram knows nothing about. But then Claude Code never learns the
+contract exists, so `init` tells you the one line to add:
+
+```markdown
+This is an engram vault. The contract is [AGENTS.md](AGENTS.md) — read it first.
+```
+
+Run `engram init` again any time. It is idempotent and never overwrites.
+
+## 3. Wire an agent
+
+### Claude Code
+
+Create `.mcp.json` in the vault:
+
+```json
+{
+  "mcpServers": {
+    "engram": { "command": "engram", "args": ["mcp"] }
+  }
+}
+```
+
+`engram mcp` speaks MCP over **stdio** — Claude Code spawns it as a subprocess and
+talks over pipes. No socket, no port, nothing listening
+([ADR-0034](../specs/decisions/0034-encryption-is-a-substrate-concern.md) holds
+intact). Omit `--vault` and it uses the working directory; pass
+`"args": ["mcp", "--vault", "/abs/path"]` to drive a vault from elsewhere.
+
+Then start Claude Code in the vault. It reads `CLAUDE.md` → `AGENTS.md` for the
+contract, and gets these tools:
+
+| Tool | What it does |
+|---|---|
+| `engram_capture` | Persist raw content. **Never rejects** |
+| `engram_format` | Content + the structure the agent decided → a validated node |
+| `engram_link` | Assert one typed relation |
+| `engram_reindex` | Regenerate `index.md` and `views/` |
+| `engram_doctor` | Health report. Read-only |
+| `engram_queue_list`, `engram_queue_show` | **Read** the approval queue |
+
+There is deliberately **no tool that approves or rejects** — see §4.
+
+### Gemini CLI, Antigravity, Codex
+
+Same server, each client's own config location. `init` writes `GEMINI.md` and
+`.antigravity/AGENTS.md` pointers; Codex and anything following the `AGENTS.md`
+convention needs no pointer because it already reads the contract. Adding another
+agent is [one descriptor](../src/surface/adapters.ts), no code.
+
+### Any agent with a shell
+
+Needs no MCP at all — `AGENTS.md` plus the CLI is a complete surface. This is the
+floor the whole design targets.
+
+## 4. Decide what the agent may do
+
+Edit `.engram/guardrails.md`. The field that matters most:
+
+```yaml
+proposeOnly: [/decisions/]
+```
+
+Paths listed there are **held for your review** instead of written. An agent's
+`format` into one of them returns "not written", and the change waits:
+
+```bash
+engram queue list           # what is pending
+engram queue show <id>      # a git-style diff of what would change
+engram queue approve <id>   # apply it
+engram queue reject <id> why not
+```
+
+Two properties worth knowing, both from
+[ADR-0042](../specs/decisions/0042-approval-queue-trust-boundary.md):
+
+- **Approve and reject are human-only.** No MCP tool for either. An agent that could
+  approve its own proposal would have turned a refusal into a retry.
+- **Approve refuses if the file changed since the proposal was made.** Engram does
+  not merge. If you edited the note in Obsidian meanwhile, your edit wins and the
+  proposal stays queued for you to look at again.
+
+`proposeOnly` ships **empty**, so nothing is held until you ask for it.
+
+## 5. Check on it
+
+```bash
+engram doctor
+```
+
+Read-only. Reports dangling relations, synthesis nodes with no sources, agent writes
+outside their permitted scope, and — if this is an Obsidian vault — whether **this
+device's** link settings disagree with how the vault's links are actually written.
+That last one matters on a laptop-plus-phone setup, where the setting is
+per-vault-per-install ([ADR-0028](../specs/decisions/0028-obsidian-owns-link-rewriting.md)).
+
+## What is not here yet
+
+- **`recall`** — structural retrieval. Phase 11, blocked on Gate 2.
+- **The Obsidian plugin** — written and tested, held for Phase 16. Until then Obsidian
+  is a first-class *reader and editor* of the vault; engram just runs beside it.
+- **Sync** — git. Engram never transmits anything.

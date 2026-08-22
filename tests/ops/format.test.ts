@@ -55,9 +55,12 @@ describe('format is deterministic', () => {
     if (r.outcome === 'applied') expect(r.node.id).toBe('chosen-slug');
   });
 
-  it('derives the path from the container', async () => {
+  // The container is used verbatim as of BUG-007: it names a directory, and
+  // slugifying it gave every folder in an existing vault a slugified twin. The slug
+  // still governs the *filename*, which comes from the identity.
+  it('derives the path from the container, keeping the folder name as written', async () => {
     const r = await format('# Raft', { by: 'a', container: 'Distributed Systems' }, deps());
-    if (r.outcome === 'applied') expect(r.node.path).toBe('/distributed-systems/raft.md');
+    if (r.outcome === 'applied') expect(r.node.path).toBe('/Distributed Systems/raft.md');
   });
 
   it('an explicit path wins over a derived one', async () => {
@@ -197,5 +200,48 @@ describe('preventive guardrails run at the gate, not only in doctor', () => {
   it('applies normally when no guardrails are configured', async () => {
     const r = await format('# Synthesis of everything', { by: 'a', id: 'synthesis-x' }, deps());
     expect(r.outcome).toBe('applied');
+  });
+});
+
+/**
+ * Adoption into a real vault (BUG-007).
+ *
+ * `container` names a directory, not an identity. It was being slugified, so a vault
+ * with `Daily Notes/` and `Reading List/` acquired a slugified twin of every folder
+ * it already had — and on a case-insensitive filesystem `Projects` silently resolved
+ * into the existing `Projects/` while engram reported writing `/projects/`.
+ *
+ * ADR-0021 draws the line this restores: slug is identity, path is address.
+ */
+describe('container names a directory, so it is used verbatim', () => {
+  const run = (container: string, files = memoryFileStore()) =>
+    format('# A note', { by: 'me', id: 'n', container }, { files, clock: fixedClock(AT) });
+
+  it('files into a capitalised folder as written', async () => {
+    const r = await run('Projects');
+    expect(r.outcome === 'applied' && r.node.path).toBe('/Projects/n.md');
+  });
+
+  it('preserves spaces in a real folder name', async () => {
+    const r = await run('Daily Notes');
+    expect(r.outcome === 'applied' && r.node.path).toBe('/Daily Notes/n.md');
+  });
+
+  it('handles a nested folder', async () => {
+    const r = await run('Areas/Work');
+    expect(r.outcome === 'applied' && r.node.path).toBe('/Areas/Work/n.md');
+  });
+
+  /** The edge still names an identity, which must be a slug. */
+  it('still slugifies the part-of edge target', async () => {
+    const r = await run('Daily Notes');
+    expect(r.outcome === 'applied' && r.edges[0]?.kind).toBe('part-of');
+    expect(r.outcome === 'applied' && r.edges[0]?.to).toBe('daily-notes');
+  });
+
+  it('writes exactly one file, where it said it would', async () => {
+    const files = memoryFileStore();
+    await run('Projects', files);
+    expect(await files.list()).toEqual(['/Projects/n.md']);
   });
 });

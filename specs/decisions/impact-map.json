@@ -92,6 +92,7 @@
     ],
     "structure-views": [
       "specs/decisions/0023-structure-tree-plus-views.md",
+      "specs/decisions/0043-vault-declares-a-filing-convention.md",
       "specs/architecture/v2-overview.md"
     ],
     "architecture-tiers": [
@@ -138,6 +139,15 @@
     "architecture": [
       "specs/architecture/v2-overview.md",
       "specs/architecture/overview.md"
+    ],
+    "approval-queue": [
+      "specs/decisions/0042-approval-queue-trust-boundary.md",
+      "specs/architecture/v2-overview.md"
+    ],
+    "write-gate": [
+      "specs/decisions/0024-tiered-architecture.md",
+      "specs/decisions/0042-approval-queue-trust-boundary.md",
+      "specs/architecture/v2-overview.md"
     ]
   }
 }

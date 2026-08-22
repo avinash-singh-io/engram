@@ -134,19 +134,75 @@ describe('nested roots and derived state', () => {
   });
 });
 
-describe('Obsidian is detected, not configured (ADR-0025/0028)', () => {
-  it('reports the link-format expectation when Obsidian is present', async () => {
+/**
+ * ADR-0028's detective half, implemented in Phase 14.
+ *
+ * The ADR says `doctor` **reads** the link-format setting from `.obsidian/app.json`
+ * and warns when a device disagrees with the vault. Until now it emitted one fixed
+ * line and never opened the file — the same words to a correct vault and a broken
+ * one, which is the same as saying nothing. The setting is per-vault-per-install,
+ * and the ADR was written for a laptop, a phone and a tablet on one synced vault.
+ */
+describe('Obsidian link settings are read, not assumed (ADR-0025/0028)', () => {
+  const obsidian = staticDetector({ obsidian: true });
+  const withSettings = (settings: Record<string, unknown>) =>
+    memoryFileStore({ '/a.md': note('a'), '/.obsidian/app.json': JSON.stringify(settings) });
+
+  it('says nothing when this device is configured the way the vault is written', async () => {
     const r = await doctor(
-      memoryFileStore({ '/a.md': note('a') }),
-      staticDetector({ obsidian: true }),
+      withSettings({ useMarkdownLinks: true, newLinkFormat: 'absolute' }),
+      obsidian,
     );
-    expect(r.warnings.join(' ')).toMatch(/absolute \+ markdown/);
-    expect(r.warnings.join(' ')).toMatch(/never rewrites link targets/);
+    expect(r.warnings.join(' ')).not.toMatch(/\[obsidian\]/);
+  });
+
+  it('warns when the device would write wikilinks', async () => {
+    const r = await doctor(
+      withSettings({ useMarkdownLinks: false, newLinkFormat: 'absolute' }),
+      obsidian,
+    );
+    expect(r.warnings.join(' ')).toMatch(/wikilinks/i);
+  });
+
+  it('warns when the new-link format is not absolute, naming what it is', async () => {
+    const r = await doctor(
+      withSettings({ useMarkdownLinks: true, newLinkFormat: 'shortest' }),
+      obsidian,
+    );
+    expect(r.warnings.join(' ')).toMatch(/"shortest", not "absolute"/);
+    expect(r.warnings.join(' ')).toMatch(/per-vault-per-install/);
+  });
+
+  /** A fresh install writes almost nothing; missing keys are Obsidian's defaults. */
+  it('treats missing keys as Obsidian defaults rather than as fine', async () => {
+    const r = await doctor(withSettings({}), obsidian);
+    expect(r.warnings.join(' ')).toMatch(/wikilinks/i);
+    expect(r.warnings.join(' ')).toMatch(/not "absolute"/);
+  });
+
+  it('says the settings could not be read when app.json is absent', async () => {
+    const r = await doctor(memoryFileStore({ '/a.md': note('a') }), obsidian);
+    expect(r.warnings.join(' ')).toMatch(/could not be checked/);
+  });
+
+  it('survives a corrupt app.json rather than failing the command', async () => {
+    const files = memoryFileStore({ '/a.md': note('a'), '/.obsidian/app.json': '{not json' });
+    const r = await doctor(files, obsidian);
+    expect(r.failures).toEqual([]);
+    expect(r.warnings.join(' ')).toMatch(/\[obsidian\]/);
   });
 
   it('says nothing about Obsidian when it is absent', async () => {
     const r = await doctor(memoryFileStore({ '/a.md': note('a') }), noObsidian);
     expect(r.warnings.join(' ')).not.toMatch(/Obsidian/);
+  });
+
+  it('still rewrites nothing — detection only', async () => {
+    const files = withSettings({ useMarkdownLinks: false, newLinkFormat: 'shortest' });
+    const before = (await files.list()).sort();
+    await doctor(files, obsidian);
+    expect((await files.list()).sort()).toEqual(before);
+    expect(await files.read('/.obsidian/app.json')).toContain('shortest');
   });
 });
 

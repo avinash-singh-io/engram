@@ -165,3 +165,41 @@ describe('generateAll', () => {
     expect(files.find((f) => f.path.endsWith('recent.md'))!.content).toContain('[lapsed]');
   });
 });
+
+/**
+ * ADR-0023: views "provide the *other* arrangements as extra entry points".
+ *
+ * The format has always allowed a node to declare several parents. The index
+ * generator used `.find()` and kept only the first, so one note could never
+ * appear in two groupings — the model permitted it and the projection discarded
+ * it. This is what makes several structures over the same files possible without
+ * moving or duplicating anything.
+ */
+describe('a node appears under every container it claims', () => {
+  const at = '2026-08-22T09:00:00.000Z';
+  const stamp = { by: 'me', at, until: null };
+  const n = (id: string) => makeNode({ id, path: `/${id}.md`, stamp, body: `# ${id}` });
+  const partOf = (from: string, to: string) => makeEdge({ from, to, kind: 'part-of', stamp });
+
+  it('lists it in both places, from one file', () => {
+    const { content } = generateIndex(
+      [n('raft')],
+      [partOf('raft', 'concepts'), partOf('raft', 'consensus')],
+    );
+    expect(content).toContain('## concepts');
+    expect(content).toContain('## consensus');
+    expect(content.match(/\/raft\.md/g)).toHaveLength(2);
+  });
+
+  it('does not duplicate it when the same edge is asserted twice', () => {
+    const { content } = generateIndex(
+      [n('raft')],
+      [partOf('raft', 'concepts'), partOf('raft', 'concepts')],
+    );
+    expect(content.match(/\/raft\.md/g)).toHaveLength(1);
+  });
+
+  it('still files a node with no parent under Unfiled', () => {
+    expect(generateIndex([n('loose')], []).content).toContain('## Unfiled');
+  });
+});

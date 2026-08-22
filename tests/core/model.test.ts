@@ -71,9 +71,9 @@ describe('Node — an addressable thing', () => {
       id: 'x',
       path: '/new/x.md',
       stamp: stamp(),
-      aliases: ['/inbox/2026-06-14-x.md'],
+      aliases: ['/raw/2026-06-14-x.md'],
     });
-    expect(n.aliases).toEqual(['/inbox/2026-06-14-x.md']);
+    expect(n.aliases).toEqual(['/raw/2026-06-14-x.md']);
   });
 
   it('defaults aliases to an empty list rather than undefined', () => {

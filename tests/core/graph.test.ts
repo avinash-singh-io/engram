@@ -26,7 +26,7 @@ describe('identity — address is path, identity is the slug (ADR-0021)', () => 
       id: 'moved',
       path: '/concepts/moved.md',
       stamp: stamp(),
-      aliases: ['/inbox/2026-06-14-draft.md'],
+      aliases: ['/raw/2026-06-14-draft.md'],
     }),
   ];
 
@@ -39,7 +39,7 @@ describe('identity — address is path, identity is the slug (ADR-0021)', () => 
   });
 
   it('resolves by a prior address — the repair path (aliases)', () => {
-    expect(resolve(nodes, '/inbox/2026-06-14-draft.md')?.id).toBe('moved');
+    expect(resolve(nodes, '/raw/2026-06-14-draft.md')?.id).toBe('moved');
   });
 
   it('returns undefined for something unknown rather than throwing', () => {

@@ -24,7 +24,9 @@ export function memoryFileStore(seed: Record<string, string> = {}): FileStore {
       return files.has(path);
     },
     async list() {
-      return [...files.keys()];
+      // Sorted, like the other two stores. An in-memory store that enumerates in
+      // insertion order lets a test pass on an ordering production never produces.
+      return [...files.keys()].sort();
     },
   };
 }

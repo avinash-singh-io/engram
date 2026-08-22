@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { handle, PROTOCOL_VERSION, TOOLS } from '../../src/surface/mcp.js';
+import { handle, HUMAN_ONLY_ACTIONS, PROTOCOL_VERSION, TOOLS } from '../../src/surface/mcp.js';
 import { OPERATIONS } from '../../src/policy/skill-schema.js';
 import { fixedClock, memoryFileStore, staticDetector } from '../../src/substrate/index.js';
 
@@ -56,10 +56,20 @@ describe('handshake', () => {
 
 describe('operations are tools', () => {
   it('exposes one tool per operation engram actually has', async () => {
-    const names = (ok(await handle(req('tools/list'), deps())).tools ?? [])
-      .map((t) => t.name.replace('engram_', ''))
-      .sort();
-    expect(names).toEqual([...OPERATIONS].sort());
+    const names = (ok(await handle(req('tools/list'), deps())).tools ?? []).map((t) =>
+      t.name.replace('engram_', ''),
+    );
+    for (const op of OPERATIONS) expect(names).toContain(op);
+  });
+
+  it('and nothing beyond the operations except reading the queue', async () => {
+    const names = (ok(await handle(req('tools/list'), deps())).tools ?? []).map((t) =>
+      t.name.replace('engram_', ''),
+    );
+    expect(names.filter((n) => !(OPERATIONS as readonly string[]).includes(n)).sort()).toEqual([
+      'queue_list',
+      'queue_show',
+    ]);
   });
 
   it('every tool declares an input schema and a description', () => {
@@ -164,5 +174,92 @@ describe('skills are prompts, not tools', () => {
 
   it('an unknown prompt is a JSON-RPC error', async () => {
     expect(err(await handle(req('prompts/get', { name: 'nope' }), deps())).code).toBe(-32602);
+  });
+});
+
+/**
+ * ADR-0042's load-bearing property, and the whole reason the queue is worth
+ * building. An agent that can approve its own proposal has converted a refusal
+ * into a retry, and every guardrail behind `propose-only` becomes advisory.
+ *
+ * Asserted over the real tool list rather than left to review: the cheapest way to
+ * lose this is for someone to add the obvious missing tool in six months.
+ */
+describe('the queue is readable by an agent and never approvable', () => {
+  const deferring = {
+    '/.engram/guardrails.md': [
+      '---',
+      'enabled: [propose-only]',
+      'proposeOnly: [/decisions/]',
+      '---',
+      '',
+    ].join('\n'),
+  };
+
+  it('exposes no tool that approves or rejects', async () => {
+    const tools = ok(await handle(req('tools/list'), deps())).tools ?? [];
+    for (const action of HUMAN_ONLY_ACTIONS) {
+      expect(tools.map((t) => t.name).some((n) => n.includes(action))).toBe(false);
+    }
+  });
+
+  it('and calling one anyway is an error, not a hidden capability', async () => {
+    for (const name of ['engram_queue_approve', 'engram_approve', 'engram_queue_reject']) {
+      expect(ok(await handle(call(name, { id: 'x' }), deps())).isError).toBe(true);
+    }
+  });
+
+  it('a deferred write is reported as not-written, naming the rule', async () => {
+    const d = deps(deferring);
+    const r = await handle(
+      call('engram_format', { content: '# D', id: 'd1', container: 'decisions' }),
+      d,
+    );
+
+    expect(ok(r).isError).toBe(true);
+    expect(textOf(r)).toMatch(/queued \[propose-only\]/);
+    expect(textOf(r)).toMatch(/NOT written/);
+  });
+
+  it('tells the agent approval is a human action and no tool exists', async () => {
+    const r = await handle(
+      call('engram_format', { content: '# D', id: 'd1', container: 'decisions' }),
+      deps(deferring),
+    );
+    expect(textOf(r)).toMatch(/human action/i);
+    expect(textOf(r)).toMatch(/no tool for it/i);
+  });
+
+  it('lists what it queued, so it does not retry and queue a duplicate', async () => {
+    const d = deps(deferring);
+    await handle(call('engram_format', { content: '# D', id: 'd1', container: 'decisions' }), d);
+
+    const listed = textOf(await handle(call('engram_queue_list'), d));
+    expect(listed).toContain('/decisions/d1.md');
+    expect(listed).toContain('propose-only');
+  });
+
+  it('shows one proposal in full', async () => {
+    const d = deps(deferring);
+    await handle(call('engram_format', { content: '# D', id: 'd1', container: 'decisions' }), d);
+    const id = textOf(await handle(call('engram_queue_list'), d)).split(' ')[0]!;
+
+    expect(textOf(await handle(call('engram_queue_show', { id }), d))).toContain('id: d1');
+  });
+
+  it('an unknown proposal id is an error, not a crash', async () => {
+    expect(ok(await handle(call('engram_queue_show', { id: 'nope' }), deps())).isError).toBe(true);
+  });
+
+  it('and the queue tools never write', async () => {
+    const d = deps(deferring);
+    await handle(call('engram_format', { content: '# D', id: 'd1', container: 'decisions' }), d);
+    const before = (await d.files.list()).sort();
+
+    await handle(call('engram_queue_list'), d);
+    await handle(call('engram_queue_show', { id: 'whatever' }), d);
+
+    expect((await d.files.list()).sort()).toEqual(before);
+    expect(await d.files.read('/decisions/d1.md')).toBeNull();
   });
 });

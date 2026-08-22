@@ -12,10 +12,42 @@
  * Rescued from v1's `isReservedFile` during the Phase 8 sweep, where it was noted
  * as belonging to whichever phase built the walker (ADR-0029).
  */
-export const RESERVED_FILES: readonly string[] = ['index.md', 'log.md', 'AGENTS.md', 'CLAUDE.md'];
+/**
+ * The guide to how this vault is organised. Written once by `init`, never
+ * overwritten — a `custom` vault's owner records their own convention in it.
+ */
+export const STRUCTURE_GUIDE = '/STRUCTURE.md';
+
+/**
+ * Vault documentation, not vault content. Reserved so the walker never reads any
+ * of it back as a knowledge node.
+ *
+ * Defined once and imported by everything that writes these files. Restating a
+ * path in a second module is how `GEMINI.md` came to be indexed as knowledge and
+ * broke `reindex` idempotence (BUG-008) — and `STRUCTURE.md` reproduced it the
+ * same day, which is the argument for one definition rather than care.
+ */
+export const RESERVED_FILES: readonly string[] = [
+  'index.md',
+  'log.md',
+  'AGENTS.md',
+  'CLAUDE.md',
+  'STRUCTURE.md',
+];
 
 /** Derived subtree — 100% generated, gitignored, safe to delete (ADR-0023, ADR-0029). */
 export const VIEWS_DIR = 'views';
+
+/**
+ * Where `capture` puts unprocessed content.
+ *
+ * Named `raw/` rather than `inbox/`: an inbox implies a queue someone owes it to
+ * you to drain, and nothing in here is owed processing. `raw/` describes what the
+ * files are — unformatted thoughts, pasted articles, half-finished notes — which is
+ * the honest promise, since ADR-0026 lets capture accept anything and never asks
+ * what happens next.
+ */
+export const RAW_DIR = '/raw';
 
 /** The marker that makes a directory a vault root (ADR-0030). */
 export const ROOT_MARKER = '.engram';

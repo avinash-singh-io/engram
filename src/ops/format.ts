@@ -12,7 +12,7 @@
  * no extractor in this file, and there is not meant to be one.
  *
  * The shape is `content (from anywhere) → format → [gate] → nodes`. Nothing is
- * required to pass through `inbox/` first — that is a buffer, not a stage.
+ * required to pass through `raw/` first — that is a buffer, not a stage.
  */
 
 import { makeEdge, makeNode, type Edge, type Node } from '../core/model.js';
@@ -20,6 +20,7 @@ import type { Clock, FileStore } from '../core/ports.js';
 import { isClosedRelation } from '../core/relations.js';
 import { writeNode } from '../format/registry.js';
 import { validate, type Change } from '../gate.js';
+import { propose, type Proposal } from './queue.js';
 import type { GuardrailConfig } from '../policy/guardrails.js';
 
 export interface FormatHints {
@@ -47,6 +48,8 @@ export interface FormatHints {
 
 export type FormatResult =
   | { outcome: 'applied'; node: Node; edges: Edge[]; warnings: string[] }
+  /** Deferred to a human (ADR-0042). The target is untouched; the proposal is queued. */
+  | { outcome: 'queued'; proposal: Proposal; reason: string; rule: string }
   | { outcome: 'rejected'; reason: string; rule: string };
 
 export interface FormatDeps {
@@ -105,7 +108,15 @@ export async function format(
     };
   }
 
-  const dir = hints.container === undefined ? '' : `/${slugify(hints.container)}`;
+  // The container names a **directory**, so it is used verbatim; only the `part-of`
+  // edge below gets slugified, because that names an *identity*. ADR-0021 draws
+  // exactly this line — slug is identity, path is address — and slugifying the
+  // directory conflated them: a vault with `Daily Notes/` and `Reading List/` got a
+  // slugified twin of every folder it already had, and on a case-insensitive
+  // filesystem `Projects` silently resolved into the existing `Projects/` while
+  // engram reported `/projects/`. Link targets are percent-encoded on write
+  // (BUG-001), so a space in a real folder name is already handled.
+  const dir = hints.container === undefined ? '' : `/${hints.container.replace(/^\/+|\/+$/g, '')}`;
   const path = hints.path ?? `${dir}/${id}.md`;
 
   const at = deps.clock.now();
@@ -140,8 +151,23 @@ export async function format(
           },
         },
   );
-  if (verdict.outcome === 'reject') {
-    return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+  // **Fail closed.** This was `if (verdict.outcome === 'reject')` until Phase 14
+  // added a third outcome, and that shape wrote the file for the new one — a
+  // guardrail that had been refusing writes began silently applying them, with
+  // the whole suite green. Anything that is not an explicit `apply` stops here.
+  if (verdict.outcome !== 'apply') {
+    if (verdict.outcome === 'reject') {
+      return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+    }
+    // Persisted here rather than by the caller. A deferral the surface forgets to
+    // queue is a change that vanishes silently, which is worse than either
+    // applying or refusing it.
+    const proposal = await propose(
+      verdict.change,
+      { rule: verdict.rule, reason: verdict.reason },
+      { files: deps.files, clock: deps.clock, by: hints.by },
+    );
+    return { outcome: 'queued', proposal, reason: verdict.reason, rule: verdict.rule };
   }
 
   await deps.files.write(path, serialized);

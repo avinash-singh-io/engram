@@ -1,12 +1,14 @@
 /**
  * THE WRITE GATE — every mediated write converges here (v2-overview §5).
  *
- * Phase 8 ships **validation only**. Guardrails, the approval queue and the
- * rejection-with-the-rule-that-fired live in Phase 10.
+ * All three outcomes are here as of Phase 14. Phase 8 shipped validation, Phase 10
+ * the guardrails and the rejection-with-the-rule-that-fired, and Phase 14 QUEUE —
+ * which is what **a change is a proposed diff, not a file write** was for. A
+ * deferred change is simply one that has been described and not yet applied.
  *
- * The framing that matters is already here: **a change is a proposed diff, not a
- * file write.** That is what makes QUEUE possible later, lets a rejection name
- * the exact rule, and makes dry-run free rather than a special mode.
+ * The gate routes; it never decides *which* outcome a rule means. That is the
+ * rule's declared `disposition` (ADR-0042), so a second deferring rule needs no
+ * change here.
  *
  * §1 of the architecture is explicit that this gate mediates only two of the
  * four write paths — Obsidian and any agent with a shell write files directly.
@@ -27,6 +29,7 @@ export interface Change {
 
 export type GateResult =
   | { outcome: 'apply'; change: Change; warnings: string[] }
+  | { outcome: 'queue'; change: Change; reason: string; rule: string }
   | { outcome: 'reject'; reason: string; rule: string };
 
 /**
@@ -55,9 +58,14 @@ export function validate(
     };
   }
   if (guardrails !== undefined) {
-    const refusal = checkAll(change, guardrails.ctx, guardrails.config);
-    if (refusal !== null) {
-      return { outcome: 'reject', reason: refusal.reason, rule: refusal.rule };
+    const hit = checkAll(change, guardrails.ctx, guardrails.config);
+    if (hit !== null) {
+      // The rule says what happens; the gate only routes it. Naming a rule here
+      // would work until a second one wanted to defer, and would then fail by
+      // rejecting — silently, and in exactly the paths that matter most.
+      return hit.disposition === 'queue'
+        ? { outcome: 'queue', change, reason: hit.reason, rule: hit.rule }
+        : { outcome: 'reject', reason: hit.reason, rule: hit.rule };
     }
   }
 

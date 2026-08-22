@@ -16,6 +16,7 @@
 
 import { ROOT_MARKER } from '../core/paths.js';
 import { isDerived, isReservedFile } from '../core/paths.js';
+import { isContractFile } from '../surface/adapters.js';
 import type { FileStore } from '../core/ports.js';
 
 export interface WalkFinding {
@@ -72,6 +73,9 @@ export async function walk(files: FileStore): Promise<WalkResult> {
     if (!p.endsWith('.md')) continue;
     if (isDerived(p)) continue;
     if (isReservedFile(p)) continue;
+    // Generated contract files are engram's output, not your notes. Asked of
+    // the adapter registry so a newly added agent cannot reintroduce the gap.
+    if (isContractFile(p)) continue;
     paths.push(p);
   }
 

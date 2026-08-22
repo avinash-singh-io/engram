@@ -11,6 +11,7 @@ import type { Clock, FileStore } from '../core/ports.js';
 import { isClosedRelation } from '../core/relations.js';
 import { readNode, writeNode } from '../format/registry.js';
 import { validate, type Change } from '../gate.js';
+import { propose, type Proposal } from './queue.js';
 
 export interface LinkDeps {
   files: FileStore;
@@ -21,6 +22,8 @@ export interface LinkDeps {
 
 export type LinkResult =
   | { outcome: 'applied'; edge: Edge; warnings: string[] }
+  /** Deferred to a human (ADR-0042). The target is untouched; the proposal is queued. */
+  | { outcome: 'queued'; proposal: Proposal; reason: string; rule: string }
   | { outcome: 'rejected'; reason: string; rule: string };
 
 export async function link(
@@ -40,8 +43,19 @@ export async function link(
   const change: Change = { path: fromPath, node, edges: all, content };
 
   const verdict = validate(change);
-  if (verdict.outcome === 'reject') {
-    return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+  // Fail closed, as in `format`. `link` wires no guardrails today, so `queue` is
+  // unreachable here — but the branch that assumes that is exactly the branch
+  // that writes the file, so it is not left to the assumption.
+  if (verdict.outcome !== 'apply') {
+    if (verdict.outcome === 'reject') {
+      return { outcome: 'rejected', reason: verdict.reason, rule: verdict.rule };
+    }
+    const proposal = await propose(
+      verdict.change,
+      { rule: verdict.rule, reason: verdict.reason },
+      { files: deps.files, clock: deps.clock, by: deps.by },
+    );
+    return { outcome: 'queued', proposal, reason: verdict.reason, rule: verdict.rule };
   }
 
   await deps.files.write(fromPath, content);

@@ -60,8 +60,8 @@ describe('readNode is total (ADR-0026)', () => {
   });
 
   it('reads a file with no frontmatter at all — an empty node, not an error', () => {
-    const { node } = readNode('just some prose', '/inbox/scratch.md');
-    expect(node.path).toBe('/inbox/scratch.md');
+    const { node } = readNode('just some prose', '/raw/scratch.md');
+    expect(node.path).toBe('/raw/scratch.md');
     expect(node.body).toBe('just some prose');
   });
 
