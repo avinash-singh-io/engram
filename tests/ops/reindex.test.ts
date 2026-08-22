@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { init, STRUCTURES } from '../../src/ops/init.js';
+import { init } from '../../src/ops/init.js';
+import { structureIds } from '../../src/policy/structures.js';
 import { reindex } from '../../src/ops/reindex.js';
 import { BEGIN, END } from '../../src/surface/adapters.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
@@ -120,16 +121,17 @@ describe('reindex reports what the walker found', () => {
 });
 
 describe('init', () => {
-  it('scaffolds raw/ and nothing else — the one directory the design requires', async () => {
+  it('creates raw/ plus the containers the declared structure names', async () => {
     const files = memoryFileStore();
     const { created, reindexed } = await init(files, clock);
 
-    // `capture` must put bytes somewhere before anything is decided about them.
+    // raw/ is in every vault: `capture` must put bytes somewhere before anything
+    // is decided about them.
     expect(created).toContain('/raw/.gitkeep');
-    // The other four folders were a suggestion, and engram claims no opinion
-    // about your shape (ADR-0023). The suggestion lives in AGENTS.md instead.
+    // The default structure declares these, so choosing it means getting them.
+    // A vault that wants none of it declares `custom` and gets raw/ alone.
     for (const dir of ['concepts', 'decisions', 'sources', 'projects']) {
-      expect(created).not.toContain(`/${dir}/.gitkeep`);
+      expect(created).toContain(`/${dir}/.gitkeep`);
     }
     expect(reindexed.length).toBeGreaterThan(0);
   });
@@ -172,11 +174,11 @@ describe('init', () => {
   });
 
   it('rejects an unknown structure, and says what it ships', async () => {
-    await expect(init(memoryFileStore(), clock, 'para')).rejects.toThrow(/engram ships only/);
+    await expect(init(memoryFileStore(), clock, 'nonsense')).rejects.toThrow(/engram ships/);
   });
 
-  it('ships exactly one structure — presets are opinions engram does not hold', () => {
-    expect([...STRUCTURES]).toEqual(['default']);
+  it('ships several structures plus custom, and prefers none', () => {
+    expect(structureIds()).toEqual(['default', 'para', 'zettelkasten', 'custom']);
   });
 
   it('produces a vault the walker does not treat the sidecar as nested', async () => {

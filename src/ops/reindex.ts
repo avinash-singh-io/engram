@@ -9,7 +9,7 @@
 
 import type { Edge, Node } from '../core/model.js';
 import type { Clock, FileStore } from '../core/ports.js';
-import { loadGuardrails } from '../policy/config.js';
+import { loadGuardrails, loadStructureId } from '../policy/config.js';
 import { readNode } from '../format/registry.js';
 import { generateAgentsMd } from '../surface/agents-md.js';
 import { writeContracts, type AdapterResult } from '../surface/adapters.js';
@@ -54,7 +54,7 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   // built-in defaults meant AGENTS.md never mentioned a vault's propose-only
   // paths — which read as "there are none" rather than "engram cannot see them".
   const { config: guardrails } = await loadGuardrails(files);
-  const contract = generateAgentsMd(guardrails);
+  const contract = generateAgentsMd(guardrails, await loadStructureId(files));
   await files.write('/AGENTS.md', contract);
   // ADR-0017: every agent reads only its own file, so each gets the contract in
   // full — regenerated here from the one source, so no copy can drift.

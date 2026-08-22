@@ -18,6 +18,7 @@ import { parseFrontmatter } from '../format/registry.js';
 import { guardrailNames, type GuardrailConfig } from './guardrails.js';
 
 export const GUARDRAILS_PATH = '/.engram/guardrails.md';
+export const CONFIG_PATH = '/.engram/config.json';
 
 /** Rules in force when a vault declares nothing. Every rule on, none scoped. */
 export const DEFAULTS: GuardrailConfig = { enabled: guardrailNames() };
@@ -155,4 +156,24 @@ export function scaffoldGuardrails(): string {
     'Maximum new nodes per run — the guard against a large, well-formatted pile you',
     'never reviewed.',
   ].join('\n');
+}
+
+/**
+ * Which structure this vault declared, from `.engram/config.json`.
+ *
+ * Falls back to `default` for a vault that predates the field or has an
+ * unreadable config — a missing declaration should degrade to a sensible
+ * convention, never to none, because "no convention" is the state that lets two
+ * agents invent different folders.
+ */
+export async function loadStructureId(files: FileStore): Promise<string> {
+  const raw = await files.read(CONFIG_PATH);
+  if (raw === null) return 'default';
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const id = (parsed as Record<string, unknown> | null)?.structure;
+    return typeof id === 'string' && id !== '' ? id : 'default';
+  } catch {
+    return 'default';
+  }
 }

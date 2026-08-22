@@ -177,3 +177,19 @@ Affects-specs: none
 Detail: Filed as BUG-008 (P0, fixed). `reindex` writes each agent's contract file, then the walker read `GEMINI.md` back as an authored node on the next run — run 1 reported 1 node, run 2 reported 2, violating ADR-0029's determinism claim outright. `RESERVED_FILES` matched on basename, so `AGENTS.md` and `CLAUDE.md` were excluded and `.antigravity/AGENTS.md` was excluded by accident of its basename, while `GEMINI.md` was not. Fixed by deriving the set from the adapter registry rather than restating it. Found by building a realistic vault to demonstrate view generation — not by the suite, which is now the fourth time a defect has lived in the gap between "the function works" and "a person uses it".
 
 ---
+
+### [FEATURE] 2026-08-22 — A vault declares a filing convention; engram still prefers none
+Topics: structure-views, adoption, agents-contract
+Affects-phases: phase-14-obsidian
+Affects-specs: specs/decisions/0023-structure-tree-plus-views.md
+Detail: ADR-0023's "no opinion about the shape" had been read as "say nothing", and saying nothing cost more than intended — with no stated convention, four filings into one vault produced `concepts/`, `knowledge/` and `notes/`, and on a case-sensitive filesystem a fourth. Engram now ships four structures (default, para, zettelkasten, custom), creates the chosen one's directories, writes a `STRUCTURE.md` guide, and renders the containers into `AGENTS.md` where every agent reads them. `custom` declares none and gets `raw/` alone. The opinion belongs to the vault, not to engram: it insists a vault *has* a convention, never which one. Adding a philosophy is adding a registry entry.
+
+---
+
+### [DISCOVERY] 2026-08-22 — Reproduced BUG-008 within the hour, which settled how to fix it
+Topics: derived-state, indexes
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: `STRUCTURE.md` was written at the vault root and immediately indexed as a knowledge node — a fresh vault reported 1 node — the same defect as `GEMINI.md` (BUG-008), reproduced the same day by the very next generated file. That is the argument against fixing this class by adding a literal each time. `STRUCTURE_GUIDE` now has one definition in `core/paths.ts` that both `init` and `RESERVED_FILES` use, and a new invariant test asserts the property rather than the instances: **whatever engram writes into an empty vault, that vault reports zero nodes** — checked for every structure, and again on a second reindex.
+
+---

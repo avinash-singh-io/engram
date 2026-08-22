@@ -23,8 +23,14 @@ describe('reserved files are never authored content, at any depth', () => {
     expect(isReservedFile(path)).toBe(expected);
   });
 
-  it('names exactly the four engram owns', () => {
-    expect([...RESERVED_FILES].sort()).toEqual(['AGENTS.md', 'CLAUDE.md', 'index.md', 'log.md']);
+  it('names exactly the files engram owns', () => {
+    expect([...RESERVED_FILES].sort()).toEqual([
+      'AGENTS.md',
+      'CLAUDE.md',
+      'STRUCTURE.md',
+      'index.md',
+      'log.md',
+    ]);
   });
 });
 

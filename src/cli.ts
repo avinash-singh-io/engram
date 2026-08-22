@@ -37,7 +37,8 @@ usage:
 options:
   --vault <dir>       vault root (default: cwd)
   --by <who>          who is asserting (default: $USER)
-  --structure <name>  init only; engram ships "default"
+  --structure <name>  init only: default | para | zettelkasten | custom
+                      custom creates only raw/ and leaves the shape to you
 
 format options (the agent supplies the structure; engram does not infer it):
   --title <t>         title; the slug is derived from it
