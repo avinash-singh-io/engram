@@ -153,7 +153,9 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         const { created, skipped, reindexed, notes } = await init(
           files,
           clock,
-          flag(argv, 'structure', 'default'),
+          // undefined when absent, so init can tell "not asked" from "asked for
+          // default" — passing a default made `--structure para` a silent no-op.
+          flagOrUndef(argv, 'structure'),
         );
         for (const p of created) process.stdout.write(`created ${p}\n`);
         for (const p of skipped) process.stderr.write(`exists, left alone: ${p}\n`);

@@ -138,3 +138,88 @@ describe('an empty vault has no knowledge in it, whatever engram wrote there', (
     expect((await reindex(files, clock)).counts.nodes).toBe(0);
   });
 });
+
+/**
+ * BUG-009. `engram init --structure para` on an already-initialised vault did
+ * nothing at all and said nothing about it: `config.json` existed, so it was
+ * skipped as "exists, left alone", and the flag vanished. There was also no other
+ * way to change a vault's structure short of hand-editing JSON.
+ *
+ * The cause was that `init` defaulted the parameter, making "no flag given"
+ * indistinguishable from "asked for default".
+ */
+describe("changing a vault's structure after init", () => {
+  const existing = () => memoryFileStore({ '/my-note.md': '# an existing note' });
+
+  it('takes effect rather than being silently skipped', async () => {
+    const files = existing();
+    await init(files, clock);
+    await init(files, clock, 'para');
+
+    expect(await files.read('/.engram/config.json')).toContain('"structure": "para"');
+  });
+
+  it('re-renders the contract, so agents file the new way', async () => {
+    const files = existing();
+    await init(files, clock);
+    await init(files, clock, 'para');
+
+    const contract = (await files.read('/AGENTS.md'))!;
+    expect(contract).toContain('PARA');
+    expect(contract).toContain('1-projects');
+  });
+
+  it('says what changed and what it did not touch', async () => {
+    const files = existing();
+    await init(files, clock);
+    const { notes } = await init(files, clock, 'para');
+
+    expect(notes.join(' ')).toMatch(/structure changed: default → para/);
+    expect(notes.join(' ')).toMatch(/Nothing on disk moved/);
+  });
+
+  it('leaves existing notes exactly where they are', async () => {
+    const files = existing();
+    await init(files, clock);
+    await init(files, clock, 'para');
+
+    expect(await files.read('/my-note.md')).toBe('# an existing note');
+  });
+
+  it("regenerates the guide when it is still engram's own words", async () => {
+    const files = existing();
+    await init(files, clock);
+    await init(files, clock, 'zettelkasten');
+
+    expect(await files.read('/STRUCTURE.md')).toContain('Zettelkasten');
+  });
+
+  /** Once you have edited it, it is yours — changing structure must not cost that. */
+  it('never overwrites a guide the user has edited', async () => {
+    const mine = '# My own convention\n\nEverything in one pile.';
+    const files = existing();
+    await init(files, clock);
+    await files.write('/STRUCTURE.md', mine);
+
+    const { notes } = await init(files, clock, 'para');
+    expect(await files.read('/STRUCTURE.md')).toBe(mine);
+    expect(notes.join(' ')).toMatch(/left alone because you have edited it/);
+  });
+
+  it('says so when the vault already uses what was asked for', async () => {
+    const files = existing();
+    await init(files, clock, 'para');
+    const { notes } = await init(files, clock, 'para');
+
+    expect(notes.join(' ')).toMatch(/already using the PARA structure/);
+  });
+
+  /** Re-running plain `init` must not silently reset a declared structure. */
+  it('keeps the declared structure when no flag is given', async () => {
+    const files = existing();
+    await init(files, clock, 'zettelkasten');
+    await init(files, clock);
+
+    expect(await files.read('/.engram/config.json')).toContain('"structure": "zettelkasten"');
+  });
+});

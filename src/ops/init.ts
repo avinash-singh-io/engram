@@ -19,7 +19,7 @@ import {
   STRUCTURE_GUIDE,
 } from '../core/paths.js';
 import type { Clock, FileStore } from '../core/ports.js';
-import { GUARDRAILS_PATH, scaffoldGuardrails } from '../policy/config.js';
+import { GUARDRAILS_PATH, loadStructureId, scaffoldGuardrails } from '../policy/config.js';
 import { getStructure, guideFor, RAW, structureIds } from '../policy/structures.js';
 import { AGENTS } from '../surface/adapters.js';
 import { reindex } from './reindex.js';
@@ -91,8 +91,18 @@ export interface InitResult {
 export async function init(
   files: FileStore,
   clock: Clock,
-  structure: string = 'default',
+  /**
+   * The structure asked for, or `undefined` when the caller did not ask.
+   *
+   * The distinction matters: passing `'default'` because no flag was given used to
+   * be indistinguishable from asking for it, so `init --structure para` on an
+   * already-initialised vault silently did nothing — the config was skipped as an
+   * existing file and the flag vanished without a word.
+   */
+  requested?: string,
 ): Promise<InitResult> {
+  const declared = await loadStructureId(files);
+  const structure = requested ?? declared;
   const def = getStructure(structure);
   if (def === undefined) {
     throw new Error(
@@ -107,11 +117,11 @@ export async function init(
 
   // An existing vault already has a shape, and ADR-0023 says engram does not get
   // an opinion about it. Only an empty vault gets the reference tree.
+  const changing = requested !== undefined && requested !== declared;
   const adopting = await hasAuthoredNotes(files);
   const scaffold = {
     ...(adopting ? {} : { ...alwaysTree(), ...structureTree(structure) }),
     ...ESSENTIAL,
-    [`/${ROOT_MARKER}/config.json`]: `${JSON.stringify({ structure }, null, 2)}\n`,
     // The guide, so the structure is usable by a human as well as an agent.
     // Non-destructive like everything else: an existing one is left alone.
     [STRUCTURE_GUIDE]: guideFor(def),
@@ -131,6 +141,34 @@ export async function init(
     }
     await files.write(path, content);
     created.push(path);
+  }
+
+  // The declaration is engram's own file, so it is written rather than skipped —
+  // otherwise asking for a different structure would be a silent no-op.
+  const configPath = `/${ROOT_MARKER}/config.json`;
+  const config = `${JSON.stringify({ structure }, null, 2)}\n`;
+  if (!(await files.exists(configPath))) {
+    await files.write(configPath, config);
+    created.push(configPath);
+  } else if (changing) {
+    await files.write(configPath, config);
+    notes.push(`structure changed: ${declared} → ${structure}. ${changeConsequences(adopting)}`);
+
+    // The guide is regenerated only when it is still engram's own words. Once you
+    // have edited it, it is yours — a changed structure must not cost you that.
+    const guide = await files.read(STRUCTURE_GUIDE);
+    const previous = getStructure(declared);
+    if (previous !== undefined && guide === guideFor(previous)) {
+      await files.write(STRUCTURE_GUIDE, guideFor(def));
+      notes.push(`${STRUCTURE_GUIDE} regenerated for ${def.label}.`);
+    } else if (guide !== null) {
+      notes.push(
+        `${STRUCTURE_GUIDE} was left alone because you have edited it — it is yours. ` +
+          `Delete it and re-run init to get the ${def.label} guide.`,
+      );
+    }
+  } else if (requested !== undefined) {
+    notes.push(`already using the ${def.label} structure; nothing to change.`);
   }
 
   const gitignore = (await files.read('/.gitignore')) ?? '';
@@ -155,4 +193,13 @@ export async function init(
     );
   }
   return { created: created.sort(), skipped: skipped.sort(), reindexed: written, notes };
+}
+
+/** What actually changes when a vault redeclares its structure. */
+function changeConsequences(adopting: boolean): string {
+  return adopting
+    ? 'AGENTS.md now advertises the new containers, so agents will file there from ' +
+        'now on. Nothing on disk moved and no directories were created — your ' +
+        'existing notes stay exactly where they are.'
+    : 'AGENTS.md now advertises the new containers, and the new directories were created.';
 }

@@ -154,12 +154,22 @@ describe('init', () => {
   });
 
   it('is non-destructive — never overwrites authored content', async () => {
-    const mine = '# my own gitignore rules';
-    const files = memoryFileStore({ '/.engram/config.json': mine });
-    const { created, skipped } = await init(files, clock);
-    expect(skipped).toContain('/.engram/config.json');
-    expect(created).not.toContain('/.engram/config.json');
-    expect(await files.read('/.engram/config.json')).toBe(mine);
+    const mine = '# a note I wrote';
+    const files = memoryFileStore({ '/concepts/mine.md': mine });
+    await init(files, clock);
+    expect(await files.read('/concepts/mine.md')).toBe(mine);
+  });
+
+  /**
+   * `config.json` is engram's own file, not authored content — it has to be
+   * rewritable, or `--structure` could never change anything (BUG-009). Left
+   * untouched when nothing was asked for; rewritten only on an explicit request.
+   */
+  it('leaves its own config alone when no structure is requested', async () => {
+    const existing = '{ "structure": "zettelkasten" }';
+    const files = memoryFileStore({ '/.engram/config.json': existing });
+    await init(files, clock);
+    expect(await files.read('/.engram/config.json')).toBe(existing);
   });
 
   it('is safe to run twice', async () => {
