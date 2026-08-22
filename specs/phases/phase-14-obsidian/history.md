@@ -153,3 +153,27 @@ Affects-specs: none
 Detail: BUG-005, BUG-006 and BUG-007 were all found within minutes of adopting an existing Obsidian-shaped vault, and none was visible to 587 passing tests, because every test creates its vault from nothing and calls functions directly. The pattern is now unmistakable: this project's defects live in the gap between "the function works" and "a person can use it". `scripts/smoke-cli.mjs` and `scripts/smoke-plugin.mjs` exist to close it and both run in `npm run check`.
 
 ---
+
+### [DECISION] 2026-08-22 — A new vault scaffolds `raw/` and nothing else
+Topics: structure-views, adoption, init
+Affects-phases: phase-14-obsidian
+Affects-specs: specs/decisions/0023-structure-tree-plus-views.md
+Detail: Engram claims no opinion about folder shape and then created five specific folders; both could not be true. `raw/` is the one directory the design genuinely requires, because `capture` must put bytes somewhere before anything has been decided about them. The other four were a suggestion, and a suggestion belongs in `AGENTS.md` where the agent doing the filing will read it — not as empty directories that make a vault look organised before it is. Owner delegated the call. Structure now emerges from the `part-of` edges actually authored, rendered by `views/`.
+
+---
+
+### [ARCH_CHANGE] 2026-08-22 — The index honours every `part-of` edge, not the first
+Topics: structure-views, indexes
+Affects-phases: phase-14-obsidian
+Affects-specs: specs/decisions/0023-structure-tree-plus-views.md
+Detail: ADR-0023 promises views that provide "the *other* arrangements as extra entry points", and the format has always permitted `part-of: [concepts, consensus]`. `generateIndex` used `.find()` and kept only the first parent, so a note could never appear in two groupings — the model permitted it and the projection discarded it. This is the enabling change for several structures over the same files without moving or duplicating anything: physical layout stays a stable address; the index renders every membership declared. Philosophy-shaped views (PARA, Zettelkasten) become skills that emit a view, which keeps engram agnostic while the skill carries the opinion.
+
+---
+
+### [DISCOVERY] 2026-08-22 — `reindex` was not idempotent; it indexed its own output
+Topics: derived-state, adapters, indexes
+Affects-phases: phase-14-obsidian
+Affects-specs: none
+Detail: Filed as BUG-008 (P0, fixed). `reindex` writes each agent's contract file, then the walker read `GEMINI.md` back as an authored node on the next run — run 1 reported 1 node, run 2 reported 2, violating ADR-0029's determinism claim outright. `RESERVED_FILES` matched on basename, so `AGENTS.md` and `CLAUDE.md` were excluded and `.antigravity/AGENTS.md` was excluded by accident of its basename, while `GEMINI.md` was not. Fixed by deriving the set from the adapter registry rather than restating it. Found by building a realistic vault to demonstrate view generation — not by the suite, which is now the fourth time a defect has lived in the gap between "the function works" and "a person uses it".
+
+---
