@@ -72,6 +72,22 @@ async function hasAuthoredNotes(files: FileStore): Promise<boolean> {
   return false;
 }
 
+export interface InitOptions {
+  /**
+   * Create the structure's directories even in a vault that already has notes.
+   *
+   * Off by default: a vault with its own shape should not acquire folders it did
+   * not ask for. But choosing PARA *and* wanting its four buckets in an existing
+   * vault is a perfectly reasonable thing to want, and before this there was no
+   * way to say so.
+   *
+   * A flag rather than a prompt, deliberately. The same `init` runs over MCP,
+   * where there is no human on stdin — an agent calling a prompting `init` would
+   * hang forever. Non-interactive keeps one code path honest for both callers.
+   */
+  scaffold?: boolean;
+}
+
 export interface InitResult {
   created: string[];
   skipped: string[];
@@ -100,6 +116,7 @@ export async function init(
    * existing file and the flag vanished without a word.
    */
   requested?: string,
+  options: InitOptions = {},
 ): Promise<InitResult> {
   const declared = await loadStructureId(files);
   const structure = requested ?? declared;
@@ -119,22 +136,33 @@ export async function init(
   // an opinion about it. Only an empty vault gets the reference tree.
   const changing = requested !== undefined && requested !== declared;
   const adopting = await hasAuthoredNotes(files);
-  const scaffold = {
-    ...(adopting ? {} : { ...alwaysTree(), ...structureTree(structure) }),
+  // An existing vault gets directories only when asked. `raw/` comes with them,
+  // since a vault opting into a shape should have somewhere for capture to land.
+  const makeDirs = !adopting || options.scaffold === true;
+  const toWrite = {
+    ...(makeDirs ? { ...alwaysTree(), ...structureTree(structure) } : {}),
     ...ESSENTIAL,
     // The guide, so the structure is usable by a human as well as an agent.
     // Non-destructive like everything else: an existing one is left alone.
     [STRUCTURE_GUIDE]: guideFor(def),
   };
-  if (adopting) {
+  if (adopting && !makeDirs) {
+    const dirs = def.containers.map((c) => `${c.name}/`).join(' ');
     notes.push(
       'this vault already has notes, so no directories were created — engram has no ' +
         'opinion about your folders (ADR-0023). File notes wherever you already do, ' +
-        `and see ${STRUCTURE_GUIDE} for the conventions agents will follow.`,
+        `and see ${STRUCTURE_GUIDE} for the conventions agents will follow.` +
+        (dirs === '' ? '' : `\n      Want them anyway? Re-run with --scaffold to create: ${dirs}`),
+    );
+  } else if (adopting) {
+    notes.push(
+      `--scaffold: created this structure's directories in a vault that already has ` +
+        'notes. Nothing was moved into them — your existing files are untouched, and ' +
+        'the new folders are empty until you or an agent file something there.',
     );
   }
 
-  for (const [path, content] of Object.entries(scaffold)) {
+  for (const [path, content] of Object.entries(toWrite)) {
     if (await files.exists(path)) {
       skipped.push(path);
       continue;

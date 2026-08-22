@@ -39,6 +39,8 @@ options:
   --by <who>          who is asserting (default: $USER)
   --structure <name>  init only: default | para | zettelkasten | custom
                       custom creates only raw/ and leaves the shape to you
+  --scaffold          init only: create the structure's directories even in a
+                      vault that already has notes. Nothing is moved into them
 
 format options (the agent supplies the structure; engram does not infer it):
   --title <t>         title; the slug is derived from it
@@ -156,6 +158,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
           // undefined when absent, so init can tell "not asked" from "asked for
           // default" — passing a default made `--structure para` a silent no-op.
           flagOrUndef(argv, 'structure'),
+          { scaffold: argv.includes('--scaffold') },
         );
         for (const p of created) process.stdout.write(`created ${p}\n`);
         for (const p of skipped) process.stderr.write(`exists, left alone: ${p}\n`);

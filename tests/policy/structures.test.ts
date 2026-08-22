@@ -223,3 +223,53 @@ describe("changing a vault's structure after init", () => {
     expect(await files.read('/.engram/config.json')).toContain('"structure": "zettelkasten"');
   });
 });
+
+/**
+ * Choosing a structure and wanting its directories in a vault that already has
+ * notes is a reasonable thing to want, and there was no way to say so.
+ *
+ * A flag rather than a prompt, deliberately: the same `init` runs over MCP where
+ * there is no human on stdin, and a prompting `init` would hang an agent forever.
+ */
+describe('--scaffold: directories in a vault that already has notes', () => {
+  const existing = () => memoryFileStore({ '/Daily Notes/2026-08-01.md': '# my note' });
+
+  it('creates nothing by default — a vault with a shape keeps it', async () => {
+    const { created } = await init(existing(), clock, 'para');
+    expect(created.filter((p) => p.endsWith('/.gitkeep'))).toEqual([]);
+  });
+
+  it('names the flag rather than leaving you to guess', async () => {
+    const { notes } = await init(existing(), clock, 'para');
+    expect(notes.join(' ')).toMatch(/--scaffold/);
+    expect(notes.join(' ')).toContain('1-projects/');
+  });
+
+  it('creates them when asked', async () => {
+    const { created } = await init(existing(), clock, 'para', { scaffold: true });
+    for (const dir of ['1-projects', '2-areas', '3-resources', '4-archive']) {
+      expect(created).toContain(`/${dir}/.gitkeep`);
+    }
+  });
+
+  it('creates raw/ too, so capture has somewhere to land', async () => {
+    const { created } = await init(existing(), clock, 'para', { scaffold: true });
+    expect(created).toContain('/raw/.gitkeep');
+  });
+
+  it('moves nothing — existing notes stay exactly where they are', async () => {
+    const files = existing();
+    await init(files, clock, 'para', { scaffold: true });
+    expect(await files.read('/Daily Notes/2026-08-01.md')).toBe('# my note');
+  });
+
+  it('says the new folders are empty, so nothing looks migrated', async () => {
+    const { notes } = await init(existing(), clock, 'para', { scaffold: true });
+    expect(notes.join(' ')).toMatch(/Nothing was moved into them/);
+  });
+
+  it('is a no-op for custom, which declares no directories', async () => {
+    const { created } = await init(existing(), clock, 'custom', { scaffold: true });
+    expect(created.filter((p) => p.endsWith('/.gitkeep'))).toEqual(['/raw/.gitkeep']);
+  });
+});
