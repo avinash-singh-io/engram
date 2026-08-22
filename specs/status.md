@@ -93,7 +93,7 @@ productivity suite, and is deliberately kept out of the core. See
 
 | ID | Type | Description |
 |----|------|-------------|
-| BUG-002 | Bug | **npm publish broken since v0.6.5.** OIDC trusted publishing fails `ENEEDAUTH` on every tag. Workflow config re-verified correct (`id-token: write`, npm 12.0.2, no `registry-url`); the remaining cause is the trusted-publisher registration on npmjs.com, which needs the package owner. **Six tags point at nothing** — v0.6.6, v0.6.7, v0.6.8, v0.7.0, v0.8.0, v0.9.0, and v0.10.0 will be the seventh. |
+| _(none)_ | | **BUG-002 resolved 2026-08-22** — v0.11.0 is on npm, verified against the registry and by installing the published tarball. |
 
 ## Next Actions
 
