@@ -12,7 +12,7 @@
  * no extractor in this file, and there is not meant to be one.
  *
  * The shape is `content (from anywhere) → format → [gate] → nodes`. Nothing is
- * required to pass through `inbox/` first — that is a buffer, not a stage.
+ * required to pass through `raw/` first — that is a buffer, not a stage.
  */
 
 import { makeEdge, makeNode, type Edge, type Node } from '../core/model.js';

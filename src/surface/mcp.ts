@@ -49,7 +49,7 @@ const S = (description: string) => ({ type: 'string', description });
 export const TOOLS = [
   {
     name: 'engram_capture',
-    description: 'Persist raw content to the inbox. Never validates, never fails.',
+    description: 'Persist raw content to raw/. Never validates, never fails.',
     inputSchema: {
       type: 'object',
       properties: { content: S('Anything at all. Nothing is rejected.') },

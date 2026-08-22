@@ -61,7 +61,7 @@ export default class EngramPlugin extends Plugin {
 
     this.addCommand({
       id: 'engram-capture',
-      name: 'Capture selection to inbox',
+      name: 'Capture selection to raw/',
       editorCallback: (editor) => {
         const text = editor.getSelection() || editor.getValue();
         void this.run(captureCommand(text, this.deps()));

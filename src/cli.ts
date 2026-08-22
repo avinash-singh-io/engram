@@ -25,7 +25,7 @@ const USAGE = `engram — a notes system where the organizing work is done by an
 
 usage:
   engram init                    scaffold a vault; non-destructive
-  engram capture [text]          persist raw content to the inbox; never rejects
+  engram capture [text]          persist raw content to raw/; never rejects
   engram format [text]           content + your structure -> a validated node
   engram link <file> <to> <kind> assert a typed relation (supersedes | sources | part-of)
   engram reindex                 regenerate derived state (index.md, views/)

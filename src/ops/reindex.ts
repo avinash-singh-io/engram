@@ -12,10 +12,13 @@ import type { Clock, FileStore } from '../core/ports.js';
 import { loadGuardrails } from '../policy/config.js';
 import { readNode } from '../format/registry.js';
 import { generateAgentsMd } from '../surface/agents-md.js';
+import { writeContracts, type AdapterResult } from '../surface/adapters.js';
 import { generateAll } from '../views/generate.js';
 import { walk, type WalkFinding } from './walk.js';
 
 export interface ReindexResult {
+  /** Which agent contract files were rewritten, and which were merged into. */
+  contracts: AdapterResult;
   written: string[];
   counts: { nodes: number; edges: number };
   findings: WalkFinding[];
@@ -51,11 +54,16 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   // built-in defaults meant AGENTS.md never mentioned a vault's propose-only
   // paths — which read as "there are none" rather than "engram cannot see them".
   const { config: guardrails } = await loadGuardrails(files);
-  await files.write('/AGENTS.md', generateAgentsMd(guardrails));
-  written.push('/AGENTS.md');
+  const contract = generateAgentsMd(guardrails);
+  await files.write('/AGENTS.md', contract);
+  // ADR-0017: every agent reads only its own file, so each gets the contract in
+  // full — regenerated here from the one source, so no copy can drift.
+  const contracts = await writeContracts(files, contract);
+  written.push('/AGENTS.md', ...contracts.written, ...contracts.merged);
 
   return {
     written,
+    contracts,
     counts: { nodes: nodes.length, edges: edges.length },
     findings: walked.findings,
     warnings,

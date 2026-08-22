@@ -1,17 +1,26 @@
 /**
- * Agent adapters — native instruction pointers, and nothing else.
+ * Agent adapters — the contract, rendered into every file an agent actually reads.
  *
- * [ADR-0011](../../specs/decisions/0011-adapters-converge-on-agents-md.md)'s
- * decision is convergence on `AGENTS.md`. Its *implementation* section describes
- * v1's per-agent command surfaces — `.claude/commands/`, `.codex/prompts/` — which
- * existed to reach v1's operations. MCP is that surface now.
+ * **[ADR-0017](../../specs/decisions/0017-agent-contract-files-full.md) decided this
+ * and the v2 rewrite lost it.** ADR-0011 converged every agent on `AGENTS.md`;
+ * ADR-0017 amended it with the reason that matters:
  *
- * So an adapter emits a **pointer** and carries no contract content. That is not a
- * simplification for its own sake: every duplicated instruction is a second place
- * the contract can drift, and Phase 9 already demonstrated what that costs when the
- * codec's hardcoded relation list silently disagreed with the registry.
+ * > Each agent loads only its **own** native instructions file — Claude Code reads
+ * > `CLAUDE.md`; Codex and other agents read `AGENTS.md`. An agent that loads
+ * > `CLAUDE.md` does **not** reliably go and read a *referenced* `AGENTS.md`. So a
+ * > pointer means the agent never actually gets the contract.
  *
- * **Adding an agent is adding a descriptor.** No code, no template, no branch.
+ * Phase 15 shipped pointers anyway, citing ADR-0011 without noticing that ADR-0017
+ * amends it. A pointer looks tidy and fails silently: `CLAUDE.md` said "read
+ * AGENTS.md", Claude Code often did not, and the contract stayed invisible to the
+ * agent it was written for.
+ *
+ * So the contract is rendered **in full** into each agent's own file. The
+ * duplication is deliberate and safe because there is exactly one source — the
+ * generator in `agents-md.ts` — and every copy is rewritten by `reindex`. Nothing
+ * is hand-maintained, so nothing can drift.
+ *
+ * **Adding an agent is still adding a descriptor.** No code, no template.
  */
 
 import type { FileStore } from '../core/ports.js';
@@ -19,86 +28,129 @@ import type { FileStore } from '../core/ports.js';
 export interface AgentDescriptor {
   /** How the agent is referred to. */
   name: string;
-  /** The file this agent looks for, relative to the vault root. */
-  instructionsPath: string;
-  /** Why it needs a pointer at all — agents that read AGENTS.md natively do not. */
+  /** The file this agent reads, relative to the vault root. */
+  contractFile: string;
+  /** Why it needs its own copy — agents that read AGENTS.md natively do not. */
   why: string;
 }
 
 /**
- * Agents that look for a filename other than `AGENTS.md`.
+ * Agents that read a filename other than `AGENTS.md`.
  *
- * Codex and any agent following the AGENTS.md convention are deliberately absent:
- * they already read the contract, so emitting anything for them would be a file that
- * exists only to be maintained.
+ * Codex and anything following the AGENTS.md convention are deliberately absent:
+ * they already read the canonical file, and a second copy for them would be a file
+ * that exists only to be maintained.
  */
 export const AGENTS: AgentDescriptor[] = [
   {
     name: 'claude',
-    instructionsPath: '/CLAUDE.md',
-    why: 'Claude Code looks for CLAUDE.md and would not otherwise find the contract',
+    contractFile: '/CLAUDE.md',
+    why: 'Claude Code reads CLAUDE.md, and nothing else, at session start',
   },
   {
     name: 'antigravity',
-    instructionsPath: '/.antigravity/AGENTS.md',
+    contractFile: '/.antigravity/AGENTS.md',
     why: 'Antigravity reads instructions from its own directory',
   },
   {
     name: 'gemini',
-    instructionsPath: '/GEMINI.md',
-    why: 'the Gemini CLI looks for GEMINI.md and would not otherwise find the contract',
+    contractFile: '/GEMINI.md',
+    why: 'the Gemini CLI reads GEMINI.md',
   },
 ];
 
 /**
- * The pointer body.
+ * The fences around engram's region of a file it does not own.
  *
- * Deliberately says almost nothing. Anything stated here would be a second copy of
- * something `AGENTS.md` already says, and the second copy is the one that goes stale.
+ * A vault's `CLAUDE.md` may already carry instructions engram knows nothing about,
+ * and overwriting it would destroy more than it explains. But leaving it alone
+ * entirely means the agent never gets the contract — the exact failure ADR-0017
+ * names. A delimited region is the only option that satisfies both: **engram owns
+ * what is between the markers and nothing else.**
+ *
+ * This is the pattern this project's own tooling already uses on this repo's
+ * `CLAUDE.md`, so it is borrowed rather than invented.
  */
-export function pointerFor(agent: AgentDescriptor): string {
-  const depth = agent.instructionsPath.split('/').filter(Boolean).length - 1;
-  const target = `${'../'.repeat(depth)}AGENTS.md`;
-  return [
-    `<!-- GENERATED by engram. Points at the contract; contains none of it. -->`,
-    '',
-    `# ${agent.name}`,
-    '',
-    `This is an engram vault. **The contract is [AGENTS.md](${target}).** Read it first.`,
-    '',
-    'Nothing is duplicated here on purpose: a second copy of the rules is the copy',
-    'that goes stale.',
-    '',
-  ].join('\n');
-}
+export const BEGIN = '<!-- BEGIN ENGRAM CONTRACT — generated by `engram reindex`. Do not edit. -->';
+export const END = '<!-- END ENGRAM CONTRACT -->';
 
-export interface AdapterResult {
-  written: string[];
-  skipped: string[];
+/**
+ * Splice engram's region into a file, preserving everything outside it.
+ *
+ * Three cases: the markers are present and the region between them is replaced; the
+ * file exists without markers and the block is **appended** below what is already
+ * there; the file does not exist and the block is the whole file.
+ */
+export function spliceContract(existing: string | null, contract: string): string {
+  const block = `${BEGIN}\n\n${contract.trimEnd()}\n\n${END}\n`;
+
+  if (existing === null || existing.trim() === '') return block;
+
+  const start = existing.indexOf(BEGIN);
+  const end = existing.indexOf(END);
+
+  if (start !== -1 && end !== -1 && end > start) {
+    const before = existing.slice(0, start);
+    const after = existing.slice(end + END.length);
+    // The user's text on both sides survives byte for byte.
+    return `${before}${block.trimEnd()}${after.startsWith('\n') ? after : `\n${after}`}\n`.replace(
+      /\n+$/,
+      '\n',
+    );
+  }
+
+  // Their file, their content first. Appending rather than prepending means a
+  // human opening CLAUDE.md still sees what they wrote at the top.
+  return `${existing.trimEnd()}\n\n${block}`;
 }
 
 /**
- * Emit a pointer for each agent that needs one.
+ * Is this path a generated contract file?
  *
- * **Non-destructive**, like `init`: an existing file is left alone. A user's own
- * `CLAUDE.md` may carry instructions engram knows nothing about, and overwriting it
- * to say "read AGENTS.md" would destroy more than it explains.
+ * **Derived from the registry, never restated.** `core/paths.ts` cannot know
+ * this — it may import only `core/` — and its basename-matching `RESERVED_FILES`
+ * happened to cover `AGENTS.md` and `CLAUDE.md` while silently missing
+ * `GEMINI.md`. The consequence was not cosmetic: `reindex` picked its own output
+ * up as a knowledge node on the *next* run, so run 1 and run 2 disagreed and
+ * ADR-0029's idempotence guarantee quietly failed.
+ *
+ * Adding an agent must not be able to re-arm that trap, so this asks the
+ * registry rather than a parallel list.
  */
-export async function writePointers(
+export function isContractFile(path: string, agents: AgentDescriptor[] = AGENTS): boolean {
+  return agents.some((a) => a.contractFile === path);
+}
+
+export interface AdapterResult {
+  /** Files engram wrote in full — it owns all of them. */
+  written: string[];
+  /** Files where the user's own content was preserved around engram's region. */
+  merged: string[];
+}
+
+/**
+ * Render the contract into every agent's file.
+ *
+ * Called from `reindex`, not `init`: ADR-0017's consequence is that regenerating
+ * keeps every copy in sync from the single source, and a file written once at `init`
+ * would go stale the moment a guardrail changed.
+ */
+export async function writeContracts(
   files: FileStore,
+  contract: string,
   agents: AgentDescriptor[] = AGENTS,
 ): Promise<AdapterResult> {
   const written: string[] = [];
-  const skipped: string[] = [];
+  const merged: string[] = [];
 
   for (const agent of agents) {
-    if (await files.exists(agent.instructionsPath)) {
-      skipped.push(agent.instructionsPath);
-      continue;
-    }
-    await files.write(agent.instructionsPath, pointerFor(agent));
-    written.push(agent.instructionsPath);
+    const existing = await files.read(agent.contractFile);
+    const hadOwnContent =
+      existing !== null && existing.trim() !== '' && !existing.trimStart().startsWith(BEGIN);
+
+    await files.write(agent.contractFile, spliceContract(existing, contract));
+    (hadOwnContent ? merged : written).push(agent.contractFile);
   }
 
-  return { written: written.sort(), skipped: skipped.sort() };
+  return { written: written.sort(), merged: merged.sort() };
 }

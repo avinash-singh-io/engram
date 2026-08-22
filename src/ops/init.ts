@@ -12,27 +12,28 @@
 import { DERIVED_GITIGNORE, isDerived, RESERVED_FILES, ROOT_MARKER } from '../core/paths.js';
 import type { Clock, FileStore } from '../core/ports.js';
 import { GUARDRAILS_PATH, scaffoldGuardrails } from '../policy/config.js';
-import { AGENTS, writePointers } from '../surface/adapters.js';
+import { AGENTS } from '../surface/adapters.js';
 import { reindex } from './reindex.js';
 
 export const STRUCTURES = ['default'] as const;
 export type Structure = (typeof STRUCTURES)[number];
 
 /**
- * The reference tree. **Only ever written into an empty vault** (BUG-005).
+ * What a brand-new vault gets: **`raw/` and nothing else.**
  *
- * ADR-0023 says engram has no opinion about the shape, and writing these into a
- * vault that already has folders is an opinion. It is also actively messy: on a
- * case-insensitive filesystem `projects/` resolves into an existing `Projects/`,
- * dropping a `.gitkeep` beside someone's real notes, and on a case-sensitive one it
- * produces two siblings differing only in case.
+ * Engram says it has no opinion about your folder shape (ADR-0023), and creating
+ * five specific folders was an opinion contradicting that claim. `raw/` is the one
+ * directory the design genuinely requires, because `capture` must put bytes
+ * somewhere before anything has been decided about them.
+ *
+ * The other four were a *suggestion*, and a suggestion belongs in `AGENTS.md`
+ * where the agent doing the filing will actually read it — not as empty
+ * directories that make a vault look organised before it is. Structure emerges
+ * from the `part-of` edges you author, and `views/` renders as many arrangements
+ * of it as you like.
  */
 const TREE: Record<string, string> = {
-  '/inbox/.gitkeep': '',
-  '/concepts/.gitkeep': '',
-  '/decisions/.gitkeep': '',
-  '/sources/.gitkeep': '',
-  '/projects/.gitkeep': '',
+  '/raw/.gitkeep': '',
 };
 
 /** What every vault needs, whatever shape it already has. */
@@ -54,7 +55,7 @@ async function hasAuthoredNotes(files: FileStore): Promise<boolean> {
     if (!path.endsWith('.md')) continue;
     if (path.startsWith(`/${ROOT_MARKER}/`) || isDerived(path)) continue;
     if (RESERVED_FILES.includes(path.replace(/^\//, ''))) continue;
-    if (AGENTS.some((a) => a.instructionsPath === path)) continue;
+    if (AGENTS.some((a) => a.contractFile === path)) continue;
     return true;
   }
   return false;
@@ -124,34 +125,14 @@ export async function init(
     skipped.push('/.gitignore');
   }
 
-  // Native pointers for agents that look for a filename other than AGENTS.md.
-  // Non-destructive like everything else here: an existing CLAUDE.md is left alone.
-  const pointers = await writePointers(files);
-  created.push(...pointers.written);
-  skipped.push(...pointers.skipped);
-
-  // BUG-006. Leaving the file alone is right — it may carry instructions engram
-  // knows nothing about — but the pointer's only job is to route the agent, so a
-  // skip means the agent is never routed. Saying "left alone" does not convey that,
-  // and the most common adoption path is precisely a vault that already has a
-  // CLAUDE.md. Name the line to add.
-  for (const path of pointers.skipped) {
-    const agent = AGENTS.find((a) => a.instructionsPath === path);
-    if (agent === undefined) continue;
-    const existing = (await files.read(path)) ?? '';
-    if (existing.includes('AGENTS.md')) continue;
+  // reindex writes AGENTS.md and splices the contract into every agent's own
+  // file (ADR-0017), so init does not write them itself.
+  const { written, contracts } = await reindex(files, clock);
+  for (const path of contracts.merged) {
     notes.push(
-      `${path} is yours and was left alone — so ${agent.name} will NOT find the ` +
-        `contract. Add this line to it:\n    ${pointerLine(agent.instructionsPath)}`,
+      `${path} is yours — engram added its contract in a marked block at the end and ` +
+        `left everything you wrote untouched. That block is regenerated on reindex.`,
     );
   }
-
-  const { written } = await reindex(files, clock);
   return { created: created.sort(), skipped: skipped.sort(), reindexed: written, notes };
-}
-
-/** The single line a hand-written instructions file needs. */
-export function pointerLine(instructionsPath: string): string {
-  const depth = instructionsPath.split('/').filter(Boolean).length - 1;
-  return `This is an engram vault. The contract is [AGENTS.md](${'../'.repeat(depth)}AGENTS.md) — read it first.`;
 }

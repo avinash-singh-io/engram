@@ -41,8 +41,8 @@ describe('capture, in an editor', () => {
   it('writes what was selected', async () => {
     const d = deps();
     await captureCommand('a half-formed thought', d);
-    const inbox = (await d.files.list()).find((p) => p.startsWith('/inbox/'));
-    expect(await d.files.read(inbox!)).toBe('a half-formed thought');
+    const raw = (await d.files.list()).find((p) => p.startsWith('/raw/'));
+    expect(await d.files.read(raw!)).toBe('a half-formed thought');
   });
 });
 

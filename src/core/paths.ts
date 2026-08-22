@@ -17,6 +17,17 @@ export const RESERVED_FILES: readonly string[] = ['index.md', 'log.md', 'AGENTS.
 /** Derived subtree — 100% generated, gitignored, safe to delete (ADR-0023, ADR-0029). */
 export const VIEWS_DIR = 'views';
 
+/**
+ * Where `capture` puts unprocessed content.
+ *
+ * Named `raw/` rather than `inbox/`: an inbox implies a queue someone owes it to
+ * you to drain, and nothing in here is owed processing. `raw/` describes what the
+ * files are — unformatted thoughts, pasted articles, half-finished notes — which is
+ * the honest promise, since ADR-0026 lets capture accept anything and never asks
+ * what happens next.
+ */
+export const RAW_DIR = '/raw';
+
 /** The marker that makes a directory a vault root (ADR-0030). */
 export const ROOT_MARKER = '.engram';
 
