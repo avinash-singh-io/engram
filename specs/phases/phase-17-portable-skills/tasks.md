@@ -4,10 +4,10 @@
 > Mark `[x]` only after a verification command produced passing output **this session** (Rule 12).
 
 ## Group 0 — Contracts
-- [ ] T0.1 Verify a skills-directory plugin loads in a real session — **gate on this**
-- [ ] T0.2 `SkillTarget` on `AgentDescriptor`
-- [ ] T0.3 `PLUGIN_DIR` / `PLUGIN_MANIFEST` / `MANAGED_KEY` defined once
-- [ ] T0.4 ADR-0045
+- [x] T0.1 Verify a skills-directory plugin loads in a real session — **gate on this**
+- [x] T0.2 `SkillTarget` on `AgentDescriptor`
+- [x] T0.3 `PLUGIN_DIR` / `PLUGIN_MANIFEST` / `MANAGED_KEY` defined once
+- [x] T0.4 ADR-0045
 
 ## Group 1 — Format
 - [ ] T1.1 `parseSkill` reads `metadata.engram-*`, legacy still accepted
