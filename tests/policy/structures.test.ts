@@ -3,6 +3,7 @@ import { init } from '../../src/ops/init.js';
 import { reindex } from '../../src/ops/reindex.js';
 import { getStructure, guideFor, STRUCTURES, structureIds } from '../../src/policy/structures.js';
 import { generateAgentsMd } from '../../src/surface/agents-md.js';
+import { isSkillPath } from '../../src/surface/adapters.js';
 import { DEFAULTS, loadGuardrails } from '../../src/policy/config.js';
 import { discoverSkills, parseSkill } from '../../src/policy/skills.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
@@ -290,6 +291,10 @@ describe('the files you author are visible; the files engram owns are not', () =
     await init(files, clock);
 
     for (const p of await files.list()) {
+      // Rendered copies in an agent's own directory are engram's output, not
+      // something you author — asked of the registry rather than listed here, so a
+      // newly added agent cannot make this test wrong.
+      if (isSkillPath(p)) continue;
       if (p.includes('guardrails.md') || p.includes('/skills/')) {
         expect(p.startsWith('/engram/')).toBe(true);
       }

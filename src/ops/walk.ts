@@ -16,7 +16,7 @@
 
 import { ROOT_MARKER } from '../core/paths.js';
 import { ENGRAM_DIR, isDerived, isReservedFile } from '../core/paths.js';
-import { isContractFile } from '../surface/adapters.js';
+import { isContractFile, isSkillPath } from '../surface/adapters.js';
 import type { FileStore } from '../core/ports.js';
 
 export interface WalkFinding {
@@ -79,6 +79,11 @@ export async function walk(files: FileStore): Promise<WalkResult> {
     // Generated contract files are engram's output, not your notes. Asked of
     // the adapter registry so a newly added agent cannot reintroduce the gap.
     if (isContractFile(p)) continue;
+    // Rendered skills are engram's output too. Asked of the registry for the same
+    // reason: this is BUG-008's shape a third time — the first was GEMINI.md, the
+    // second STRUCTURE.md the same day, and a SKILL.md in an agent's directory is
+    // indistinguishable from a note to a walker that only checks the extension.
+    if (isSkillPath(p)) continue;
     paths.push(p);
   }
 

@@ -22,12 +22,12 @@
 - [x] T2.4 Invariant: every operation has a skill
 
 ## Group 3 — Rendering
-- [ ] T3.1 `renderSkills` writes plugin + siblings
-- [ ] T3.2 Provenance marker governs overwrite
-- [ ] T3.3 Override removes the built-in
-- [ ] T3.4 Walk exclusion derived from the registry
-- [ ] T3.5 Narrow managed gitignore lines
-- [ ] T3.6 `reindex` calls `renderSkills`
+- [x] T3.1 `renderSkills` writes plugin + siblings
+- [x] T3.2 Provenance marker governs overwrite
+- [x] T3.3 Override removes the built-in
+- [x] T3.4 Walk exclusion derived from the registry
+- [x] T3.5 Narrow managed gitignore lines
+- [x] T3.6 `reindex` calls `renderSkills`
 
 ## Group 4 — Root discovery
 - [ ] T4.1 ADR-0046
