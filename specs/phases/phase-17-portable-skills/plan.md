@@ -3,6 +3,23 @@
 # Execution order:
 # Group 0 → Group 1 → (Groups 2 + 3 + 4 in parallel) → Group 5 → Group 6
 
+## Reference specs (Rule 10)
+
+Read as a **stable reference** during implementation. Gaps are logged as
+`[ARCH_CHANGE]` in `history.md` with `Affects-specs:` and reconciled at
+`/sync-docs`, never edited mid-phase.
+
+| Spec | Why it is relevant |
+|---|---|
+| [`specs/architecture/v2-overview.md`](../../architecture/v2-overview.md) §6 | Defines what a skill is and the guarantee that bounds it — a skill can only sequence operations that already exist, because engram never runs one. Groups 1–2 must not weaken this. |
+| [`specs/architecture/v2-overview.md`](../../architecture/v2-overview.md) §1 | Engram mediates two of four write paths. Rendering skills into agent directories adds no write path — the agent still calls the same operations through the same gate. |
+| [`specs/architecture/ecosystem.md`](../../architecture/ecosystem.md) | Where agent adapters sit. This phase extends the descriptor registry rather than adding a layer. |
+
+**Additive vs decisional (Rule 10).** Giving `AgentDescriptor` a skills target is
+*additive* — a new field on an existing design, reconciled at completion. The
+namespace change and vault-root discovery are *decisional*, so ADR-0045 and
+ADR-0046 are written **before** any spec update, as T0.4 and T4.1.
+
 ---
 
 ## Group 0 — Verify the mechanism, then write the contracts

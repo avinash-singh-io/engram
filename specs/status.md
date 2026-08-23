@@ -1,8 +1,8 @@
 # Project Status
 
-> **Last Updated**: 2026-08-22
-> **Current Phase**: **Phase 14 complete, released as v0.11.0.** The Obsidian plugin moved to **Phase 16** so the agent surfaces get real use first. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.11.0** — the approval queue, guardrail configuration, and the vault's filing convention. Publish verified against the registry, not the workflow log.
+> **Last Updated**: 2026-08-23
+> **Current Phase**: **Phase 17 — Portable skills** (in progress, targeting v0.14.0). Engram's skills become invocable as slash commands with no MCP server. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Latest Release**: **v0.13.0** — verified against the registry (`npm view @avinash-singh-io/engram dist-tags` → `{ latest: '0.13.0' }`, 2026-08-23). v0.12.0 and v0.13.0 shipped as ad-hoc releases after Phase 14's v0.11.0: the visible authoring surface (BUG-010), vault structures, and `engram upgrade`.
 > **Health**: Good — 627 tests, both smoke checks green, and the six adoption bugs that made engram unusable outside a fresh vault are fixed.
 
 ## Summary
@@ -60,7 +60,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 14 released as v0.11.0)_ | | | |
+| 17 — Portable skills | `phase-17-portable-skills` | In Progress | Group 0 of 6 |
 
 ## Upcoming Phases — the v2 line
 
