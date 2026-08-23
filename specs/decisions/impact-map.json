@@ -60,9 +60,11 @@
       "specs/phases/phase-0-foundation/overview.md"
     ],
     "adapters": [
-      "specs/decisions/0011-adapters-converge-on-agents-md.md",
       "docs/adapters.md",
-      "specs/architecture/v2-overview.md"
+      "specs/architecture/v2-overview.md",
+      "specs/decisions/0011-adapters-converge-on-agents-md.md",
+      "specs/decisions/0017-agent-contract-files-full.md",
+      "specs/decisions/0044-adopt-the-agent-skills-standard.md"
     ],
     "promote": [
       "specs/decisions/0012-promote-one-way-reference-snapshot.md",
@@ -148,6 +150,11 @@
       "specs/decisions/0024-tiered-architecture.md",
       "specs/decisions/0042-approval-queue-trust-boundary.md",
       "specs/architecture/v2-overview.md"
+    ],
+    "skills": [
+      "specs/decisions/0044-adopt-the-agent-skills-standard.md",
+      "specs/architecture/v2-overview.md",
+      "src/policy/skills.ts"
     ]
   }
 }
