@@ -18,7 +18,9 @@ import { init } from './ops/init.js';
 import { link } from './ops/link.js';
 import { reindex } from './ops/reindex.js';
 import { applyUpgrade, needsUpgrade, planUpgrade } from './ops/upgrade.js';
-import { discoverSkills, SKILLS_DIR } from './policy/skills.js';
+import { discoverSkills, scaffoldSkill, SKILLS_DIR } from './policy/skills.js';
+import { SKILL_FILE } from './policy/skill-schema.js';
+import { invocationName, skillTargets } from './surface/adapters.js';
 import { serveHttp, serveStdio } from './surface/mcp-transport.js';
 import { choose, confirm, interactive } from './surface/prompt.js';
 import { STRUCTURES } from './policy/structures.js';
@@ -115,34 +117,6 @@ const stripFlags = (argv: string[]): string[] => {
   }
   return out;
 };
-
-/**
- * A skill scaffold that passes validation on first save.
- *
- * Authoring a skill should not require reading the schema, and a scaffold that
- * fails its own validator would be worse than none.
- */
-function scaffoldSkill(name: string): string {
-  return [
-    '---',
-    `name: ${name}`,
-    'description: One line on when to reach for this.',
-    'uses: [capture, format]',
-    'guardrails: [require-sources]',
-    '---',
-    '',
-    '# When to use',
-    '',
-    'Describe the situation that should make someone pick this skill.',
-    '',
-    '# Steps',
-    '',
-    '1. Engram runs none of this — you do. It only checks the operations exist.',
-    '2. `uses:` may name only real operations; `guardrails:` may tighten, never loosen.',
-    '3. Every write still passes the gate, so this cannot exceed what you already may do.',
-    '',
-  ].join('\n');
-}
 
 /**
  * Does this vault already hold notes? Used only to decide whether asking about
@@ -468,13 +442,22 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         process.stderr.write('usage: engram skill [list] | engram skill new <name>\n');
         return 2;
       }
-      const path = `${SKILLS_DIR}/${name}.md`;
+      const path = `${SKILLS_DIR}/${name}/${SKILL_FILE}`;
       if (await files.exists(path)) {
         process.stderr.write(`${path} already exists\n`);
         return 1;
       }
       await files.write(path, scaffoldSkill(name));
       process.stdout.write(`created ${path}\n`);
+
+      // Rendered immediately, so the skill is invocable without the user having to
+      // know that a second command exists. A scaffold you then have to reindex by
+      // hand is a scaffold most people will believe is broken.
+      const { skills: rendered } = await reindex(files, clock);
+      process.stdout.write(`rendered into ${rendered.written.length} agent file(s)\n`);
+      for (const agent of skillTargets()) {
+        process.stdout.write(`  ${invocationName(agent.skills, name, false)}  (${agent.name})\n`);
+      }
       return 0;
     }
     case 'mcp': {

@@ -36,10 +36,10 @@
 - [x] T4.4 No root → error naming `engram init`
 
 ## Group 5 — Wiring
-- [ ] T5.1 `create-skill`
-- [ ] T5.2 `engram skill new <name>`
-- [ ] T5.3 `AGENTS.md` — How to run these
-- [ ] T5.4 `doctor` checks
+- [x] T5.1 `create-skill`
+- [x] T5.2 `engram skill new <name>`
+- [x] T5.3 `AGENTS.md` — How to run these
+- [x] T5.4 `doctor` checks
 
 ## Group 6 — Verification
 - [ ] T6.1 `scripts/smoke-skills.mjs` in `npm run check`

@@ -397,6 +397,69 @@ export const BUILT_IN_SKILLS: Record<string, string> = {
     operationSkills().map((s) => [s.name, serializeSkill(s, { allowedTools: OPERATION_TOOLS })]),
   ),
 
+  'create-skill': [
+    '---',
+    'name: create-skill',
+    'description: Write a new engram skill into this vault, so it becomes invocable as' +
+      ' a slash command in every agent. Use when the user wants to capture a repeatable' +
+      ' way of working as a reusable skill.',
+    'metadata:',
+    '  engram-uses: reindex',
+    '---',
+    '',
+    '# When to use',
+    '',
+    'The user describes a way of working they repeat, and wants it saved rather than',
+    're-explained. Also when they ask directly for a new skill.',
+    '',
+    '# Where it goes',
+    '',
+    '```',
+    'engram/skills/<name>/SKILL.md',
+    '```',
+    '',
+    '**That directory is theirs.** Never write a skill anywhere else — everything under',
+    "an agent's own directory (`.claude/skills/`, `.gemini/skills/`, `.antigravity/`)",
+    'is generated from this one and is overwritten on the next `engram reindex`.',
+    '',
+    '# Steps',
+    '',
+    '1. Agree the `name` with the user. Lowercase, hyphenated, and it MUST match the',
+    '   directory it lives in — that is the standard, not an engram preference.',
+    '2. Write `engram/skills/<name>/SKILL.md`. Only `name` and `description` are',
+    '   required. Put engram-specific fields under `metadata`:',
+    '',
+    '   ```yaml',
+    '   ---',
+    '   name: literature-review',
+    '   description: Read several sources on one question and emit one synthesis citing',
+    '     them all. Use when the user wants the shape of an argument, not a summary.',
+    '   metadata:',
+    '     engram-uses: capture format link',
+    '     engram-guardrails: require-sources',
+    '   ---',
+    '   ```',
+    '',
+    '3. Spend real effort on `description`. It is what an agent matches against when',
+    '   deciding whether to load the skill at all, so it must name the **occasion**,',
+    '   not just restate the title.',
+    '4. `engram-uses` may name only operations engram actually has. Naming anything',
+    '   else means the skill is **rejected at load** — with the offending name.',
+    '5. `engram-guardrails` may only tighten: rules union, path scopes intersect, rate',
+    '   limits take the minimum. A skill can hand itself less freedom, never more.',
+    '6. Run `engram reindex`. That renders the skill into every agent directory.',
+    '7. Tell the user it is now `/<name>` — with no prefix, because they wrote it.',
+    "   Engram's own skills carry `engram:` or `engram-`; a name without that mark is",
+    '   theirs.',
+    '',
+    '# Do not',
+    '',
+    '- Do not write code. A skill is instructions an agent follows; engram never runs',
+    '  one. That is what stops a downloaded skill doing anything the user could not',
+    '  already do.',
+    '- Do not edit a generated copy to change a skill. Edit the source and reindex.',
+  ].join('\n'),
+
   'connect-the-dots': [
     '---',
     'name: connect-the-dots',
@@ -446,6 +509,38 @@ export const BUILT_IN_SKILLS: Record<string, string> = {
     '4. Emit one digest node citing every node it mentions. Cite, do not restate.',
   ].join('\n'),
 };
+
+/**
+ * The starting point `engram skill new` writes.
+ *
+ * In the standard's shape, because a scaffold teaches the format more effectively
+ * than any documentation does — whatever this file looks like is what the next
+ * hand-written skill will look like.
+ */
+export function scaffoldSkill(name: string): string {
+  return [
+    '---',
+    `name: ${name}`,
+    'description: One line on what this does AND when to reach for it. An agent matches' +
+      ' against this string to decide whether to load the skill, so name the occasion.',
+    'metadata:',
+    '  engram-uses: capture format',
+    '  engram-guardrails: require-sources',
+    '---',
+    '',
+    '# When to use',
+    '',
+    'Describe the situation that should make someone pick this skill.',
+    '',
+    '# Steps',
+    '',
+    '1. Engram runs none of this — you do. It only checks the operations exist.',
+    '2. `engram-uses` may name only real operations; `engram-guardrails` may tighten,',
+    '   never loosen.',
+    '3. Every write still passes the gate, so this cannot exceed what you already may do.',
+    '',
+  ].join('\n');
+}
 
 /**
  * A worked example, written into a new vault so skills are discoverable at all.

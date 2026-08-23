@@ -214,3 +214,50 @@ export function spliceIgnore(existing: string, lines: string[]): string {
   }
   return existing.trim() === '' ? `${block}\n` : `${existing.trimEnd()}\n\n${block}\n`;
 }
+
+export interface SkillAudit {
+  /** Engram-managed renders no current skill maps to. Usually an overridden built-in. */
+  stale: string[];
+  /** A skill in the source that has not been rendered anywhere. */
+  unrendered: string[];
+  /** A file where engram's render should be, that engram did not write and will not touch. */
+  foreign: string[];
+}
+
+/**
+ * The read-only half of rendering, for `doctor`.
+ *
+ * Separate from `renderSkills` because `doctor` changes nothing — that is the whole
+ * shape of the command (ADR-0028 makes not-acting engram's default posture, and
+ * `--fix` its single deliberate exception). Sharing `skillPath` with the renderer is
+ * what keeps the two from disagreeing about where a skill belongs.
+ */
+export async function auditSkills(
+  files: FileStore,
+  skills: Skill[],
+  agents: AgentDescriptor[] = AGENTS,
+): Promise<SkillAudit> {
+  const expected = new Map<string, boolean>();
+  for (const agent of skillTargets(agents)) {
+    for (const skill of skills) {
+      expected.set(skillPath(agent.skills, skill.name, skill.origin === 'built-in'), true);
+    }
+  }
+
+  const stale: string[] = [];
+  const foreign: string[] = [];
+  const present = new Set<string>();
+
+  for (const path of await files.list()) {
+    if (!path.endsWith(`/${SKILL_FILE}`)) continue;
+    if (!skillTargets(agents).some((a) => path.startsWith(`${a.skills.dir}/`))) continue;
+    const raw = await files.read(path);
+    const managed = raw === null ? null : managedBy(raw);
+    if (managed !== null) present.add(path);
+    if (managed !== null && !expected.has(path)) stale.push(path);
+    if (managed === null && expected.has(path)) foreign.push(path);
+  }
+
+  const unrendered = [...expected.keys()].filter((p) => !present.has(p) && !foreign.includes(p));
+  return { stale: stale.sort(), unrendered: unrendered.sort(), foreign: foreign.sort() };
+}

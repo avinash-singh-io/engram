@@ -63,7 +63,11 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   // built-in defaults meant AGENTS.md never mentioned a vault's propose-only
   // paths — which read as "there are none" rather than "engram cannot see them".
   const { config: guardrails } = await loadGuardrails(files);
-  const contract = generateAgentsMd(guardrails, await loadStructureId(files));
+  // Discovered before the contract is generated, so it can name the skills this
+  // vault actually has rather than describing the mechanism in the abstract.
+  const discovered = await discoverSkills(files);
+  for (const e of discovered.errors) warnings.push(`skill ${e.name}: ${e.reason}`);
+  const contract = generateAgentsMd(guardrails, await loadStructureId(files), discovered.skills);
   await files.write('/AGENTS.md', contract);
   // ADR-0017: every agent reads only its own file, so each gets the contract in
   // full — regenerated here from the one source, so no copy can drift.
@@ -73,8 +77,6 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   // Skills reach an agent the same way the contract does: rendered into the file it
   // actually reads. A skill only engram can see is a skill nobody can run — which is
   // what FEAT-009 reported.
-  const discovered = await discoverSkills(files);
-  for (const e of discovered.errors) warnings.push(`skill ${e.name}: ${e.reason}`);
   const skills = await renderSkills(files, discovered.skills);
   written.push(...skills.written);
 

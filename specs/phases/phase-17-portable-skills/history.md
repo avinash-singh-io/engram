@@ -315,3 +315,35 @@ it does not cover and where that coverage lives instead. A test whose name overs
 what it checks is worse than a smaller honest one.
 
 ---
+### [FEATURE] 2026-08-23 — create-skill, and a contract that says how to invoke
+Topics: skills, agents-md, cli, invocation
+Affects-phases: none
+Affects-specs: none
+Detail: `create-skill` ships as a built-in, so making a skill is itself invocable
+rather than something the user has to be told about. It sends the agent to
+`engram/skills/<name>/SKILL.md` and says explicitly never to write anywhere else,
+because everything in an agent's own directory is regenerated. `engram skill new`
+writes the directory layout and **reindexes immediately**, then prints the invocation
+name for each agent — a scaffold you have to reindex by hand is one most people will
+believe is broken. `AGENTS.md` gains **How to run these**: the shell form, the slash
+form per agent with the correct separator, the MCP form, and the host constraints
+engram cannot fix. That section is FEAT-009's actual cause — the contract listed
+`engram capture [text]` and never said what kind of thing that was.
+
+---
+
+### [DECISION] 2026-08-23 — Doctor reports one line per condition, not one per file
+Topics: doctor, skills, reporting
+Affects-phases: none
+Affects-specs: none
+Detail: The first version of the skill checks emitted 27 warnings on an uninitialised
+directory — one per skill per agent, all saying the same thing. Twenty-seven warnings
+is the same as none: nobody reads past the third. Collapsed to one warning per
+condition. The stale check still lists every path, because each needs removing
+individually and engram will not do it — the `FileStore` port has no removal, the same
+stance as `upgrade`. The whole audit is skipped for a directory with no
+`.engram/config.json`, on the reasoning `planUpgrade` already established: a warning is
+only worth reading if it is actionable, and "your skills are not rendered" is noise in
+a folder that is not a vault.
+
+---
