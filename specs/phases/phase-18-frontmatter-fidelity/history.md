@@ -240,3 +240,32 @@ at all rather than applied partially. Nine tests name the three policies so the
 inconsistency is deliberate and findable. 869 tests pass.
 
 ---
+### [DECISION] 2026-08-23 — Group 5: identity loss is a loud warning, not a failure
+Topics: doctor, identity, frontmatter
+Affects-phases: none
+Affects-specs: specs/decisions/0021-identity-slug-path-aliases.md
+Detail: `doctor` gained `[frontmatter]`, naming the line and what engram reads
+instead, and `[identity-lost]`, which fires only when path-as-identity was **caused
+by** a parse failure — a note that simply never had an `id` is a legitimate state and
+stays unflagged, or the new warning would be noise on every hand-written note. It was
+first written as a `failure`; an existing test caught that ADR-0021 says a missing slug
+is "a warning and a fallback, never an error". Raising it is a real argument — this is
+data integrity, not tidiness — but it amends ADR-0021 and does not belong in a health
+check, so it is worded to carry its own severity instead. Recorded here so the option
+is findable rather than forgotten.
+
+---
+
+### [DECISION] 2026-08-23 — Group 5: `upgrade` reports, and deliberately rewrites nothing
+Topics: upgrade, frontmatter
+Affects-phases: none
+Affects-specs: none
+Detail: There is nothing to migrate. The affected files were always valid YAML; engram
+simply could not read them, so with the parser fixed they work untouched. Rewriting
+them to normalise a formatting variation engram now handles is the exact damage
+ADR-0047 §5 exists to prevent, and it would fight Obsidian, which rewrites them back.
+What `upgrade` does say is that a workaround can stop — the version bump to 0.15.0
+landed here rather than at release because the guard's semantics depend on it, which an
+existing test caught.
+
+---

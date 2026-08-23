@@ -33,12 +33,12 @@
 - [x] T4.4 A named policy test per consumer
 
 ## Group 5 — Name the remedy
-- [/] T5.1 `doctor` says what to do
-- [ ] T5.2 Detective: path-as-identity *caused by* a parse failure
-- [ ] T5.3 `upgrade` reports, does not rewrite
+- [x] T5.1 `doctor` says what to do
+- [x] T5.2 Detective: path-as-identity *caused by* a parse failure
+- [x] T5.3 `upgrade` reports, does not rewrite
 
 ## Group 6 — Verification
-- [ ] T6.1 `scripts/smoke-obsidian.mjs` in `npm run check`
+- [/] T6.1 `scripts/smoke-obsidian.mjs` in `npm run check`
 - [ ] T6.2 The 16-construct probe as a permanent test
 - [ ] T6.3 Revert-and-fail both
 - [ ] T6.4 `docs/using-engram.md`

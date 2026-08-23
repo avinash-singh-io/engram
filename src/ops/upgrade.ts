@@ -81,6 +81,29 @@ export async function planUpgrade(files: FileStore): Promise<UpgradePlan> {
   const moves: Move[] = [];
   const manual: Manual[] = [];
 
+  // v0.15 — engram reads the frontmatter Obsidian writes (BUG-011).
+  //
+  // Deliberately a **report, not a rewrite.** There is nothing to migrate: the files
+  // were always valid YAML and engram simply could not read them, so with the parser
+  // fixed they work untouched. Rewriting a user's notes to normalise a formatting
+  // variation engram now handles correctly would be the exact damage ADR-0047 §5
+  // exists to prevent — and it would fight Obsidian, which rewrites them back.
+  //
+  // What is worth saying is that a workaround can stop: this bug was live long enough
+  // that people wrote "do not edit properties in Obsidian" into their own vault
+  // conventions, and nothing would otherwise tell them that had become false.
+  if (config.createdWith !== undefined && isOlderSeries(config.createdWith, '0.15.0')) {
+    manual.push({
+      what: 'notes whose properties you edited in Obsidian',
+      command: 'engram doctor',
+      why:
+        'engram now reads the block sequences Obsidian writes, so nothing needs ' +
+        'rewriting and the Properties panel is safe again (BUG-011). If you wrote a ' +
+        '"do not edit properties in Obsidian" rule anywhere, it no longer applies. ' +
+        'Run doctor to see anything still unreadable.',
+    });
+  }
+
   // v0.12 — the authoring surface moved out of the hidden directory.
   if ((await files.exists(LEGACY_GUARDRAILS_PATH)) && !(await files.exists(GUARDRAILS_PATH))) {
     moves.push({
