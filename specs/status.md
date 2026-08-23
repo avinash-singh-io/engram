@@ -3,7 +3,7 @@
 > **Last Updated**: 2026-08-23
 > **Current Phase**: **Phase 18 complete, released as v0.15.0.** engram reads the frontmatter Obsidian actually writes, and a line it cannot read never costs a note its identity (BUG-011). **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
 > **Latest Release**: **v0.15.0** — frontmatter fidelity, fixing BUG-011. **Verified against the registry and the published artifact**, not the workflow log: `npm view @avinash-singh-io/engram dist-tags` returns `{ latest: '0.15.0' }`, and the published tarball was installed into a clean directory and run against the reporter's file — `engram doctor` reports `nodes: 2  edges: 1` with no parse failure, and `engram upgrade` tells a 0.14 vault the Obsidian workaround can stop (2026-08-23). That distinction is the whole lesson of BUG-002.
-> **Health**: Good — 883 tests, four smoke checks green, one of which reads a corpus of frontmatter taken verbatim from a real Obsidian vault. The P0 that cost notes their identity is fixed.
+> **Health**: Good — 897 tests, four smoke checks green. No open P0. One open P1 (TD-008), which needs an ADR and is phase-sized.
 
 ## Summary
 
@@ -52,6 +52,7 @@ is rewritten clean-room rather than patched.
 | v0.6.5 | 2026-07-04 | quick-task (BUG-001) | Percent-encode markdown link targets (CommonMark §6.3) — fixes broken links on spaced filenames + engram's own dropped index bullets. `specs/adhoc/BUG-001/` |
 | v0.6.6 | 2026-07-04 | release-infra (BUG-002) | OIDC publish attempt — **failed to publish** (npm < 11.5.1 via setup-node@v4/Node22 ignored OIDC → E404). Git tag exists; never on npm. Superseded by v0.6.7. |
 | v0.6.7 | 2026-07-04 | release-infra (BUG-002) | OIDC attempt — **failed E404**: setup-node's `registry-url` injected a dummy `_authToken`, so npm used a bogus token and skipped OIDC. Git tag exists; never on npm. Superseded by v0.6.8. |
+| v0.15.1 | 2026-08-23 | quick-task (sweep) | Five open items after v0.15.0: `--help` no longer hangs on the stdin-reading commands (BUG-012); `link` stops appending an edge that already exists and says so (BUG-013); `doctor` reports body links that resolve to nothing (ENH-002); ADR index rebuilt from the files, 18 rows → 48 (TD-007); ENH-008 resolved as already documented. `specs/adhoc/2026-08-23-backlog-sweep/` |
 | v0.6.8 | 2026-07-05 | release-infra (BUG-002) | OIDC trusted-publishing release with `registry-url` removed (tokenless, auto-provenance). No functional/package change vs 0.6.5. |
 
 ## Active Phase

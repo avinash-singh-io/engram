@@ -168,6 +168,19 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   const by = flag(argv, 'by', process.env.USER ?? 'unknown');
   const [command, ...rest] = stripFlags(argv);
 
+  // `--help` is a flag, so `stripFlags` removes it before the dispatch below ever
+  // sees it. For the two commands that read content from stdin that meant
+  // `engram format --help` fell through to `readStdin()` and blocked forever, and
+  // `-h` was passed along as the content to format (BUG-012). A `--help` that hangs
+  // reads as the tool being broken rather than as a missing flag.
+  //
+  // Handled here, once, rather than per command — so a third stdin-reading command
+  // cannot reintroduce it.
+  if (argv.some((a) => a === '--help' || a === '-h')) {
+    process.stdout.write(USAGE_TEXT);
+    return 0;
+  }
+
   // An unknown command is reported as one. Checking the vault first would answer
   // `engram frobnicate` with "no vault here", which is true and not the point.
   if (command !== undefined && !HELP.has(command) && COMMANDS[command] === undefined) {

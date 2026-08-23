@@ -23,6 +23,7 @@ import { needsUpgrade, planUpgrade, versionSkew } from './upgrade.js';
 import { auditSkills } from '../surface/render-skills.js';
 import { discoverSkills, SKILLS_DIR } from '../policy/skills.js';
 import { walk, type WalkFinding } from './walk.js';
+import { extractMarkdownLinks } from '../format/links.js';
 import { parseFrontmatter, readNode } from '../format/registry.js';
 import { subsetNames } from '../format/subset.js';
 
@@ -106,6 +107,34 @@ export async function doctor(
   }
 
   for (const f of inspect(nodes, edges)) warnings.push(say(f));
+
+  // ENH-002, deferred from BUG-001. Frontmatter relations get a detective each; links
+  // in the **body** had none, so a link to a note that was renamed or never existed
+  // read as a clean bill of health. Obsidian owns link rewriting (ADR-0028), so this
+  // reports and never repairs — but reporting nothing was not the same as staying out
+  // of the way.
+  const present = new Set(await files.list());
+  for (const path of walked.paths) {
+    const raw = await files.read(path);
+    if (raw === null) continue;
+    for (const link of extractMarkdownLinks(raw)) {
+      if (link.target === '' || /^[a-z][a-z0-9+.-]*:/i.test(link.target)) continue;
+      if (link.target.startsWith('#')) continue;
+      const target = link.target.split('#')[0]!;
+      if (target === '') continue;
+      const abs = target.startsWith('/')
+        ? target
+        : `${path.slice(0, path.lastIndexOf('/'))}/${target}`.replace(/\/\.\//g, '/');
+      const candidates = [abs, `${abs}.md`, target.startsWith('/') ? target : `/${target}`];
+      if (!candidates.some((c) => present.has(c) || present.has(`${c}.md`))) {
+        warnings.push(
+          `[link-unresolved] ${path}: [${link.text}](${link.target}) resolves to nothing. ` +
+            `Obsidian owns link rewriting (ADR-0028), so engram reports this rather than ` +
+            `repairing it — rename the target back, or fix the link.`,
+        );
+      }
+    }
+  }
 
   // A reserved path holding content no generator would write. The walker excludes
   // reserved paths from authored content, so without this check a hand-written

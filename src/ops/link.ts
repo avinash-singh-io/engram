@@ -38,7 +38,15 @@ export async function link(
   const stamp = { by: deps.by, at: deps.clock.now(), until: null };
   const edge = makeEdge({ from: node.id, to, kind, stamp });
 
-  const all = [...edges, edge];
+  // An edge that is already there is not added twice. `link` appended
+  // unconditionally, so running the same command twice wrote `part-of: [b, b]`
+  // (BUG-013) — present since Phase 8 and invisible in flow style, where a bracket
+  // hid it. The result is reported rather than silently swallowed: an agent calling
+  // this cannot see the file, so "already linked" is information it needs.
+  const already = edges.some(
+    (e) => e.from === edge.from && e.to === edge.to && e.kind === edge.kind,
+  );
+  const all = already ? edges : [...edges, edge];
   // Styles from the read, so a file written in block style stays in block style.
   // Without this `link` silently reformats a note the user edited in Obsidian, and
   // Obsidian reformats it back (ADR-0047 §5).
@@ -64,6 +72,9 @@ export async function link(
   await deps.files.write(fromPath, content);
 
   const notes = [...warnings, ...writeWarnings];
+  if (already) {
+    notes.push(`${node.id} --${kind}--> ${to} already exists; nothing was added`);
+  }
   if (!isClosedRelation(kind)) {
     // Not an error — free vocabulary is the point (ADR-0022). But an untyped
     // edge draws no validity power, and the caller should know that.
