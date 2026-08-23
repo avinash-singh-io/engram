@@ -18,13 +18,21 @@ import { init } from './ops/init.js';
 import { link } from './ops/link.js';
 import { reindex } from './ops/reindex.js';
 import { applyUpgrade, needsUpgrade, planUpgrade } from './ops/upgrade.js';
-import { discoverSkills, SKILLS_DIR } from './policy/skills.js';
+import { discoverSkills, scaffoldSkill, SKILLS_DIR } from './policy/skills.js';
+import { SKILL_FILE } from './policy/skill-schema.js';
+import { invocationName, skillTargets } from './surface/adapters.js';
 import { serveHttp, serveStdio } from './surface/mcp-transport.js';
 import { choose, confirm, interactive } from './surface/prompt.js';
 import { STRUCTURES } from './policy/structures.js';
-import { filesystemDetector, nodeFileStore, systemClock } from './substrate/index.js';
+import {
+  filesystemDetector,
+  nodeFileStore,
+  noVaultMessage,
+  resolveVaultRoot,
+  systemClock,
+} from './substrate/index.js';
 
-const USAGE = `engram — a notes system where the organizing work is done by an agent
+export const USAGE_TEXT = `engram — a notes system where the organizing work is done by an agent
 
 usage:
   engram init                    scaffold a vault; non-destructive
@@ -39,7 +47,8 @@ usage:
   engram mcp                     MCP server over stdio (no socket, nothing listens)
 
 options:
-  --vault <dir>       vault root (default: cwd)
+  --vault <dir>       vault root. Default: the nearest directory at or above
+                      the cwd containing .engram/ (ADR-0046)
   --by <who>          who is asserting (default: $USER)
   --structure <name>  init only: default | para | zettelkasten | custom
                       custom creates only raw/ and leaves the shape to you
@@ -110,34 +119,6 @@ const stripFlags = (argv: string[]): string[] => {
 };
 
 /**
- * A skill scaffold that passes validation on first save.
- *
- * Authoring a skill should not require reading the schema, and a scaffold that
- * fails its own validator would be worse than none.
- */
-function scaffoldSkill(name: string): string {
-  return [
-    '---',
-    `name: ${name}`,
-    'description: One line on when to reach for this.',
-    'uses: [capture, format]',
-    'guardrails: [require-sources]',
-    '---',
-    '',
-    '# When to use',
-    '',
-    'Describe the situation that should make someone pick this skill.',
-    '',
-    '# Steps',
-    '',
-    '1. Engram runs none of this — you do. It only checks the operations exist.',
-    '2. `uses:` may name only real operations; `guardrails:` may tighten, never loosen.',
-    '3. Every write still passes the gate, so this cannot exceed what you already may do.',
-    '',
-  ].join('\n');
-}
-
-/**
  * Does this vault already hold notes? Used only to decide whether asking about
  * directories is worth the human's time.
  */
@@ -148,6 +129,33 @@ async function isPopulated(files: ReturnType<typeof nodeFileStore>): Promise<boo
   return false;
 }
 
+/**
+ * Every command, and whether it needs a vault that already exists.
+ *
+ * One list rather than a condition spelled out at each site. It decides two things
+ * that were previously implicit and disagreed with each other: what counts as an
+ * unknown command, and which commands may run outside a vault. A test asserts every
+ * key here is actually handled by the switch, so the registry cannot drift from it.
+ */
+const COMMANDS: Record<string, { vault: boolean }> = {
+  // Creating a vault is the one case where not having one is the point.
+  init: { vault: false },
+  capture: { vault: true },
+  format: { vault: true },
+  link: { vault: true },
+  reindex: { vault: true },
+  doctor: { vault: true },
+  queue: { vault: true },
+  upgrade: { vault: true },
+  skill: { vault: true },
+  mcp: { vault: true },
+};
+
+const HELP = new Set(['help', '--help', '-h']);
+
+/** Command names, for tests and for anything that needs to enumerate them. */
+export const commandNames = (): string[] => Object.keys(COMMANDS);
+
 /** Reads stdin when it is piped; returns '' for an interactive terminal. */
 async function readStdin(): Promise<string> {
   if (process.stdin.isTTY) return '';
@@ -157,9 +165,32 @@ async function readStdin(): Promise<string> {
 }
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
-  const root = flag(argv, 'vault', process.cwd());
   const by = flag(argv, 'by', process.env.USER ?? 'unknown');
   const [command, ...rest] = stripFlags(argv);
+
+  // An unknown command is reported as one. Checking the vault first would answer
+  // `engram frobnicate` with "no vault here", which is true and not the point.
+  if (command !== undefined && !HELP.has(command) && COMMANDS[command] === undefined) {
+    process.stderr.write(`unknown command: ${command}\n\n${USAGE_TEXT}`);
+    return 2;
+  }
+
+  // ADR-0046. Running from a subdirectory used to create a second vault inside the
+  // first and report a path relative to a root the user did not think they were in.
+  // Only `init` may proceed without a vault, because the absence of one is the point
+  // rather than an error.
+  const needsVault = command !== undefined && (COMMANDS[command]?.vault ?? false);
+  const resolved = resolveVaultRoot(process.cwd(), flagOrUndef(argv, 'vault'), !needsVault);
+  if (resolved.missing) {
+    process.stderr.write(noVaultMessage(process.cwd()));
+    return 1;
+  }
+  const root = resolved.root;
+  // Discovery that is invisible is indistinguishable from magic, and you need to be
+  // able to see which vault you just wrote to.
+  if (resolved.how === 'found' && root !== process.cwd()) {
+    process.stderr.write(`engram: vault root ${root}\n`);
+  }
 
   const files = nodeFileStore(root);
   const clock = systemClock();
@@ -411,13 +442,22 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         process.stderr.write('usage: engram skill [list] | engram skill new <name>\n');
         return 2;
       }
-      const path = `${SKILLS_DIR}/${name}.md`;
+      const path = `${SKILLS_DIR}/${name}/${SKILL_FILE}`;
       if (await files.exists(path)) {
         process.stderr.write(`${path} already exists\n`);
         return 1;
       }
       await files.write(path, scaffoldSkill(name));
       process.stdout.write(`created ${path}\n`);
+
+      // Rendered immediately, so the skill is invocable without the user having to
+      // know that a second command exists. A scaffold you then have to reindex by
+      // hand is a scaffold most people will believe is broken.
+      const { skills: rendered } = await reindex(files, clock);
+      process.stdout.write(`rendered into ${rendered.written.length} agent file(s)\n`);
+      for (const agent of skillTargets()) {
+        process.stdout.write(`  ${invocationName(agent.skills, name, false)}  (${agent.name})\n`);
+      }
       return 0;
     }
     case 'mcp': {
@@ -461,11 +501,12 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     }
     case undefined:
     case 'help':
+    case '-h':
     case '--help':
-      process.stdout.write(USAGE);
+      process.stdout.write(USAGE_TEXT);
       return 0;
     default:
-      process.stderr.write(`unknown command: ${command}\n\n${USAGE}`);
+      process.stderr.write(`unknown command: ${command}\n\n${USAGE_TEXT}`);
       return 2;
   }
 }

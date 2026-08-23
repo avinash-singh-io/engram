@@ -74,7 +74,69 @@ Run `engram init` again any time. It is idempotent and never overwrites.
 
 ## 3. Wire an agent
 
-### Claude Code
+Since v0.14.0 there are **two** ways, and the simpler one needs no configuration at
+all. Skills are rendered into each agent's own directory by `engram reindex`, so the
+whole surface is reachable as slash commands the moment a vault exists.
+
+### Slash commands — no MCP, no config
+
+```bash
+engram reindex     # renders skills into every agent directory
+```
+
+Then, in a session started **at the vault root**:
+
+| | Engram's own | Skills you wrote |
+|---|---|---|
+| Claude Code | `/engram:capture`, `/engram:format`, … | `/your-skill-name` |
+| Gemini CLI, Antigravity | `/engram-capture`, `/engram-format`, … | `/your-skill-name` |
+
+**If it carries engram's mark, engram wrote it. If it does not, you did.** Only the
+separator differs — `:` where the host provides a namespace, `-` where it does not.
+
+Two things about Claude Code specifically, both of which are its rules rather than
+engram's, and neither of which engram can work around:
+
+- **You have to accept the workspace trust dialog once.** Project-scoped skills load
+  only after that. Engram uses project scope deliberately — the personal directory
+  (`~/.claude/skills/`) has no prompt but is machine-wide, and would leak one vault's
+  skills into every unrelated project you open.
+- **Start the session at the vault root.** Project-scoped plugins load only from the
+  directory Claude Code starts in and do not walk up. `engram` itself is fine from any
+  subdirectory ([ADR-0046](../specs/decisions/0046-vault-root-discovery.md)), but the
+  slash commands will not be there.
+
+### Writing your own skill
+
+```bash
+engram skill new literature-review
+```
+
+That writes `engram/skills/literature-review/SKILL.md` — **visible in Obsidian,
+committed with your vault** — and renders it immediately. Edit it there and run
+`engram reindex`. Or just ask an agent: `/engram:create-skill`.
+
+Everything under an agent's own directory (`.claude/skills/`, `.gemini/skills/`,
+`.antigravity/skills/`) is **generated**. Editing a file there does nothing lasting:
+the next `engram reindex` overwrites it. There is no lock on those files and there
+should not be — they are plain files on your disk — but the edit you want to keep
+belongs in `engram/skills/`.
+
+To replace one of engram's own skills, create one with the same name in
+`engram/skills/`. Engram then stops rendering its own, and yours takes the plain
+name. You never need to edit engram's copy.
+
+The format is the [Agent Skills standard](https://agentskills.io/specification): a
+directory containing `SKILL.md`, with `name` and `description` required and anything
+engram-specific under `metadata`. A skill written here works in any agent that
+implements the standard, including ones engram has never heard of.
+
+### Over MCP — optional, and additive
+
+MCP is still supported and still useful for a client already configured that way. It
+is no longer the only route to the operations.
+
+#### Claude Code
 
 Create `.mcp.json` in the vault:
 
@@ -106,17 +168,19 @@ contract, and gets these tools:
 
 There is deliberately **no tool that approves or rejects** — see §4.
 
-### Gemini CLI, Antigravity, Codex
+#### Gemini CLI, Antigravity, Codex
 
 Same server, each client's own config location. `init` writes `GEMINI.md` and
 `.antigravity/AGENTS.md` pointers; Codex and anything following the `AGENTS.md`
 convention needs no pointer because it already reads the contract. Adding another
 agent is [one descriptor](../src/surface/adapters.ts), no code.
 
-### Any agent with a shell
+#### Any agent with a shell
 
 Needs no MCP at all — `AGENTS.md` plus the CLI is a complete surface. This is the
-floor the whole design targets.
+floor the whole design targets, and `AGENTS.md` now includes a **How to run these**
+section naming the shell form, the slash form and the MCP form, so an agent is told
+how to reach an operation rather than only that it exists.
 
 ## 4. Decide what the agent may do
 

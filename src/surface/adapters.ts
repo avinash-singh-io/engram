@@ -24,6 +24,7 @@
  */
 
 import type { FileStore } from '../core/ports.js';
+import { SKILL_FILE } from '../policy/skill-schema.js';
 
 export interface AgentDescriptor {
   /** How the agent is referred to. */
@@ -32,7 +33,57 @@ export interface AgentDescriptor {
   contractFile: string;
   /** Why it needs its own copy — agents that read AGENTS.md natively do not. */
   why: string;
+  /**
+   * Where this agent reads **project-scoped** skills, when engram has verified it.
+   *
+   * Optional on purpose. ADR-0044 refused to write to `.agents/skills/` because it
+   * could not be verified as read, and that principle applies to every target: an
+   * agent gets a skills directory here only once someone has watched a skill load
+   * from it. Absent means engram renders no skills for that agent — which is honest,
+   * and strictly better than writing files into a directory nobody reads.
+   */
+  skills?: SkillTarget;
 }
+
+/**
+ * A directory an agent reads skills from, and what the host does about names.
+ *
+ * The interesting field is `plugin`. Claude Code loads any folder under its skills
+ * directory carrying a `.claude-plugin/plugin.json` as a plugin, and namespaces
+ * everything inside it as `/<plugin>:<skill>` — so engram gets separation from the
+ * user's own skills for free, without inventing a prefix. Hosts with no plugin
+ * concept fall back to an `engram-` prefix on engram's own skills, which keeps the
+ * same *meaning* everywhere: if it carries engram's mark, engram wrote it.
+ */
+export interface SkillTarget {
+  /** Vault-relative directory. Project-scoped — never a home directory (ADR-0044). */
+  dir: string;
+  /**
+   * Plugin name engram's own skills are grouped under, or `null` when this host has
+   * no plugin concept and engram must prefix instead.
+   */
+  plugin: string | null;
+  /**
+   * How this was verified, and when.
+   *
+   * A descriptor is a promise that files written here are read. Recording the
+   * evidence beside the claim is what stops the next person adding a plausible path
+   * from a blog post — which is exactly what ADR-0044 refused to do.
+   */
+  verified: string;
+  /** Host constraints the human needs to know. Rendered into the contract. */
+  caveats: string[];
+}
+
+/** The plugin name engram's own skills are grouped under where a host supports one. */
+export const ENGRAM_PLUGIN = 'engram';
+
+/** Only `plugin.json` goes in here. Skills live at the plugin root, not inside it. */
+export const PLUGIN_MANIFEST_DIR = '.claude-plugin';
+export const PLUGIN_MANIFEST = 'plugin.json';
+
+/** Skills as `<name>/SKILL.md` at the plugin root. `commands/` is the legacy form. */
+export const PLUGIN_SKILLS_DIR = 'skills';
 
 /**
  * Agents that read a filename other than `AGENTS.md`.
@@ -46,18 +97,97 @@ export const AGENTS: AgentDescriptor[] = [
     name: 'claude',
     contractFile: '/CLAUDE.md',
     why: 'Claude Code reads CLAUDE.md, and nothing else, at session start',
+    skills: {
+      dir: '/.claude/skills',
+      plugin: ENGRAM_PLUGIN,
+      verified:
+        'Claude Code 2.1.235, 2026-08-23: `claude plugin validate` passed on this ' +
+        'exact structure, and a session loaded it as `engram:probe` alongside an ' +
+        'unprefixed project skill. See phase-17 evidence/t0-1-plugin-mechanism.md',
+      caveats: [
+        'Project-scoped skills load only after you accept the workspace trust ' +
+          'dialog once. Engram uses project scope deliberately: the personal ' +
+          'directory has no such prompt but is machine-wide, and would leak this ' +
+          "vault's skills into every unrelated project you open.",
+        'They load only from the directory Claude Code starts in — this does not ' +
+          'walk up. Start your session at the vault root.',
+      ],
+    },
   },
   {
     name: 'antigravity',
     contractFile: '/.antigravity/AGENTS.md',
     why: 'Antigravity reads instructions from its own directory',
+    skills: {
+      dir: '/.antigravity/skills',
+      plugin: null,
+      verified:
+        'Antigravity documentation, 2026-08-23: project skills live in ' +
+        '`.antigravity/skills/` at the repository root and load automatically. ' +
+        'No plugin concept, so engram prefixes its own.',
+      caveats: [],
+    },
   },
   {
     name: 'gemini',
     contractFile: '/GEMINI.md',
     why: 'the Gemini CLI reads GEMINI.md',
+    skills: {
+      dir: '/.gemini/skills',
+      plugin: null,
+      verified:
+        'Gemini CLI documentation, 2026-08-23: the workspace tier is ' +
+        '`.gemini/skills/`, shared through version control. No plugin concept, ' +
+        'so engram prefixes its own.',
+      caveats: [
+        'Gemini CLI also reads `.agents/skills/`, which takes precedence over ' +
+          '`.gemini/skills/`. Engram writes only the agent-specific path, so a ' +
+          "skill you put in `.agents/skills/` wins over engram's copy.",
+      ],
+    },
   },
 ];
+
+/** Every agent engram renders skills for. Derived, so a descriptor is the only edit. */
+export function skillTargets(agents: AgentDescriptor[] = AGENTS): (AgentDescriptor & {
+  skills: SkillTarget;
+})[] {
+  return agents.filter(
+    (a): a is AgentDescriptor & { skills: SkillTarget } => a.skills !== undefined,
+  );
+}
+
+/**
+ * The name a skill is invoked by in one host.
+ *
+ * Three cases, and the rule underneath them is one sentence: **if it carries
+ * engram's mark, engram wrote it.** Only the separator changes — `:` where the host
+ * namespaces for us, `-` where it does not.
+ */
+export function invocationName(target: SkillTarget, name: string, managed: boolean): string {
+  if (!managed) return `/${name}`;
+  return target.plugin === null ? `/engram-${name}` : `/${target.plugin}:${name}`;
+}
+
+/** Where a skill's `SKILL.md` is written in one host. Mirrors `invocationName`. */
+export function skillPath(target: SkillTarget, name: string, managed: boolean): string {
+  if (!managed) return `${target.dir}/${name}/${SKILL_FILE}`;
+  return target.plugin === null
+    ? `${target.dir}/engram-${name}/${SKILL_FILE}`
+    : `${target.dir}/${target.plugin}/${PLUGIN_SKILLS_DIR}/${name}/${SKILL_FILE}`;
+}
+
+/**
+ * Is this path inside any agent's skills directory?
+ *
+ * **Derived from the registry, never restated** — the same reason `isContractFile`
+ * exists. A rendered `SKILL.md` that the walker reads back becomes a knowledge node,
+ * which broke `reindex` idempotence when `GEMINI.md` did it and again when
+ * `STRUCTURE.md` did. Adding an agent must not be able to re-arm that trap.
+ */
+export function isSkillPath(path: string, agents: AgentDescriptor[] = AGENTS): boolean {
+  return skillTargets(agents).some((a) => path.startsWith(`${a.skills.dir}/`));
+}
 
 /**
  * The fences around engram's region of a file it does not own.

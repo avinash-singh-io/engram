@@ -13,12 +13,21 @@ import { loadGuardrails, loadStructureId } from '../policy/config.js';
 import { readNode } from '../format/registry.js';
 import { generateAgentsMd } from '../surface/agents-md.js';
 import { writeContracts, type AdapterResult } from '../surface/adapters.js';
+import {
+  renderSkills,
+  skillIgnoreLines,
+  spliceIgnore,
+  type SkillRenderResult,
+} from '../surface/render-skills.js';
+import { discoverSkills } from '../policy/skills.js';
 import { generateAll } from '../views/generate.js';
 import { walk, type WalkFinding } from './walk.js';
 
 export interface ReindexResult {
   /** Which agent contract files were rewritten, and which were merged into. */
   contracts: AdapterResult;
+  /** Which skills were rendered, left alone, or orphaned. */
+  skills: SkillRenderResult;
   written: string[];
   counts: { nodes: number; edges: number };
   findings: WalkFinding[];
@@ -54,16 +63,37 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   // built-in defaults meant AGENTS.md never mentioned a vault's propose-only
   // paths — which read as "there are none" rather than "engram cannot see them".
   const { config: guardrails } = await loadGuardrails(files);
-  const contract = generateAgentsMd(guardrails, await loadStructureId(files));
+  // Discovered before the contract is generated, so it can name the skills this
+  // vault actually has rather than describing the mechanism in the abstract.
+  const discovered = await discoverSkills(files);
+  for (const e of discovered.errors) warnings.push(`skill ${e.name}: ${e.reason}`);
+  const contract = generateAgentsMd(guardrails, await loadStructureId(files), discovered.skills);
   await files.write('/AGENTS.md', contract);
   // ADR-0017: every agent reads only its own file, so each gets the contract in
   // full — regenerated here from the one source, so no copy can drift.
   const contracts = await writeContracts(files, contract);
   written.push('/AGENTS.md', ...contracts.written, ...contracts.merged);
 
+  // Skills reach an agent the same way the contract does: rendered into the file it
+  // actually reads. A skill only engram can see is a skill nobody can run — which is
+  // what FEAT-009 reported.
+  const skills = await renderSkills(files, discovered.skills);
+  written.push(...skills.written);
+
+  // Derived state is never committed (ADR-0029). The block is delimited so engram
+  // owns what is between the markers and nothing else — `.claude/` also holds
+  // settings and commands that are the user's.
+  const gitignore = (await files.read('/.gitignore')) ?? '';
+  const merged = spliceIgnore(gitignore, skillIgnoreLines(discovered.skills));
+  if (merged !== gitignore) {
+    await files.write('/.gitignore', merged);
+    written.push('/.gitignore');
+  }
+
   return {
     written,
     contracts,
+    skills,
     counts: { nodes: nodes.length, edges: edges.length },
     findings: walked.findings,
     warnings,

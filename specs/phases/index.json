@@ -147,6 +147,24 @@
         "agents-md",
         "tier-2"
       ]
+    },
+    "phase-17-portable-skills": {
+      "name": "Portable skills",
+      "status": "complete",
+      "directory": "phase-17-portable-skills",
+      "topics": [
+        "skills",
+        "agent-skills-standard",
+        "adapters",
+        "plugins",
+        "namespacing",
+        "operations",
+        "derived-state",
+        "walker",
+        "vault-root",
+        "agents-md",
+        "invocation"
+      ]
     }
   }
 }

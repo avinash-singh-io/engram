@@ -12,7 +12,14 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, symlinkSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  symlinkSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -57,6 +64,33 @@ else fail('doctor produced no output through the symlink');
 
 if (run(asInstalled, ['queue'], vault).includes('nothing pending')) pass('queue works through the symlink');
 else fail('queue produced no output through the symlink');
+
+// ADR-0046. Running from a subdirectory used to create a SECOND vault inside the
+// first, file the note there, and report a path relative to a root the user did not
+// think they were in. The unit tests cover findVaultRoot; this asserts the binary
+// actually wires it in, which is the half BUG-004 proved the suite cannot see.
+const sub = join(vault, 'concepts');
+mkdirSync(sub, { recursive: true });
+run(asInstalled, ['capture', 'from a subdirectory'], sub);
+const landed = readdirSync(join(vault, 'raw'))
+  .filter((f) => f.endsWith('.md'))
+  .map((f) => readFileSync(join(vault, 'raw', f), 'utf8'))
+  .join('\n');
+if (existsSync(join(sub, 'raw'))) {
+  fail('capture from a subdirectory created a second vault inside the first');
+} else if (landed.includes('from a subdirectory')) {
+  pass('capture from a subdirectory files into the vault root, not a nested one');
+} else {
+  fail('capture from a subdirectory did not reach the vault root');
+}
+
+const orphan = mkdtempSync(join(tmpdir(), 'engram-novault-'));
+const refused = run(asInstalled, ['doctor'], orphan);
+if (refused.includes('no vault here') && refused.includes('engram init')) {
+  pass('outside a vault, engram says so and names the fix');
+} else {
+  fail('outside a vault, engram did not refuse — it would invent one silently');
+}
 
 console.log(failed ? '\nCLI smoke FAILED' : '\nCLI smoke passed — the built binary works as installed.');
 if (failed) process.exitCode = 1;

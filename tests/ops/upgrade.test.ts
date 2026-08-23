@@ -56,9 +56,12 @@ describe('planning an upgrade', () => {
 
   it('finds the authoring surface that should become visible', async () => {
     const plan = await planUpgrade(legacyVault());
+    // Both hops at once: out of the hidden directory (v0.12) and into the
+    // standard's `<name>/SKILL.md` layout (v0.14). A vault that skipped a release
+    // lands where it should rather than at the intermediate stop.
     expect(plan.moves.map((m) => m.to)).toEqual([
       '/engram/guardrails.md',
-      '/engram/skills/mine.md',
+      '/engram/skills/mine/SKILL.md',
     ]);
   });
 
@@ -107,7 +110,7 @@ describe('applying an upgrade', () => {
   it('carries your skills across', async () => {
     const files = legacyVault();
     await applyUpgrade(files, await planUpgrade(files));
-    expect(await files.read('/engram/skills/mine.md')).toContain('name: mine');
+    expect(await files.read('/engram/skills/mine/SKILL.md')).toContain('name: mine');
 
     const { skills } = await discoverSkills(files);
     expect(skills.map((s) => s.name)).toContain('mine');

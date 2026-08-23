@@ -116,12 +116,50 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
  */
 function parseSimpleYaml(yaml: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const line of yaml.split('\n')) {
-    if (line.trim() === '' || line.trimStart().startsWith('#')) continue;
+  const lines = yaml.split('\n');
+  const meaningful = (l: string): boolean => l.trim() !== '' && !l.trimStart().startsWith('#');
+
+  /** The nested map currently open, or null when the last key was a scalar. */
+  let nested: Record<string, unknown> | null = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (!meaningful(line)) continue;
+
     const at = line.indexOf(':');
     if (at === -1) throw new Error(`not a key: value pair: ${line}`);
     const key = line.slice(0, at).trim();
-    out[key] = parseScalar(line.slice(at + 1).trim());
+    const value = line.slice(at + 1).trim();
+
+    if (/^\s/.test(line)) {
+      // An indented pair used to be flattened into the top level, so
+      // `metadata:` followed by indented keys silently produced top-level keys
+      // and a null `metadata`. Skills need one level of nesting — the Agent
+      // Skills standard puts every tool-specific field under `metadata` — and
+      // reading it wrong is worse than refusing it.
+      if (nested === null) throw new Error(`indented key with no parent: ${line.trim()}`);
+      nested[key] = parseScalar(value);
+      continue;
+    }
+
+    if (value !== '') {
+      nested = null;
+      out[key] = parseScalar(value);
+      continue;
+    }
+
+    // `key:` with nothing after it is either an empty scalar or the head of a
+    // nested block, and only the next meaningful line can say which. Looking
+    // ahead keeps `aliases:` reading as null exactly as it always has —
+    // this extension is a strict superset for any flat document.
+    const next = lines.slice(i + 1).find(meaningful);
+    if (next !== undefined && /^\s/.test(next)) {
+      nested = {};
+      out[key] = nested;
+    } else {
+      nested = null;
+      out[key] = null;
+    }
   }
   return out;
 }
@@ -145,16 +183,39 @@ function parseScalar(v: string): unknown {
     }
     return map;
   }
-  if (
-    (v.startsWith('"') && v.endsWith('"') && v.length > 1) ||
-    (v.startsWith("'") && v.endsWith("'") && v.length > 1)
-  ) {
-    return v.slice(1, -1);
+  if (v.startsWith('"') && v.endsWith('"') && v.length > 1) {
+    // Unescape, so `yamlScalar` round-trips exactly. Without this a description
+    // containing a quote comes back with the backslashes still in it.
+    return v.slice(1, -1).replace(/\\(["\\])/g, '$1');
+  }
+  if (v.startsWith("'") && v.endsWith("'") && v.length > 1) {
+    return v.slice(1, -1).replace(/''/g, "'");
   }
   if (v === 'true') return true;
   if (v === 'false') return false;
   if (v === 'null' || v === '~') return null;
   return v;
+}
+
+/**
+ * Serialize a scalar so a **real** YAML parser reads back what was written.
+ *
+ * OKF files are read only by engram, whose subset splits on the first colon and
+ * therefore tolerates unquoted prose. A `SKILL.md` is read by Claude Code, the Gemini
+ * CLI and anything else implementing the standard, so the same tolerance would be a
+ * file that engram can read and nobody else can. Quotes only when it has to, because
+ * an unquoted description is the one a human wants to edit.
+ */
+export function yamlScalar(value: string): string {
+  const needsQuoting =
+    value === '' ||
+    value !== value.trim() ||
+    /[:#\n\r\t]/.test(value) ||
+    /^[-?*&!|>%@`[\]{},"']/.test(value) ||
+    ['true', 'false', 'null', '~', 'yes', 'no', 'on', 'off'].includes(value.toLowerCase()) ||
+    (value !== '' && Number.isFinite(Number(value)));
+  if (!needsQuoting) return value;
+  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' ')}"`;
 }
 
 /**

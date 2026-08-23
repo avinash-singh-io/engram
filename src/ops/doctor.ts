@@ -17,8 +17,11 @@ import { isDerived } from '../core/paths.js';
 import type { Detector, FileStore } from '../core/ports.js';
 import { getRelation, relationKinds } from '../core/relations.js';
 import { detectAll, guardrailNames, type GuardrailConfig } from '../policy/guardrails.js';
+import { CONFIG_PATH } from '../policy/config.js';
 import { linkSettingWarnings, OBSIDIAN_APP_JSON, readLinkSettings } from './obsidian-settings.js';
 import { needsUpgrade, planUpgrade, versionSkew } from './upgrade.js';
+import { auditSkills } from '../surface/render-skills.js';
+import { discoverSkills, SKILLS_DIR } from '../policy/skills.js';
 import { walk, type WalkFinding } from './walk.js';
 import { readNode } from '../format/registry.js';
 
@@ -79,6 +82,63 @@ export async function doctor(
       warnings.push(
         `[derived-not-generated] ${path} is a derived path but was not written by engram. ` +
           `On conflict the rule is regenerate, never merge (ADR-0029) — run \`engram reindex\`.`,
+      );
+    }
+  }
+
+  // Skills reach an agent only through the copies in its own directory, so a source
+  // skill that was never rendered is a skill nobody can invoke — the failure FEAT-009
+  // reported, in a form engram can actually detect.
+  //
+  // Skipped entirely for a directory engram has never initialised, on the same
+  // reasoning `planUpgrade` uses: warnings are only worth reading if every one of
+  // them is actionable, and "your skills are not rendered" is noise in a folder that
+  // is not a vault.
+  const initialised = await files.exists(CONFIG_PATH);
+  if (initialised) {
+    const discovered = await discoverSkills(files);
+    for (const e of discovered.errors) warnings.push(`[skill] ${e.name}: ${e.reason}`);
+
+    const audit = await auditSkills(files, discovered.skills);
+    // One line per condition, not per file. Twenty-seven warnings saying the same
+    // thing is the same as no warning: nobody reads past the third.
+    if (audit.unrendered.length > 0) {
+      warnings.push(
+        `[skill-unrendered] ${audit.unrendered.length} skill file(s) are missing from ` +
+          `agent directories, so those skills cannot be invoked. Run \`engram reindex\`. ` +
+          `First: ${audit.unrendered[0]}`,
+      );
+    }
+    if (audit.edited.length > 0) {
+      // The one warning that has to name the source file. "Do not edit" without an
+      // alternative just gets worked around, and this is the moment someone finds out
+      // their change is about to disappear.
+      warnings.push(
+        `[skill-edited] ${audit.edited.length} rendered skill file(s) have been changed ` +
+          `by hand and will be overwritten by the next \`engram reindex\`. Rendered ` +
+          `skills are derived state (ADR-0029) — to keep a change, put it in ` +
+          `${SKILLS_DIR}/<name>/SKILL.md instead: ${audit.edited.join(', ')}`,
+      );
+    }
+    if (audit.foreign.length > 0) {
+      warnings.push(
+        `[skill-not-ours] ${audit.foreign.length} file(s) where engram would render a ` +
+          `skill have no provenance marker, so engram will never overwrite them — and ` +
+          `is therefore not rendering its own skill of that name. If you meant to take ` +
+          `them over, this is working as intended: ${audit.foreign.join(', ')}`,
+      );
+    }
+    if (audit.stale.length > 0) {
+      // Every path is listed rather than counted, because each one needs removing
+      // individually. Engram will not do it: the FileStore port has four methods and
+      // removal is deliberately not one — the same stance as `upgrade`, which copies
+      // and then names what it left behind. A leftover only ever returned in a result
+      // object and never printed is the same as not having detected it.
+      warnings.push(
+        `[skill-stale] ${audit.stale.length} file(s) written by engram no longer ` +
+          `correspond to any skill — usually a built-in you have since overridden, ` +
+          `which keeps working until removed. Engram will not delete them for you: ` +
+          audit.stale.join(', '),
       );
     }
   }

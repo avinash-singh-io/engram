@@ -1,9 +1,9 @@
 # Project Status
 
-> **Last Updated**: 2026-08-22
-> **Current Phase**: **Phase 14 complete, released as v0.11.0.** The Obsidian plugin moved to **Phase 16** so the agent surfaces get real use first. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.11.0** — the approval queue, guardrail configuration, and the vault's filing convention. Publish verified against the registry, not the workflow log.
-> **Health**: Good — 627 tests, both smoke checks green, and the six adoption bugs that made engram unusable outside a fresh vault are fixed.
+> **Last Updated**: 2026-08-23
+> **Current Phase**: **Phase 17 complete, released as v0.14.0.** Engram's operations and skills are invocable as slash commands in any agent implementing the Agent Skills standard, with no MCP server. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Latest Release**: **v0.13.0** on npm, verified against the registry 2026-08-23. **v0.14.0 is tagged and publishing; NOT yet confirmed on the registry.** Do not mark it released until `npm view @avinash-singh-io/engram dist-tags` says so — recording a release from a workflow log rather than the registry is exactly what made BUG-002 look resolved for ten days while five tagged versions had never shipped.
+> **Health**: Good — 771 tests, three smoke checks green (one of which runs the host's own plugin validator), and the adoption bugs that made engram unusable outside a fresh vault are fixed.
 
 ## Summary
 
@@ -38,6 +38,7 @@ is rewritten clean-room rather than patched.
 | 10 | Agent surface (write path) | Complete | v0.9.0 |
 | 15 | Surfaces — skills, MCP, adapters | Complete | v0.10.0 |
 | 14 | Approval queue, guardrail config, structures | Complete | v0.11.0 |
+| 17 | Portable skills | Complete | v0.14.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -60,7 +61,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 14 released as v0.11.0)_ | | | |
+| _(none — Phase 17 released as v0.14.0)_ | | | |
 
 ## Upcoming Phases — the v2 line
 
