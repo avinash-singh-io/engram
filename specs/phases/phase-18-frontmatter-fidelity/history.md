@@ -305,3 +305,16 @@ still appear for a note that never had an id, and both are asserted rather than 
 being assumed.
 
 ---
+### [DISCOVERY] 2026-08-23 — `link` duplicates an edge that already exists
+Topics: link, edges
+Affects-phases: none
+Affects-specs: none
+Detail: Found in the final end-to-end demonstration. `link` appends unconditionally,
+so linking the same target twice yields `part-of: [b, b]`. Present since Phase 8 and
+independent of this phase — reproduced in flow form as well as block. Block style
+simply renders the duplicate on its own line, where flow had been hiding it inside a
+bracket. Filed as BUG-013 and deliberately not fixed here: a one-line dedupe, but it
+changes `link` semantics rather than the format layer, and the P0 should ship without
+unrelated behaviour changes riding along.
+
+---

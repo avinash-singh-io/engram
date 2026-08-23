@@ -61,7 +61,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| 18 — Frontmatter fidelity | `phase-18-frontmatter-fidelity` | In Progress | Group 0 of 6 |
+| 18 — Frontmatter fidelity | `phase-18-frontmatter-fidelity` | In Progress | All 6 groups verified; awaiting merge + release |
 
 ## Upcoming Phases — the v2 line
 
