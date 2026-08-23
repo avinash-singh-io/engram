@@ -16,13 +16,13 @@
 - [x] T1.5 Regression test from the report verbatim
 
 ## Group 2 — The two missing families
-- [/] T2.1 Block sequences — indented, unindented, single-item, empty
-- [ ] T2.2 Block scalars `|` `>` with chomping
-- [ ] T2.3 Style recorded per key
-- [ ] T2.4 A test per `SUBSET` construct; a warning test per exclusion
+- [x] T2.1 Block sequences — indented, unindented, single-item, empty
+- [x] T2.2 Block scalars `|` `>` with chomping
+- [x] T2.3 Style recorded per key
+- [x] T2.4 A test per `SUBSET` construct; a warning test per exclusion
 
 ## Group 3 — Preserve arrival style
-- [ ] T3.1 Codecs emit the style that arrived
+- [/] T3.1 Codecs emit the style that arrived
 - [ ] T3.2 Flow stays the default for new notes
 - [ ] T3.3 Round-trip byte-identical, both styles
 

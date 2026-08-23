@@ -175,3 +175,50 @@ nothing says so. Failed blocks are now dropped rather than emptied, and the case
 its own test.
 
 ---
+### [DECISION] 2026-08-23 — Group 2: both forms now read identically
+Topics: frontmatter, yaml, obsidian
+Affects-phases: none
+Affects-specs: none
+Detail: Block sequences (indented, unindented, single-item, bare-dash null items) and
+block scalars (`|`, `>`, chomping) implemented. The reporting user's file now reads the
+same in flow and block form on the built binary — `id`, `author`, `timestamp` and the
+`part-of` edge all present in both — and all 16 constructs from the original probe
+pass. Check order matters and is now commented: sequence is tested *before* nested map,
+because committing to a map on seeing an indented line is the precise shape of BUG-011.
+Chomping is deliberately partial — engram clips trailing newlines in every case, so `|`
+and `|-` agree; ADR-0047 states the simplification rather than implying precision OKF
+has no field to need.
+
+---
+
+### [DISCOVERY] 2026-08-23 — Four of the five stated exclusions were silent, and one flattened
+Topics: frontmatter, yaml
+Affects-phases: none
+Affects-specs: none
+Detail: ADR-0047 §1 says excluded constructs are "warned about by name". Writing the
+test that asserts it showed four were not warned about at all: `&anchor value`,
+`*anchor` and `!!timestamp …` each parsed cleanly as the **literal string**, which is
+worse than a refusal because nothing warns and the value is quietly wrong. A complex
+key warned but also emitted a garbage `'': 'c'` entry — a silent wrong answer beside a
+loud one. Worst was nesting beyond one level, which **silently flattened**:
+`a: { b:, c: d }` hoisted a depth-3 key into depth 2, producing a plausible and wrong
+mapping. That is the same silent hoist the Phase 17 look-ahead comment says it was
+added to prevent, reproduced one level deeper. All five now name themselves and keep
+`id`. Found only because the ADR made a claim a test could check — which is the
+argument for §1 in one example.
+
+---
+
+### [DISCOVERY] 2026-08-23 — A partially filled nested map is the same lie as an empty one
+Topics: frontmatter, yaml
+Affects-phases: none
+Affects-specs: none
+Detail: Group 1 dropped a spoiled nested block only when it ended up empty. With deep
+nesting refused rather than flattened, `a:` whose child failed now yields
+`a: { b: null }` — which asserts `b` is empty when `b` had content engram could not
+read. Same shape as the empty husk and equally quiet: it looks complete and warns
+about nothing downstream. Spoiled nested blocks are now dropped whole. Sequences
+deliberately keep their readable items instead, because there the items are
+independent of one another; the asymmetry is commented where it lives.
+
+---

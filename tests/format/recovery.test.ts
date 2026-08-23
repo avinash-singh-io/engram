@@ -49,22 +49,60 @@ describe('a bad line costs you that line', () => {
     expect(parseFrontmatter(OBSIDIAN).frontmatter?.okf_version).toBe('0.2');
   });
 
+  it('reads it cleanly now that block sequences are implemented', () => {
+    // Group 1 kept the identity while `part-of` was still unreadable; Group 2 reads
+    // the sequence too. Asserted here so the file the bug was reported against is
+    // pinned end to end, not just its identity.
+    const parsed = parseFrontmatter(OBSIDIAN);
+    expect(parsed.keyErrors).toEqual([]);
+    expect(parsed.frontmatter?.['part-of']).toEqual(['finance']);
+    expect(readNode(OBSIDIAN, PATH).edges.map((e) => `${e.kind}->${e.to}`)).toEqual([
+      'part-of->finance',
+    ]);
+  });
+
+  /**
+   * A construct engram genuinely cannot read, so these assert blast radius rather
+   * than coverage. The Obsidian fixture no longer qualifies — which is the point of
+   * Group 2 — so recovery is proved against something still outside the subset.
+   */
+  const UNREADABLE = `---
+okf_version: 0.2
+id: finance-glossary
+author: avinash
+weird: &anchor value
+part-of:
+  - finance
+---
+
+The body.`;
+
   it('names the failing key and its line', () => {
-    const errors = parseFrontmatter(OBSIDIAN).keyErrors;
-    expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0]!.key).toBe('part-of');
+    const errors = parseFrontmatter(UNREADABLE).keyErrors;
+    expect(errors.length).toBe(1);
+    expect(errors[0]!.key).toBe('weird');
     expect(errors[0]!.line).toBeGreaterThan(0);
   });
 
   it('surfaces one warning per failing key, naming it', () => {
-    const { warnings } = readNode(OBSIDIAN, PATH);
-    expect(warnings.some((w) => w.includes('part-of'))).toBe(true);
+    const { warnings } = readNode(UNREADABLE, PATH);
+    expect(warnings.some((w) => w.includes('weird'))).toBe(true);
   });
 
-  it('leaves no empty husk where a block failed', () => {
-    // `part-of: {}` reads as "declared and empty", which is a quieter lie than
-    // "could not be read" — and produces no warning downstream.
-    expect(parseFrontmatter(OBSIDIAN).frontmatter).not.toHaveProperty('part-of');
+  it('costs only the failing key — everything around it survives', () => {
+    const { node, edges } = readNode(UNREADABLE, PATH);
+    expect(node.id).toBe('finance-glossary');
+    expect(node.stamp.by).toBe('avinash');
+    expect(edges.map((e) => e.to)).toEqual(['finance']);
+    expect(parseFrontmatter(UNREADABLE).frontmatter).not.toHaveProperty('weird');
+  });
+
+  it('leaves no empty husk where a nested block failed', () => {
+    // `a: {}` reads as "declared and empty", which is a quieter lie than "could not
+    // be read" — and produces no warning downstream.
+    const parsed = parseFrontmatter('---\nid: x\na:\n  b:\n    c: d\n---\nbody');
+    expect(parsed.frontmatter).not.toHaveProperty('a');
+    expect(parsed.frontmatter?.id).toBe('x');
   });
 
   it.each([

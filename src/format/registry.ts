@@ -171,6 +171,10 @@ function parseSimpleYaml(yaml: string): YamlResult {
   /** The nested map currently open, and the key that opened it. */
   let nested: Record<string, unknown> | null = null;
   let nestedKey: string | null = null;
+  /** The indent of the open nested block, so a deeper one can be refused. */
+  let nestedIndent = -1;
+  /** True between the two halves of a complex key. */
+  let complexKeyOpen = false;
   /** Keys whose nested block had a failure, so an empty husk is not left behind. */
   const spoiled = new Set<string>();
 
@@ -184,6 +188,20 @@ function parseSimpleYaml(yaml: string): YamlResult {
 
     const indented = /^\s/.test(line);
     const at = line.indexOf(':');
+
+    // A complex key (`? [a, b]` / `: c`) spans two lines. Reporting only the first
+    // left the second to parse as a key of `''`, putting a garbage entry in the
+    // mapping — a silent wrong answer beside a loud one.
+    if (/^\?(\s|$)/.test(line.trim())) {
+      fail(line.trim(), i, 'engram does not read a YAML complex key; this entry was skipped');
+      complexKeyOpen = true;
+      continue;
+    }
+    if (complexKeyOpen && /^:(\s|$)/.test(line.trim())) {
+      complexKeyOpen = false;
+      continue;
+    }
+    complexKeyOpen = false;
 
     if (at === -1) {
       // Attribute it to the block it belongs to when there is one, so the warning
@@ -202,6 +220,19 @@ function parseSimpleYaml(yaml: string): YamlResult {
         fail(key, i, `indented key with no parent: ${line.trim()}`);
         continue;
       }
+      // Deeper than the block that is open means a second level of nesting. It used
+      // to be **flattened into the first**, producing a plausible and wrong mapping
+      // — the same silent-hoist the Phase 17 look-ahead was added to stop, one level
+      // further down. A wrong answer nobody is told about is the worst outcome here.
+      if (indentOf(line) > nestedIndent) {
+        spoiled.add(nestedKey!);
+        fail(
+          nestedKey ?? key,
+          i,
+          `engram reads one level of nesting; \`${key}\` is deeper and was skipped`,
+        );
+        continue;
+      }
       const scalar = scalarOrError(value);
       if (typeof scalar === 'string') {
         spoiled.add(nestedKey!);
@@ -215,6 +246,22 @@ function parseSimpleYaml(yaml: string): YamlResult {
     if (value !== '') {
       nested = null;
       nestedKey = null;
+
+      // `key: |` and `key: >` open a multi-line scalar, so the value is on the lines
+      // that follow rather than this one.
+      if (/^[|>][-+]?\d*$/.test(value)) {
+        const blk = readBlockScalar(lines, i + 1, value, indentOf(line));
+        out[key] = blk.text;
+        i = blk.next - 1;
+        continue;
+      }
+
+      const excluded = excludedConstruct(value);
+      if (excluded !== null) {
+        fail(key, i, `engram does not read a YAML ${excluded}; this key was skipped`);
+        continue;
+      }
+
       const scalar = scalarOrError(value);
       if (typeof scalar === 'string') {
         fail(key, i, scalar);
@@ -229,9 +276,28 @@ function parseSimpleYaml(yaml: string): YamlResult {
     // nested block, and only the next meaningful line can say which. Looking
     // ahead keeps `aliases:` reading as null exactly as it always has.
     const next = lines.slice(i + 1).find(meaningful);
+
+    // Sequence is checked **first**. Before ADR-0047 this branch saw an indented
+    // next line and committed to a nested map, so the sequence item under it then
+    // failed the key:value check — that is the precise shape of BUG-011, and it is
+    // why the check order matters rather than being incidental.
+    if (next !== undefined && isSequenceItem(next)) {
+      const seq = readBlockSequence(lines, i + 1, meaningful);
+      nested = null;
+      nestedKey = null;
+      for (const bad of seq.errors) fail(key, bad.line - 1, bad.reason);
+      if (seq.items.length > 0 || seq.errors.length === 0) {
+        out[key] = seq.items;
+        styles[key] = 'block';
+      }
+      i = seq.next - 1;
+      continue;
+    }
+
     if (next !== undefined && /^\s/.test(next)) {
       nested = {};
       nestedKey = key;
+      nestedIndent = indentOf(next);
       out[key] = nested;
     } else {
       nested = null;
@@ -240,14 +306,142 @@ function parseSimpleYaml(yaml: string): YamlResult {
     }
   }
 
-  // A block that failed leaves no empty husk: `part-of: {}` reads as "declared and
-  // empty", which is a different and quieter lie than "could not be read".
-  for (const key of spoiled) {
-    const v = out[key];
-    if (v !== null && typeof v === 'object' && Object.keys(v).length === 0) delete out[key];
-  }
+  // A nested block that failed is dropped whole, not left partially filled.
+  //
+  // `a: {}` reads as "declared and empty", and `a: { b: null }` — where `b` had
+  // content engram could not read — reads as "b is empty". Both are quieter lies
+  // than "could not be read", because they look complete and warn about nothing
+  // downstream. The `keyError` says what happened; the mapping must not contradict
+  // it. Sequences are different and keep their readable items, because there the
+  // items are independent of each other.
+  for (const key of spoiled) delete out[key];
 
   return { map: out, keyErrors, styles };
+}
+
+/**
+ * The YAML constructs engram does not implement, recognised so they can be **named**
+ * rather than silently misread (ADR-0047 §1, `EXCLUDED`).
+ *
+ * An anchor read as the literal string `"&anchor value"` is worse than a refusal: it
+ * parses, so nothing warns, and the value is quietly wrong. Naming them costs one
+ * regex and converts a silent corruption into a message.
+ */
+function excludedConstruct(v: string): string | null {
+  if (v.startsWith('&')) return 'anchor';
+  if (v.startsWith('*')) return 'alias';
+  if (v.startsWith('!')) return 'tag';
+  return null;
+}
+
+/** A line that opens or continues a block sequence: `- a`, or a bare `-`. */
+function isSequenceItem(line: string): boolean {
+  return /^-(\s|$)/.test(line.trim());
+}
+
+/** How far a line is indented, in characters. Tabs count as one, as YAML forbids them. */
+function indentOf(line: string): number {
+  return line.length - line.trimStart().length;
+}
+
+interface BlockSequence {
+  items: unknown[];
+  errors: { line: number; reason: string }[];
+  /** Index of the first line after the sequence. */
+  next: number;
+}
+
+/**
+ * Read a block sequence starting at `from`.
+ *
+ * Accepts both the indented form Obsidian writes and the unindented form YAML also
+ * permits, because a vault contains files written by more than one tool and refusing
+ * either is how BUG-011 happened.
+ */
+function readBlockSequence(
+  lines: string[],
+  from: number,
+  meaningful: (l: string) => boolean,
+): BlockSequence {
+  const items: unknown[] = [];
+  const errors: { line: number; reason: string }[] = [];
+  let i = from;
+
+  for (; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (!meaningful(line)) continue;
+    if (!isSequenceItem(line)) break;
+
+    const raw = line.trim().replace(/^-\s*/, '');
+    if (raw === '') {
+      // `-` with nothing after it is a null item, not an error.
+      items.push(null);
+      continue;
+    }
+    const scalar = scalarOrError(raw);
+    if (typeof scalar === 'string') errors.push({ line: i + 1, reason: scalar });
+    else items.push(scalar.value);
+  }
+
+  return { items, errors, next: i };
+}
+
+interface BlockScalar {
+  text: string;
+  next: number;
+}
+
+/**
+ * Read a `|` or `>` block scalar.
+ *
+ * Deliberately partial, and ADR-0047 says so: engram clips trailing newlines in every
+ * case, so `|` and `|-` agree. OKF has no field where a trailing blank line carries
+ * meaning, and pretending to implement chomping precisely would be a worse promise
+ * than a stated simplification.
+ *
+ * Blank lines and `#` are **content** inside a block scalar, never comments — which
+ * is why this does its own scanning rather than reusing the caller's `meaningful`.
+ */
+function readBlockScalar(
+  lines: string[],
+  from: number,
+  header: string,
+  keyIndent: number,
+): BlockScalar {
+  const folded = header.startsWith('>');
+  const collected: string[] = [];
+  let i = from;
+
+  for (; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (line.trim() === '') {
+      collected.push('');
+      continue;
+    }
+    if (indentOf(line) <= keyIndent) break;
+    collected.push(line);
+  }
+
+  while (collected.length > 0 && collected[collected.length - 1] === '') collected.pop();
+
+  const indents = collected.filter((l) => l.trim() !== '').map(indentOf);
+  const strip = indents.length === 0 ? 0 : Math.min(...indents);
+  const dedented = collected.map((l) => (l.trim() === '' ? '' : l.slice(strip)));
+
+  return { text: folded ? foldLines(dedented) : dedented.join('\n'), next: i };
+}
+
+/** Folded style joins on spaces; a blank line is a real paragraph break. */
+function foldLines(lines: string[]): string {
+  const paragraphs: string[][] = [[]];
+  for (const l of lines) {
+    if (l === '') paragraphs.push([]);
+    else paragraphs[paragraphs.length - 1]!.push(l);
+  }
+  return paragraphs
+    .filter((p) => p.length > 0)
+    .map((p) => p.join(' '))
+    .join('\n\n');
 }
 
 /** `parseScalar`, with its throws turned into a reason string. */
