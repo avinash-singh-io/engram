@@ -144,3 +144,48 @@ known ones — but the stated reason no longer does. Recorded in ADR-0045's cons
 and as ENH-008 so the next reader does not inherit a stale justification.
 
 ---
+### [ARCH_CHANGE] 2026-08-23 — The YAML subset gains one level of nesting
+Topics: format, frontmatter, skills, okf
+Affects-phases: none
+Affects-specs: specs/architecture/v2-overview.md#2
+Detail: `parseSimpleYaml` was flat by design because OKF frontmatter is flat
+(ADR-0020). The Agent Skills standard puts every tool-specific field under
+`metadata`, and the flat parser read `metadata:` followed by indented keys as a null
+`metadata` plus top-level keys — a silent misparse, not a refusal. Extended to one
+level of block nesting, with a lookahead so `aliases:` with nothing after it still
+reads as null: **a strict superset for any flat document**, which is the property the
+tests pin. `parseScalar` now unescapes quoted strings and a new `yamlScalar` quotes on
+write, because a `SKILL.md` is parsed by other agents with real YAML engines rather
+than by engram's subset — OKF's tolerance of unquoted prose was safe only because
+engram is its sole reader. Additive under Rule 10; reconciled at `/sync-docs`.
+
+---
+
+### [DISCOVERY] 2026-08-23 — A freshly created vault reported needing an upgrade
+Topics: init, upgrade, skills
+Affects-phases: none
+Affects-specs: none
+Detail: Adding the flat-to-directory skill migration made `needsUpgrade` true for a
+vault `init` had just created, because `init` still wrote the example skill in the
+flat layout. Caught by the existing test "has nothing to say about a vault this
+version created" — a test asserting a *property* rather than a path, which is why it
+fired at all. Fixed at the cause: `init` writes `<name>/SKILL.md`. Worth noting that
+the upgrade planner is now also a consistency check on `init`, and that relationship
+should be kept.
+
+---
+
+### [DECISION] 2026-08-23 — Migration moves the file and never rewrites the content
+Topics: upgrade, skills
+Affects-phases: none
+Affects-specs: none
+Detail: `engram upgrade` moves a flat skill to `<name>/SKILL.md` but leaves the
+frontmatter exactly as written, because `parseSkill` reads both layouts and the
+source file is the user's prose. Rewriting it would edit their words to satisfy a
+format only engram reads — the rendered copies are what other agents see, and those
+are generated in the standard shape regardless. The **declared name wins over the
+filename** when choosing the directory, since the standard requires them to match;
+a file named `notes.md` declaring `name: mine` becomes `mine/SKILL.md`, and a
+malformed skill falls back to its filename rather than being silently left behind.
+
+---

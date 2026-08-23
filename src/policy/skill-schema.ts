@@ -28,10 +28,18 @@ export type Operation = (typeof OPERATIONS)[number];
  * Defined here rather than at each reader, because a key restated in a second module
  * is the shape that produced BUG-008 twice.
  */
+/** The file a skill is defined in, by the standard. One definition, imported. */
+export const SKILL_FILE = 'SKILL.md';
+
 export const META = {
   uses: 'engram-uses',
+  /** The `enabled` list. The other three tightenings get their own flat keys. */
   guardrails: 'engram-guardrails',
-  emits: 'engram-emits',
+  proposeOnly: 'engram-propose-only',
+  pathScope: 'engram-path-scope',
+  rateLimit: 'engram-rate-limit',
+  emitsType: 'engram-emits-type',
+  emitsRelations: 'engram-emits-relations',
   /**
    * The provenance marker (ADR-0044 §4). Engram regenerates a rendered skill that
    * carries it, and **never touches one that does not** — so a skill someone else

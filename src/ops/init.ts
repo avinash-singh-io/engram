@@ -27,6 +27,7 @@ import {
   vaultConfig,
 } from '../policy/config.js';
 import { exampleSkill, SKILLS_DIR } from '../policy/skills.js';
+import { SKILL_FILE } from '../policy/skill-schema.js';
 import { getStructure, guideFor, RAW, structureIds } from '../policy/structures.js';
 import { AGENTS } from '../surface/adapters.js';
 import { reindex } from './reindex.js';
@@ -58,7 +59,7 @@ const structureTree = (id: string): Record<string, string> => {
 const ESSENTIAL: Record<string, string> = {
   // A worked example, so skills are discoverable rather than a feature you only
   // find by reading docs. Non-destructive like everything else.
-  [`${SKILLS_DIR}/example-literature-review.md`]: exampleSkill(),
+  [`${SKILLS_DIR}/example-literature-review/${SKILL_FILE}`]: exampleSkill(),
   // Written per-structure below; this map holds only what never varies.
   // What an agent may do to this vault. Scaffolded so the mechanism is
   // discoverable; `proposeOnly` ships empty so a fresh vault defers nothing.

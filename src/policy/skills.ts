@@ -9,10 +9,12 @@
  */
 
 import type { FileStore } from '../core/ports.js';
-import { parseFrontmatter } from '../format/registry.js';
+import { parseFrontmatter, yamlScalar } from '../format/registry.js';
 import { tighten, type GuardrailConfig } from './guardrails.js';
 import {
   isOperation,
+  META,
+  SKILL_FILE,
   OPERATIONS,
   type Operation,
   type Skill,
@@ -34,6 +36,38 @@ export const LEGACY_SKILLS_DIR = '/.engram/skills';
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const list = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+
+/**
+ * A list written either as YAML or as a `metadata` string.
+ *
+ * `metadata` is a string→string map by the standard, so `engram-uses` arrives as
+ * `capture format link` rather than a list. Accepting both keeps one reader for the
+ * new layout and the legacy one instead of two that can drift apart.
+ */
+const words = (v: unknown): string[] => {
+  if (Array.isArray(v)) return list(v);
+  const raw = str(v);
+  return raw === null ? [] : raw.split(/[\s,]+/).filter((w) => w !== '');
+};
+
+/** The `metadata` block, or an empty map when there is none. */
+const metaOf = (fm: Record<string, unknown>): Record<string, unknown> =>
+  typeof fm.metadata === 'object' && fm.metadata !== null && !Array.isArray(fm.metadata)
+    ? (fm.metadata as Record<string, unknown>)
+    : {};
+
+/**
+ * Read the provenance marker from a rendered skill.
+ *
+ * The whole overwrite rule turns on this: a file carrying the marker is engram's to
+ * regenerate, and a file without one is never touched. Returns the version that
+ * wrote it, so a stale render can say so rather than merely being replaced.
+ */
+export function managedBy(raw: string): string | null {
+  const parsed = parseFrontmatter(raw);
+  if (parsed.frontmatter === null) return null;
+  return str(metaOf(parsed.frontmatter)[META.managed]);
+}
 
 /**
  * Parse one skill file.
@@ -72,7 +106,11 @@ export function parseSkill(
     return { error: { name, reason: 'missing `description`' } };
   }
 
-  const declared = list(fm.uses);
+  // `metadata` first, top-level second. The legacy layout is still read so a vault
+  // written by an earlier engram keeps working — the same courtesy the guardrail
+  // and skills *locations* already extend to pre-v0.12 vaults.
+  const meta = metaOf(fm);
+  const declared = meta[META.uses] === undefined ? list(fm.uses) : words(meta[META.uses]);
   if (declared.length === 0) {
     return {
       error: { name, reason: 'missing `uses`: a skill must declare which operations it sequences' },
@@ -92,24 +130,9 @@ export function parseSkill(
     };
   }
 
-  const emits =
-    typeof fm.emits === 'object' && fm.emits !== null
-      ? {
-          type: str((fm.emits as Record<string, unknown>).type) ?? undefined,
-          relations: list((fm.emits as Record<string, unknown>).relations),
-        }
-      : undefined;
+  const emits = readEmits(fm, meta);
 
-  // The array check MUST come first: `Array.isArray` is also `typeof 'object'`, so
-  // testing for an object first swallows the shorthand list form that
-  // v2-overview §6's own example uses — and a skill declaring
-  // `guardrails: [require-sources]` would then run with no guardrails at all.
-  // Silent loosening by parse order is the worst possible failure here.
-  const guardrails = Array.isArray(fm.guardrails)
-    ? { enabled: list(fm.guardrails) }
-    : typeof fm.guardrails === 'object' && fm.guardrails !== null
-      ? coerceConfig(fm.guardrails as Record<string, unknown>)
-      : undefined;
+  const guardrails = readGuardrails(fm, meta);
 
   return {
     skill: {
@@ -140,6 +163,142 @@ function coerceConfig(raw: Record<string, unknown>): Partial<GuardrailConfig> {
   };
 }
 
+/**
+ * What a skill says it produces, from either layout.
+ *
+ * `metadata` is flat by the standard, so the nested `emits: { type, relations }`
+ * becomes two keys. Nothing about the meaning changes.
+ */
+function readEmits(
+  fm: Record<string, unknown>,
+  meta: Record<string, unknown>,
+): Skill['emits'] | undefined {
+  const type = str(meta[META.emitsType]);
+  const relations = words(meta[META.emitsRelations]);
+  if (type !== null || relations.length > 0) {
+    return { type: type ?? undefined, relations };
+  }
+  if (typeof fm.emits !== 'object' || fm.emits === null) return undefined;
+  const legacy = fm.emits as Record<string, unknown>;
+  return { type: str(legacy.type) ?? undefined, relations: list(legacy.relations) };
+}
+
+/**
+ * The guardrails a skill runs under, from either layout.
+ *
+ * **The array check MUST come first** in the legacy branch: `Array.isArray` is also
+ * `typeof 'object'`, so testing for an object first swallows the shorthand list form
+ * that v2-overview §6's own example uses — and a skill declaring
+ * `guardrails: [require-sources]` would then run with **no guardrails at all**.
+ * Silent loosening by parse order is the worst possible failure here, and it is
+ * worth restating that this ordering is load-bearing rather than stylistic.
+ *
+ * Whichever layout it came from, the result only ever reaches `tighten()`, so a
+ * skill can still hand itself less freedom and never more.
+ */
+function readGuardrails(
+  fm: Record<string, unknown>,
+  meta: Record<string, unknown>,
+): Partial<GuardrailConfig> | undefined {
+  const declaresMeta = [META.guardrails, META.proposeOnly, META.pathScope, META.rateLimit].some(
+    (k) => meta[k] !== undefined,
+  );
+  if (declaresMeta) {
+    const enabled = words(meta[META.guardrails]);
+    const proposeOnly = words(meta[META.proposeOnly]);
+    const pathScope = words(meta[META.pathScope]);
+    const rate = Number(str(meta[META.rateLimit]));
+    return {
+      ...(enabled.length > 0 ? { enabled } : {}),
+      ...(proposeOnly.length > 0 ? { proposeOnly } : {}),
+      ...(pathScope.length > 0 ? { pathScope } : {}),
+      ...(meta[META.rateLimit] !== undefined && Number.isFinite(rate) ? { rateLimit: rate } : {}),
+    };
+  }
+
+  if (Array.isArray(fm.guardrails)) return { enabled: list(fm.guardrails) };
+  if (typeof fm.guardrails === 'object' && fm.guardrails !== null) {
+    return coerceConfig(fm.guardrails as Record<string, unknown>);
+  }
+  return undefined;
+}
+
+/**
+ * The banner every rendered skill opens with.
+ *
+ * "Do not edit" on its own just gets worked around; it has to say what to do
+ * instead. There is no lock here and there should not be — engram's premise is plain
+ * files you own, and a tool that says that and then chmods your files is lying about
+ * one of the two. The protection is that this file is **derived state** under
+ * ADR-0029: edit it and `reindex` takes the edit back.
+ */
+export function renderedBanner(source: string): string {
+  return [
+    `<!-- GENERATED by \`engram reindex\` from ${source}. -->`,
+    `<!-- Edits here are lost on the next reindex. Edit ${source} instead, or delete`,
+    `     the \`${META.managed}\` line above and engram will stop managing this file. -->`,
+  ].join('\n');
+}
+
+export interface RenderOptions {
+  /**
+   * The name written to frontmatter. **Must match the parent directory** — the
+   * standard requires it, so a prefixed invocation needs a prefixed directory too.
+   */
+  name?: string;
+  /** Stamp the provenance marker with this version. Omit for a source skill. */
+  managed?: string;
+  /** Where the source lives, for the banner. Omit to write no banner. */
+  source?: string;
+  /** Tool restriction hint. Experimental in the hosts, so a hint and not a guarantee. */
+  allowedTools?: string;
+}
+
+/**
+ * Write a skill in the standard's shape.
+ *
+ * **The single generator.** Every rendered file goes through here, which is what
+ * makes the copies safe: no caller can emit a variant, so no copy can be more real
+ * than another (the ADR-0017 argument, applied to skills).
+ */
+export function serializeSkill(skill: Skill, options: RenderOptions = {}): string {
+  const name = options.name ?? skill.name;
+  const meta: [string, string][] = [[META.uses, skill.uses.join(' ')]];
+
+  const g = skill.guardrails;
+  if (g?.enabled !== undefined && g.enabled.length > 0) {
+    meta.push([META.guardrails, g.enabled.join(' ')]);
+  }
+  if (g?.proposeOnly !== undefined && g.proposeOnly.length > 0) {
+    meta.push([META.proposeOnly, g.proposeOnly.join(' ')]);
+  }
+  if (g?.pathScope !== undefined && g.pathScope.length > 0) {
+    meta.push([META.pathScope, g.pathScope.join(' ')]);
+  }
+  if (g?.rateLimit !== undefined) meta.push([META.rateLimit, String(g.rateLimit)]);
+  if (skill.emits?.type !== undefined) meta.push([META.emitsType, skill.emits.type]);
+  if (skill.emits?.relations !== undefined && skill.emits.relations.length > 0) {
+    meta.push([META.emitsRelations, skill.emits.relations.join(' ')]);
+  }
+  // Last, so it reads as a stamp rather than a setting.
+  if (options.managed !== undefined) meta.push([META.managed, options.managed]);
+
+  const lines = [
+    '---',
+    `name: ${yamlScalar(name)}`,
+    `description: ${yamlScalar(skill.description)}`,
+  ];
+  if (options.allowedTools !== undefined) {
+    lines.push(`allowed-tools: ${yamlScalar(options.allowedTools)}`);
+  }
+  lines.push('metadata:');
+  for (const [k, v] of meta) lines.push(`  ${k}: ${yamlScalar(v)}`);
+  lines.push('---', '');
+  if (options.source !== undefined) lines.push(renderedBanner(options.source), '');
+  lines.push(skill.body.trim(), '');
+  return lines.join('\n');
+}
+
 export interface DiscoveryResult {
   skills: Skill[];
   errors: SkillError[];
@@ -165,9 +324,11 @@ export async function discoverSkills(
     else byName.set(result.skill.name, result.skill);
   }
 
-  for (const path of (await files.list()).sort()) {
-    const inSkills = path.startsWith(`${SKILLS_DIR}/`) || path.startsWith(`${LEGACY_SKILLS_DIR}/`);
-    if (!inSkills || !path.endsWith('.md')) continue;
+  // Later wins, so the order is the precedence: legacy location, then flat, then the
+  // standard's directory form. A vault mid-migration therefore prefers the shape it
+  // is migrating *to* rather than whichever sorts later by accident.
+  const paths = (await files.list()).sort();
+  for (const path of [...paths.filter(isFlatSkill), ...paths.filter(isDirectorySkill)]) {
     const raw = await files.read(path);
     if (raw === null) continue;
     const result = parseSkill(raw, 'vault');
@@ -177,6 +338,31 @@ export async function discoverSkills(
   }
 
   return { skills: [...byName.values()].sort((a, b) => a.name.localeCompare(b.name)), errors };
+}
+
+/** In a skills directory, at the top level. */
+const inSkillsDir = (path: string): boolean =>
+  path.startsWith(`${SKILLS_DIR}/`) || path.startsWith(`${LEGACY_SKILLS_DIR}/`);
+
+/**
+ * `<name>.md` — the single-file layout engram invented.
+ *
+ * Still read, because a vault written by an earlier engram must keep working. The
+ * legacy `.engram/skills/` location is included here for the same reason: two
+ * migrations at once (format and location) is one too many to force on someone who
+ * only wanted to upgrade.
+ */
+export function isFlatSkill(path: string): boolean {
+  if (!inSkillsDir(path) || !path.endsWith('.md') || path.endsWith(`/${SKILL_FILE}`)) return false;
+  const rest = path.slice(
+    path.startsWith(SKILLS_DIR) ? SKILLS_DIR.length + 1 : LEGACY_SKILLS_DIR.length + 1,
+  );
+  return !rest.includes('/');
+}
+
+/** `<name>/SKILL.md` — the standard's layout, and what engram writes. */
+export function isDirectorySkill(path: string): boolean {
+  return inSkillsDir(path) && path.endsWith(`/${SKILL_FILE}`);
 }
 
 /**
@@ -191,14 +377,30 @@ export function configFor(base: GuardrailConfig, skill: Skill): GuardrailConfig 
 }
 
 /** Built-in skills, shipped with engram. Vault-local copies override by name. */
+/**
+ * Built-in skills, shipped with engram. Vault-local copies override by name.
+ *
+ * Written in the standard's shape — `name`, `description`, everything else under
+ * `metadata` — because engram cannot credibly ask that of a user's skills while its
+ * own use a format it invented. They are parsed by `parseSkill` like any other, so
+ * a mistake here fails the same way a mistake in yours does.
+ *
+ * `description` says **what it does and when to use it**: that string is what an
+ * agent matches against when deciding whether to load the skill, so a description
+ * that only names the skill makes it unreachable except by explicit invocation.
+ */
 export const BUILT_IN_SKILLS: Record<string, string> = {
   'connect-the-dots': [
     '---',
     'name: connect-the-dots',
-    'description: Read several pointers, find the shared thread, emit one synthesis node.',
-    'uses: [capture, format, link]',
-    'emits: { type: Synthesis, relations: [sources] }',
-    'guardrails: [require-sources]',
+    'description: Read several sources, find the shared thread, and emit one synthesis' +
+      ' node citing them all. Use when several articles, papers or repos should add up' +
+      ' to a single claim.',
+    'metadata:',
+    '  engram-uses: capture format link',
+    '  engram-emits-type: Synthesis',
+    '  engram-emits-relations: sources',
+    '  engram-guardrails: require-sources',
     '---',
     '',
     '# When to use',
@@ -216,10 +418,13 @@ export const BUILT_IN_SKILLS: Record<string, string> = {
   'weekly-digest': [
     '---',
     'name: weekly-digest',
-    'description: Summarise what changed in the vault this week, citing the nodes.',
-    'uses: [reindex, doctor, format]',
-    'emits: { type: Digest, relations: [sources] }',
-    'guardrails: [require-sources, rate-limit]',
+    'description: Summarise what changed in the vault this week, citing the nodes it' +
+      ' mentions. Use for a weekly review, or when returning after time away.',
+    'metadata:',
+    '  engram-uses: reindex doctor format',
+    '  engram-emits-type: Digest',
+    '  engram-emits-relations: sources',
+    '  engram-guardrails: require-sources rate-limit',
     '---',
     '',
     '# When to use',
@@ -247,10 +452,14 @@ export function exampleSkill(): string {
   return [
     '---',
     'name: example-literature-review',
-    'description: Read several sources on one question and emit one synthesis citing them all.',
-    'uses: [capture, format, link]',
-    'emits: { type: Synthesis, relations: [sources] }',
-    'guardrails: [require-sources]',
+    'description: Read several sources on one question and emit one synthesis citing' +
+      ' them all. Use when you want the shape of an argument rather than a summary' +
+      ' of each source.',
+    'metadata:',
+    '  engram-uses: capture format link',
+    '  engram-emits-type: Synthesis',
+    '  engram-emits-relations: sources',
+    '  engram-guardrails: require-sources',
     '---',
     '',
     '# This file is an example — edit it, rename it, or delete it',
@@ -260,12 +469,15 @@ export function exampleSkill(): string {
     'That is what bounds the damage a careless or downloaded skill can do — it can',
     'only sequence operations that already exist.',
     '',
-    'Two lines above are checked mechanically:',
+    'Only `name` and `description` are required — that is the',
+    '[Agent Skills standard](https://agentskills.io/specification), so this file works',
+    'in any agent that implements it. Everything engram-specific lives under',
+    '`metadata`, and two of those keys are checked mechanically:',
     '',
-    '- `uses:` may name only real operations. Name one engram does not have and this',
-    '  skill is **rejected at load**, with the offending name.',
-    '- `guardrails:` may only **tighten** — rules union, path scopes intersect, rate',
-    '  limits take the minimum. A skill can hand itself less freedom, never more.',
+    '- `engram-uses` may name only real operations. Name one engram does not have and',
+    '  this skill is **rejected at load**, with the offending name.',
+    '- `engram-guardrails` may only **tighten** — rules union, path scopes intersect,',
+    '  rate limits take the minimum. A skill can hand itself less freedom, never more.',
     '',
     'Everything below is prose engram never interprets. Write it for the agent.',
     '',

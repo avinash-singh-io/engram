@@ -4,7 +4,7 @@ import { reindex } from '../../src/ops/reindex.js';
 import { getStructure, guideFor, STRUCTURES, structureIds } from '../../src/policy/structures.js';
 import { generateAgentsMd } from '../../src/surface/agents-md.js';
 import { DEFAULTS, loadGuardrails } from '../../src/policy/config.js';
-import { discoverSkills } from '../../src/policy/skills.js';
+import { discoverSkills, parseSkill } from '../../src/policy/skills.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
 
 const clock = fixedClock('2026-08-22T09:00:00.000Z');
@@ -306,9 +306,13 @@ describe('the files you author are visible; the files engram owns are not', () =
     const files = memoryFileStore();
     await init(files, clock);
 
-    const example = await files.read('/engram/skills/example-literature-review.md');
-    expect(example).toContain('uses: [capture, format, link]');
+    const example = await files.read('/engram/skills/example-literature-review/SKILL.md');
+    // Asserts the property, not the byte string. Pinning the exact frontmatter meant
+    // moving engram's fields under `metadata` — a change that keeps every skill
+    // valid — broke a test about discoverability, which is not what it was testing.
     expect(example).toMatch(/edit it, rename it, or delete it/);
+    const parsed = parseSkill(example!, 'vault');
+    expect('skill' in parsed && parsed.skill.uses).toEqual(['capture', 'format', 'link']);
   });
 
   it('and that example is itself a valid skill', async () => {

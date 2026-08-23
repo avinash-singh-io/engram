@@ -26,7 +26,8 @@ import {
   loadVaultConfig,
   vaultConfig,
 } from '../policy/config.js';
-import { LEGACY_SKILLS_DIR, SKILLS_DIR } from '../policy/skills.js';
+import { isFlatSkill, LEGACY_SKILLS_DIR, parseSkill, SKILLS_DIR } from '../policy/skills.js';
+import { SKILL_FILE } from '../policy/skill-schema.js';
 import { isOlderSeries, VERSION } from '../version.js';
 
 export interface Move {
@@ -89,11 +90,22 @@ export async function planUpgrade(files: FileStore): Promise<UpgradePlan> {
     });
   }
 
+  // v0.12 moved skills out of the hidden directory; v0.14 moved them to the
+  // standard's `<name>/SKILL.md` layout. Both hops are computed here, so a vault
+  // that skipped a release lands in one place rather than the intermediate one.
   for (const path of all) {
-    if (!path.startsWith(`${LEGACY_SKILLS_DIR}/`) || !path.endsWith('.md')) continue;
-    const to = path.replace(LEGACY_SKILLS_DIR, SKILLS_DIR);
-    if (await files.exists(to)) continue;
-    moves.push({ from: path, to, why: 'your skills should be visible and editable in Obsidian' });
+    if (!isFlatSkill(path)) continue;
+    const to = `${SKILLS_DIR}/${await skillDirName(files, path)}/${SKILL_FILE}`;
+    if (path === to || (await files.exists(to))) continue;
+    moves.push({
+      from: path,
+      to,
+      why: path.startsWith(`${LEGACY_SKILLS_DIR}/`)
+        ? 'your skills should be visible and editable in Obsidian, and a skill is a ' +
+          'directory containing SKILL.md by the Agent Skills standard'
+        : 'a skill is a directory containing SKILL.md by the Agent Skills standard, ' +
+          'so it can carry references and assets and be read by any agent',
+    });
   }
 
   // v0.11 — inbox/ became raw/. These are YOUR notes, so engram will not move them.
@@ -116,6 +128,24 @@ export async function planUpgrade(files: FileStore): Promise<UpgradePlan> {
     manual,
     stampMissing: config.createdWith === undefined,
   };
+}
+
+/**
+ * The directory a flat skill becomes.
+ *
+ * The standard requires `name` to match the parent directory, so the **declared
+ * name wins over the filename** — a file called `notes.md` declaring
+ * `name: literature-review` must become `literature-review/SKILL.md` or the moved
+ * skill is invalid rather than merely oddly placed. Falls back to the filename when
+ * the frontmatter is unreadable, because a malformed skill should still be moved
+ * somewhere predictable rather than silently left behind.
+ */
+async function skillDirName(files: FileStore, path: string): Promise<string> {
+  const stem = path.split('/').pop()!.replace(/\.md$/, '');
+  const raw = await files.read(path);
+  if (raw === null) return stem;
+  const parsed = parseSkill(raw, 'vault');
+  return 'skill' in parsed ? parsed.skill.name : stem;
 }
 
 export interface UpgradeResult {

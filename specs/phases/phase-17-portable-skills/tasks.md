@@ -10,10 +10,10 @@
 - [x] T0.4 ADR-0045
 
 ## Group 1 — Format
-- [ ] T1.1 `parseSkill` reads `metadata.engram-*`, legacy still accepted
-- [ ] T1.2 `discoverSkills` handles all three layouts
-- [ ] T1.3 `serializeSkill` — the single generator
-- [ ] T1.4 `engram upgrade` migrates legacy skills (copies, never deletes)
+- [x] T1.1 `parseSkill` reads `metadata.engram-*`, legacy still accepted
+- [x] T1.2 `discoverSkills` handles all three layouts
+- [x] T1.3 `serializeSkill` — the single generator
+- [x] T1.4 `engram upgrade` migrates legacy skills (copies, never deletes)
 
 ## Group 2 — Operations as skills
 - [ ] T2.1 Registry carries when-to-use + invocation

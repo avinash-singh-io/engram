@@ -24,6 +24,7 @@
  */
 
 import type { FileStore } from '../core/ports.js';
+import { SKILL_FILE } from '../policy/skill-schema.js';
 
 export interface AgentDescriptor {
   /** How the agent is referred to. */
@@ -83,9 +84,6 @@ export const PLUGIN_MANIFEST = 'plugin.json';
 
 /** Skills as `<name>/SKILL.md` at the plugin root. `commands/` is the legacy form. */
 export const PLUGIN_SKILLS_DIR = 'skills';
-
-/** The file a skill is defined in, by the standard. */
-export const SKILL_FILE = 'SKILL.md';
 
 /**
  * Agents that read a filename other than `AGENTS.md`.
