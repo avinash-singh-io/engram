@@ -11,6 +11,7 @@
 import type { FileStore } from '../core/ports.js';
 import { parseFrontmatter, yamlScalar } from '../format/registry.js';
 import { tighten, type GuardrailConfig } from './guardrails.js';
+import { operationSkills, OPERATION_TOOLS } from './operations.js';
 import {
   isOperation,
   META,
@@ -390,6 +391,12 @@ export function configFor(base: GuardrailConfig, skill: Skill): GuardrailConfig 
  * that only names the skill makes it unreachable except by explicit invocation.
  */
 export const BUILT_IN_SKILLS: Record<string, string> = {
+  // One per operation, generated from the registry and serialized through the same
+  // writer as everything else — so they are validated on load exactly like yours.
+  ...Object.fromEntries(
+    operationSkills().map((s) => [s.name, serializeSkill(s, { allowedTools: OPERATION_TOOLS })]),
+  ),
+
   'connect-the-dots': [
     '---',
     'name: connect-the-dots',

@@ -16,10 +16,10 @@
 - [x] T1.4 `engram upgrade` migrates legacy skills (copies, never deletes)
 
 ## Group 2 — Operations as skills
-- [ ] T2.1 Registry carries when-to-use + invocation
-- [ ] T2.2 One `SKILL.md` per operation
-- [ ] T2.3 `allowed-tools` hint, documented as non-enforcing
-- [ ] T2.4 Invariant: every operation has a skill
+- [x] T2.1 Registry carries when-to-use + invocation
+- [x] T2.2 One `SKILL.md` per operation
+- [x] T2.3 `allowed-tools` hint, documented as non-enforcing
+- [x] T2.4 Invariant: every operation has a skill
 
 ## Group 3 — Rendering
 - [ ] T3.1 `renderSkills` writes plugin + siblings

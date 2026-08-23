@@ -16,16 +16,8 @@
 
 import { getRelation, relationKinds } from '../core/relations.js';
 import { getGuardrail, type GuardrailConfig } from '../policy/guardrails.js';
+import { operations } from '../policy/operations.js';
 import { getStructure, RAW, type StructureDef } from '../policy/structures.js';
-
-const OPERATIONS = [
-  ['`engram init`', 'scaffold a vault. Non-destructive; never overwrites.'],
-  ['`engram capture [text]`', '**persist raw content. Never validates, never fails.**'],
-  ['`engram format`', 'content + your structure → validated nodes and relations.'],
-  ['`engram link <file> <to> <kind>`', 'assert one typed relation.'],
-  ['`engram reindex`', 'regenerate derived state. Idempotent.'],
-  ['`engram doctor`', 'health and integrity report. Read-only.'],
-] as const;
 
 export function generateAgentsMd(config: GuardrailConfig, structureId = 'default'): string {
   const def: StructureDef | undefined = getStructure(structureId);
@@ -43,7 +35,7 @@ export function generateAgentsMd(config: GuardrailConfig, structureId = 'default
     '',
     '| Command | What it does |',
     '|---|---|',
-    ...OPERATIONS.map(([cmd, desc]) => `| ${cmd} | ${desc} |`),
+    ...operations().map((op) => `| \`${op.command}\` | ${op.does} |`),
     '',
     '**Capture never rejects.** If you cannot format something now — no time, no',
     'structure, half a thought — capture it. Losing a thought is the only real',

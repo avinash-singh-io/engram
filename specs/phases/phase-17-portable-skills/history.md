@@ -189,3 +189,44 @@ a file named `notes.md` declaring `name: mine` becomes `mine/SKILL.md`, and a
 malformed skill falls back to its filename rather than being silently left behind.
 
 ---
+### [ARCH_CHANGE] 2026-08-23 — One operation registry, replacing two lists
+Topics: operations, agents-md, skills, registry
+Affects-phases: none
+Affects-specs: specs/architecture/v2-overview.md#6
+Detail: `skill-schema.ts` named the six operations a skill may sequence; a separate
+literal table in `surface/agents-md.ts` held the same six with their descriptions.
+That is BUG-008's shape a third time — adding a seventh operation would not fail, it
+would silently ship a contract that omits it. New `policy/operations.ts` holds the
+single registry: name, command, one-line description, when-to-use, and steps. The
+contract table and the generated skills both read from it, and `operations()` throws
+at load if the two lists ever diverge. Additive under Rule 10.
+
+---
+
+### [DECISION] 2026-08-23 — Each operation gets a skill *about* it; the operations stay six
+Topics: operations, skills
+Affects-phases: none
+Affects-specs: none
+Detail: The owner asked for operations to be invocable as skills. They are — as
+`/engram:capture` and so on — but by generating a skill that *describes* each
+operation, never by adding an operation. A skill is instructions an agent follows and
+engram never runs one (v2-overview §6); that is what bounds a careless or downloaded
+skill to sequencing operations that already exist. A seventh operation called "skill"
+would make engram interpret skills and dissolve the guarantee. The generated skills
+go through `serializeSkill` and back through `parseSkill` like any other, so a mistake
+in one of engram's own fails exactly as a mistake in a user's does.
+
+---
+
+### [NOTE] 2026-08-23 — `allowed-tools` is documented as a hint, not a guarantee
+Topics: skills, guardrails
+Affects-phases: none
+Affects-specs: none
+Detail: Every operation skill declares `allowed-tools: Bash(engram:*)`. It is
+experimental in the hosts, so both the code comment and the test say plainly that it
+narrows what a well-behaved agent reaches for and enforces nothing. The real bound is
+unchanged and is elsewhere: every write still passes the gate under the vault's
+guardrails. Claiming otherwise would be the `visibility: private` mistake ADR-0030
+refused — shipping something that looks like a boundary and is not.
+
+---
