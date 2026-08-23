@@ -2,7 +2,7 @@
 
 > **Last Updated**: 2026-08-23
 > **Current Phase**: **Phase 17 complete, released as v0.14.0.** Engram's operations and skills are invocable as slash commands in any agent implementing the Agent Skills standard, with no MCP server. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.13.0** on npm, verified against the registry 2026-08-23. **v0.14.0 is tagged and publishing; NOT yet confirmed on the registry.** Do not mark it released until `npm view @avinash-singh-io/engram dist-tags` says so — recording a release from a workflow log rather than the registry is exactly what made BUG-002 look resolved for ten days while five tagged versions had never shipped.
+> **Latest Release**: **v0.14.0** — portable skills. **Verified against the registry, not the workflow log**: `npm view @avinash-singh-io/engram dist-tags` returns `{ latest: '0.14.0' }`, and the published tarball was installed into a clean directory, used to scaffold a vault, and its rendered plugin loaded in a real Claude Code session listing `/engram:capture` … `/engram:reindex` (2026-08-23). That distinction is the whole lesson of BUG-002, which looked resolved for ten days while five tagged versions had never shipped.
 > **Health**: Good — 771 tests, three smoke checks green (one of which runs the host's own plugin validator), and the adoption bugs that made engram unusable outside a fresh vault are fixed.
 
 ## Summary
