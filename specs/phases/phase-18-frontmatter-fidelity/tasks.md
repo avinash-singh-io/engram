@@ -38,8 +38,8 @@
 - [x] T5.3 `upgrade` reports, does not rewrite
 
 ## Group 6 — Verification
-- [/] T6.1 `scripts/smoke-obsidian.mjs` in `npm run check`
-- [ ] T6.2 The 16-construct probe as a permanent test
-- [ ] T6.3 Revert-and-fail both
-- [ ] T6.4 `docs/using-engram.md`
-- [ ] T6.5 Retract the workaround — docs + release notes
+- [x] T6.1 `scripts/smoke-obsidian.mjs` in `npm run check`
+- [x] T6.2 The 16-construct probe as a permanent test
+- [x] T6.3 Revert-and-fail both
+- [x] T6.4 `docs/using-engram.md`
+- [x] T6.5 Retract the workaround — docs + release notes

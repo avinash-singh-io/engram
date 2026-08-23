@@ -269,3 +269,39 @@ landed here rather than at release because the guard's semantics depend on it, w
 existing test caught.
 
 ---
+### [DECISION] 2026-08-23 — Group 6: a corpus from a real vault, and the workaround retracted
+Topics: testing, obsidian, docs
+Affects-phases: none
+Affects-specs: none
+Detail: `scripts/smoke-obsidian.mjs` reads the reporting user's file and a tldraw note
+verbatim, through the **built binary**, and is wired into `npm run check` as a fourth
+smoke. That closes the gap the whole bug lived in: every existing test fed the parser
+frontmatter engram itself had written, so nothing could see the difference between
+"handles our format" and "handles what a person's editor produces". The 16-construct
+probe is permanent as `SUBSET`, now 24 entries, iterated by the parser tests.
+
+Both new checks were verified by breaking the code they guard — reverting the
+block-sequence branch fails 21 tests plus three smoke assertions; reverting style
+preservation fails two round-trip assertions.
+
+T6.5 retracts the workaround in `docs/using-engram.md` and `docs/obsidian-setup.md`:
+the Properties panel is safe, nothing needs migrating, and a "do not edit properties in
+Obsidian" rule should be deleted. The bug was live long enough that a user wrote one
+into their own vault conventions, and nothing else would ever tell them it had become
+false.
+
+---
+
+### [DISCOVERY] 2026-08-23 — The smoke caught the phase's own conflation
+Topics: testing, identity
+Affects-phases: none
+Affects-specs: none
+Detail: `smoke-obsidian.mjs` first asserted that no note is reduced to
+path-as-identity, and failed — on the tldraw note, which has no `id` at all. That is
+**correct** behaviour under ADR-0021 and not the bug. It is the same conflation T5.2
+exists to prevent, made in the test written to prove T5.2 works. The assertion now
+distinguishes the two: `[identity-lost]` must never appear, `[path-as-identity]` must
+still appear for a note that never had an id, and both are asserted rather than one
+being assumed.
+
+---
