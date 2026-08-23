@@ -4,12 +4,12 @@
 > Mark `[x]` only after a verification command produced passing output **this session** (Rule 12).
 
 ## Group 0 — Say what the subset is
-- [ ] T0.1 ADR-0047
-- [ ] T0.2 `SUBSET` — one documented table, tests iterate it
-- [ ] T0.3 `keyErrors` + per-key `style` on `ParsedFrontmatter`
+- [x] T0.1 ADR-0047
+- [x] T0.2 `SUBSET` — one documented table, tests iterate it
+- [x] T0.3 `keyErrors` + per-key `style` on `ParsedFrontmatter`
 
 ## Group 1 — A bad line costs you that line  ← the P0 fix
-- [ ] T1.1 Per-key failures, no first-error throw
+- [/] T1.1 Per-key failures, no first-error throw
 - [ ] T1.2 `frontmatter: null` only when wholly unreadable
 - [ ] T1.3 Correct codec on a partial parse
 - [ ] T1.4 One warning per failing key, named

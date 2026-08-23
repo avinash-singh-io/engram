@@ -8,6 +8,7 @@
  */
 
 import type { Edge, Node } from '../core/model.js';
+import type { KeyError, SequenceStyle } from './subset.js';
 import { OKF_V0_1 } from './okf-v0_1.js';
 import { OKF_V0_2 } from './okf-v0_2.js';
 
@@ -18,8 +19,28 @@ export interface ParsedFrontmatter {
   frontmatter: Record<string, unknown> | null;
   /** Everything after the block. */
   body: string;
-  /** Set when a block was present but its YAML did not parse. */
+  /**
+   * Set only when the block was **wholly** unreadable — an unterminated block, or
+   * nothing parsed at all. A document with some readable keys reports those keys and
+   * lists the rest in `keyErrors` (ADR-0047 §2).
+   */
   yamlError?: string;
+  /**
+   * Keys that could not be read, each named.
+   *
+   * The unit of failure is the key. Before ADR-0047 a single unreadable line
+   * discarded the whole mapping, so a formatting change Obsidian makes on its own
+   * cost a note its `id` and dropped it to path-as-identity (BUG-011).
+   */
+  keyErrors: KeyError[];
+  /**
+   * How each sequence key was written, so a write can give back the same style.
+   *
+   * Without this engram rewrites block to flow and Obsidian re-normalises on the
+   * next property edit — the two tools undoing each other forever in what is usually
+   * also a git repository.
+   */
+  styles: Record<string, SequenceStyle>;
 }
 
 /** What a read produced, plus anything the codec could not faithfully represent. */
@@ -76,7 +97,13 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
   const lines = text.split('\n');
 
   if (lines[0] === undefined || !DELIM.test(lines[0])) {
-    return { hasFrontmatter: false, frontmatter: null, body: withoutTrailingNewline(text) };
+    return {
+      hasFrontmatter: false,
+      frontmatter: null,
+      body: withoutTrailingNewline(text),
+      keyErrors: [],
+      styles: {},
+    };
   }
 
   const close = lines.findIndex((l, i) => i > 0 && DELIM.test(l));
@@ -87,6 +114,8 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
       frontmatter: null,
       body: '',
       yamlError: 'unterminated frontmatter block',
+      keyErrors: [],
+      styles: {},
     };
   }
 
@@ -95,13 +124,15 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
 
   try {
     const parsed = parseSimpleYaml(yaml);
-    return { hasFrontmatter: true, frontmatter: parsed, body };
+    return { hasFrontmatter: true, frontmatter: parsed, body, keyErrors: [], styles: {} };
   } catch (e) {
     return {
       hasFrontmatter: true,
       frontmatter: null,
       body,
       yamlError: e instanceof Error ? e.message : String(e),
+      keyErrors: [],
+      styles: {},
     };
   }
 }

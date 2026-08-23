@@ -116,3 +116,33 @@ Detail: `stripFlags` removes flags before the positional check, so `engram forma
 being broken. Filed as BUG-012 (P2), out of scope here.
 
 ---
+### [DECISION] 2026-08-23 — Group 0: the subset is a table the tests iterate
+Topics: frontmatter, yaml, testing
+Affects-phases: none
+Affects-specs: none
+Detail: ADR-0047 accepted. `src/format/subset.ts` holds `SUBSET` (24 guaranteed
+constructs) and `EXCLUDED` (5 named refusals) as data rather than prose, so the
+parser tests iterate the promise instead of restating it — a construct cannot be
+claimed without a test, nor tested without being claimed. This is the same
+derive-don't-restate move that closed BUG-008 three times, applied to a promise
+instead of to a path list. `ParsedFrontmatter` gains `keyErrors` and per-key `styles`;
+both are populated empty in this group so behaviour is unchanged, and Group 1 makes
+them mean something. 32 structural tests; 771 existing tests still pass.
+
+---
+
+### [DISCOVERY] 2026-08-23 — The parser cited an ADR that does not say what it claimed
+Topics: frontmatter, specs
+Affects-phases: none
+Affects-specs: none
+Detail: `registry.ts` justified its subset with "OKF frontmatter is flat by design
+(ADR-0020)". ADR-0020 is *Adopt OKF v0.2; do not invent time or provenance* and says
+nothing about flatness — no ADR does. The parser was built around an unwritten rule
+and diverged from it unobserved for ten releases, which is the actual mechanism behind
+BUG-011 rather than the missing constructs. Recorded in ADR-0047, which states both
+the flatness and the subset. Three of five ADR links in this phase's own plan.md were
+also wrong on first write and were corrected at phase start — the same class of error,
+found the same day, which is an argument for link-checking the specs. Not filed as a
+backlog item yet; if it recurs a third time it is a tooling gap, not a slip.
+
+---
