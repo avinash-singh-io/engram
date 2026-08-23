@@ -80,6 +80,12 @@ export const DEFAULT_VERSION = OKF_V0_1.version;
 export const CURRENT_VERSION = OKF_V0_2.version;
 
 const BOM = '﻿';
+interface YamlResult {
+  map: Record<string, unknown>;
+  keyErrors: KeyError[];
+  styles: Record<string, SequenceStyle>;
+}
+
 const DELIM = /^---[ \t]*$/;
 
 /**
@@ -122,77 +128,135 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
   const yaml = lines.slice(1, close).join('\n');
   const body = withoutTrailingNewline(lines.slice(close + 1).join('\n'));
 
-  try {
-    const parsed = parseSimpleYaml(yaml);
-    return { hasFrontmatter: true, frontmatter: parsed, body, keyErrors: [], styles: {} };
-  } catch (e) {
+  const { map, keyErrors, styles } = parseSimpleYaml(yaml);
+
+  // A null mapping now means **wholly** unreadable — nothing parsed at all. A
+  // document with even one readable key returns that key, because the alternative
+  // is what BUG-011 was: one bad line costing a note its identity.
+  if (Object.keys(map).length === 0 && keyErrors.length > 0) {
     return {
       hasFrontmatter: true,
       frontmatter: null,
       body,
-      yamlError: e instanceof Error ? e.message : String(e),
-      keyErrors: [],
-      styles: {},
+      yamlError: keyErrors.map((k) => k.reason).join('; '),
+      keyErrors,
+      styles,
     };
   }
+
+  return { hasFrontmatter: true, frontmatter: map, body, keyErrors, styles };
 }
 
 /**
- * A deliberately small YAML subset: scalars, inline lists, and inline maps.
+ * A deliberately small YAML subset — stated in `subset.ts`, not implied here.
  *
- * OKF frontmatter is flat by design (ADR-0020), so a full YAML engine would be a
- * dependency carrying far more surface than the format uses. Anything outside
- * the subset raises, and `parseFrontmatter` turns that into a `yamlError` rather
- * than letting it escape.
+ * **Never throws, and never fails a whole document for one bad line** (ADR-0047 §2).
+ * A key it cannot read is omitted and recorded in `keyErrors`; every other key on
+ * every other line is returned exactly as if the bad line were not there.
+ *
+ * That asymmetry is the whole point. Before this, one unreadable line returned
+ * `null` for the entire mapping, both codecs opened with `parsed.frontmatter ?? {}`,
+ * and a note lost its `id` — falling back to path-as-identity, so moving the file
+ * broke every relation pointing at it (BUG-011). The trigger was Obsidian rewriting
+ * `part-of: [a]` into a block sequence when its owner edited an unrelated property.
+ * Losing identity must never be the default response to a formatting variation.
  */
-function parseSimpleYaml(yaml: string): Record<string, unknown> {
+function parseSimpleYaml(yaml: string): YamlResult {
   const out: Record<string, unknown> = {};
+  const keyErrors: KeyError[] = [];
+  const styles: Record<string, SequenceStyle> = {};
   const lines = yaml.split('\n');
   const meaningful = (l: string): boolean => l.trim() !== '' && !l.trimStart().startsWith('#');
 
-  /** The nested map currently open, or null when the last key was a scalar. */
+  /** The nested map currently open, and the key that opened it. */
   let nested: Record<string, unknown> | null = null;
+  let nestedKey: string | null = null;
+  /** Keys whose nested block had a failure, so an empty husk is not left behind. */
+  const spoiled = new Set<string>();
+
+  const fail = (key: string, i: number, reason: string): void => {
+    keyErrors.push({ key, line: i + 1, reason });
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!;
     if (!meaningful(line)) continue;
 
+    const indented = /^\s/.test(line);
     const at = line.indexOf(':');
-    if (at === -1) throw new Error(`not a key: value pair: ${line}`);
+
+    if (at === -1) {
+      // Attribute it to the block it belongs to when there is one, so the warning
+      // names a key the reader recognises rather than a fragment of a line.
+      const owner = indented && nestedKey !== null ? nestedKey : line.trim();
+      if (indented && nestedKey !== null) spoiled.add(nestedKey);
+      fail(owner, i, `not a key: value pair: ${line.trim()}`);
+      continue;
+    }
+
     const key = line.slice(0, at).trim();
     const value = line.slice(at + 1).trim();
 
-    if (/^\s/.test(line)) {
-      // An indented pair used to be flattened into the top level, so
-      // `metadata:` followed by indented keys silently produced top-level keys
-      // and a null `metadata`. Skills need one level of nesting — the Agent
-      // Skills standard puts every tool-specific field under `metadata` — and
-      // reading it wrong is worse than refusing it.
-      if (nested === null) throw new Error(`indented key with no parent: ${line.trim()}`);
-      nested[key] = parseScalar(value);
+    if (indented) {
+      if (nested === null) {
+        fail(key, i, `indented key with no parent: ${line.trim()}`);
+        continue;
+      }
+      const scalar = scalarOrError(value);
+      if (typeof scalar === 'string') {
+        spoiled.add(nestedKey!);
+        fail(nestedKey ?? key, i, scalar);
+        continue;
+      }
+      nested[key] = scalar.value;
       continue;
     }
 
     if (value !== '') {
       nested = null;
-      out[key] = parseScalar(value);
+      nestedKey = null;
+      const scalar = scalarOrError(value);
+      if (typeof scalar === 'string') {
+        fail(key, i, scalar);
+        continue;
+      }
+      out[key] = scalar.value;
+      if (value.startsWith('[')) styles[key] = 'flow';
       continue;
     }
 
     // `key:` with nothing after it is either an empty scalar or the head of a
     // nested block, and only the next meaningful line can say which. Looking
-    // ahead keeps `aliases:` reading as null exactly as it always has —
-    // this extension is a strict superset for any flat document.
+    // ahead keeps `aliases:` reading as null exactly as it always has.
     const next = lines.slice(i + 1).find(meaningful);
     if (next !== undefined && /^\s/.test(next)) {
       nested = {};
+      nestedKey = key;
       out[key] = nested;
     } else {
       nested = null;
+      nestedKey = null;
       out[key] = null;
     }
   }
-  return out;
+
+  // A block that failed leaves no empty husk: `part-of: {}` reads as "declared and
+  // empty", which is a different and quieter lie than "could not be read".
+  for (const key of spoiled) {
+    const v = out[key];
+    if (v !== null && typeof v === 'object' && Object.keys(v).length === 0) delete out[key];
+  }
+
+  return { map: out, keyErrors, styles };
+}
+
+/** `parseScalar`, with its throws turned into a reason string. */
+function scalarOrError(v: string): { value: unknown } | string {
+  try {
+    return { value: parseScalar(v) };
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
 }
 
 function parseScalar(v: string): unknown {
@@ -292,6 +356,12 @@ export function readNode(raw: string, path: string): ReadResult {
   const result = codec.read(parsed, path);
   if (parsed.yamlError !== undefined) {
     result.warnings.push(`frontmatter did not parse: ${parsed.yamlError}`);
+  }
+  // One warning per key, naming it. A single summary line was what made BUG-011 read
+  // as a formatting nit: it said the frontmatter "did not parse" without saying which
+  // key was lost or that identity had just been traded for a path.
+  for (const e of parsed.keyErrors) {
+    result.warnings.push(`frontmatter line ${e.line}, key \`${e.key}\`: ${e.reason}`);
   }
   return result;
 }

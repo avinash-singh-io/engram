@@ -9,14 +9,14 @@
 - [x] T0.3 `keyErrors` + per-key `style` on `ParsedFrontmatter`
 
 ## Group 1 — A bad line costs you that line  ← the P0 fix
-- [/] T1.1 Per-key failures, no first-error throw
-- [ ] T1.2 `frontmatter: null` only when wholly unreadable
-- [ ] T1.3 Correct codec on a partial parse
-- [ ] T1.4 One warning per failing key, named
-- [ ] T1.5 Regression test from the report verbatim
+- [x] T1.1 Per-key failures, no first-error throw
+- [x] T1.2 `frontmatter: null` only when wholly unreadable
+- [x] T1.3 Correct codec on a partial parse
+- [x] T1.4 One warning per failing key, named
+- [x] T1.5 Regression test from the report verbatim
 
 ## Group 2 — The two missing families
-- [ ] T2.1 Block sequences — indented, unindented, single-item, empty
+- [/] T2.1 Block sequences — indented, unindented, single-item, empty
 - [ ] T2.2 Block scalars `|` `>` with chomping
 - [ ] T2.3 Style recorded per key
 - [ ] T2.4 A test per `SUBSET` construct; a warning test per exclusion

@@ -146,3 +146,32 @@ found the same day, which is an argument for link-checking the specs. Not filed 
 backlog item yet; if it recurs a third time it is a tooling gap, not a slip.
 
 ---
+### [DECISION] 2026-08-23 — Group 1: BUG-011's P0 half is fixed, and it stands alone
+Topics: frontmatter, identity, yaml
+Affects-phases: none
+Affects-specs: specs/decisions/0021-identity-slug-path-aliases.md
+Detail: `parseSimpleYaml` no longer throws. It collects per-key failures and returns
+every key it could read; `frontmatter: null` now means **wholly** unreadable. On the
+reporting user's file `id`, `author` and `timestamp` all survive and the correct codec
+is selected — verified against the built binary. Edges are still lost because block
+sequences remain unparsed, which is Group 2; the point of splitting them is that the
+identity fix does not depend on which constructs the parser knows, so a construct
+invented tomorrow cannot reopen this. The recovery tests use only content engram
+*still* cannot parse, deliberately, so they assert blast radius rather than coverage.
+Verified by reverting to per-document failure: 8 of 13 fail, including all four
+identity assertions. 803 tests pass.
+
+---
+
+### [DISCOVERY] 2026-08-23 — A failed nested block left an empty husk
+Topics: frontmatter, yaml
+Affects-phases: none
+Affects-specs: none
+Detail: Found while implementing per-key recovery. `part-of:` followed by an
+unreadable indented line opens a nested map, so a naive recovery leaves `part-of: {}`
+behind — which downstream reads as "declared and empty" and produces no warning at
+all. That is a quieter lie than "could not be read": the edges are equally gone and
+nothing says so. Failed blocks are now dropped rather than emptied, and the case has
+its own test.
+
+---
