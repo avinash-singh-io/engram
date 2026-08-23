@@ -14,6 +14,7 @@
 | 10 | Agent surface (write path) | Complete (v0.9.0) — GATE 2 unadjudicated | `phase-10-agent-surface/` |
 | 15 | Surfaces — skills, MCP, adapters | Complete (v0.10.0) | `phase-15-surfaces/` |
 | 17 | Portable skills | Complete (v0.14.0) | `phase-17-portable-skills/` |
+| 18 | Frontmatter fidelity | Planned | `phase-18-frontmatter-fidelity/` |
 
 ## Phase Structure
 

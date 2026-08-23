@@ -165,6 +165,23 @@
         "agents-md",
         "invocation"
       ]
+    },
+    "phase-18-frontmatter-fidelity": {
+      "name": "Frontmatter fidelity",
+      "status": "planned",
+      "directory": "phase-18-frontmatter-fidelity",
+      "topics": [
+        "frontmatter",
+        "yaml",
+        "okf-format",
+        "codecs",
+        "identity",
+        "obsidian",
+        "guardrails",
+        "doctor",
+        "round-trip",
+        "parser"
+      ]
     }
   }
 }
