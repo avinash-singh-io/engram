@@ -19,7 +19,13 @@ import {
   STRUCTURE_GUIDE,
 } from '../core/paths.js';
 import type { Clock, FileStore } from '../core/ports.js';
-import { GUARDRAILS_PATH, loadStructureId, scaffoldGuardrails } from '../policy/config.js';
+import {
+  GUARDRAILS_PATH,
+  loadStructureId,
+  loadVaultConfig,
+  scaffoldGuardrails,
+  vaultConfig,
+} from '../policy/config.js';
 import { exampleSkill, SKILLS_DIR } from '../policy/skills.js';
 import { getStructure, guideFor, RAW, structureIds } from '../policy/structures.js';
 import { AGENTS } from '../surface/adapters.js';
@@ -178,7 +184,9 @@ export async function init(
   // The declaration is engram's own file, so it is written rather than skipped —
   // otherwise asking for a different structure would be a silent no-op.
   const configPath = `/${ROOT_MARKER}/config.json`;
-  const config = `${JSON.stringify({ structure }, null, 2)}\n`;
+  // Preserves an existing `createdWith`, so changing structure never rewrites the
+  // stamp that says which engram built this vault.
+  const config = vaultConfig(structure, await loadVaultConfig(files));
   if (!(await files.exists(configPath))) {
     await files.write(configPath, config);
     created.push(configPath);

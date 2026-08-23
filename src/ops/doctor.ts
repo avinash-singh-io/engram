@@ -18,6 +18,7 @@ import type { Detector, FileStore } from '../core/ports.js';
 import { getRelation, relationKinds } from '../core/relations.js';
 import { detectAll, guardrailNames, type GuardrailConfig } from '../policy/guardrails.js';
 import { linkSettingWarnings, OBSIDIAN_APP_JSON, readLinkSettings } from './obsidian-settings.js';
+import { needsUpgrade, planUpgrade, versionSkew } from './upgrade.js';
 import { walk, type WalkFinding } from './walk.js';
 import { readNode } from '../format/registry.js';
 
@@ -80,6 +81,16 @@ export async function doctor(
           `On conflict the rule is regenerate, never merge (ADR-0029) — run \`engram reindex\`.`,
       );
     }
+  }
+
+  // A vault older than the engram reading it. Note files are safe by construction —
+  // each carries its own okf_version — but engram's own files are not versioned,
+  // which is the gap this surfaces rather than leaves as a mystery.
+  const plan = await planUpgrade(files);
+  const skew = versionSkew(plan);
+  if (skew !== null) warnings.push(skew);
+  else if (needsUpgrade(plan)) {
+    warnings.push('[version] `engram upgrade` has changes available for this vault.');
   }
 
   // Detection over configuration (ADR-0025). Obsidian owns link rewriting; engram

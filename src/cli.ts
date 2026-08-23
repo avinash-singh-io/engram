@@ -17,6 +17,7 @@ import { format } from './ops/format.js';
 import { init } from './ops/init.js';
 import { link } from './ops/link.js';
 import { reindex } from './ops/reindex.js';
+import { applyUpgrade, needsUpgrade, planUpgrade } from './ops/upgrade.js';
 import { discoverSkills, SKILLS_DIR } from './policy/skills.js';
 import { serveHttp, serveStdio } from './surface/mcp-transport.js';
 import { choose, confirm, interactive } from './surface/prompt.js';
@@ -33,6 +34,7 @@ usage:
   engram reindex                 regenerate derived state (index.md, views/)
   engram doctor                  health and integrity report; read-only
   engram queue                   proposals awaiting your review (approve is human-only)
+  engram upgrade                 what an older vault should change; --apply to do it
   engram skill new <name>        scaffold a skill; skill list shows what is loaded
   engram mcp                     MCP server over stdio (no socket, nothing listens)
 
@@ -349,6 +351,51 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
           );
           return 2;
       }
+    }
+    /**
+     * Reports first, changes only with `--apply` — the same stance as the approval
+     * queue. Never moves your notes: `inbox/` → `raw/` is reported as a `git mv`
+     * for you to run, because those are your files in a folder you chose.
+     */
+    case 'upgrade': {
+      const plan = await planUpgrade(files);
+      const applying = argv.includes('--apply');
+
+      process.stdout.write(
+        `vault created with: ${plan.createdWith ?? 'unknown (predates version stamping)'}\n` +
+          `engram running:     ${plan.current}\n\n`,
+      );
+
+      if (!needsUpgrade(plan)) {
+        process.stdout.write('nothing to upgrade — this vault is current.\n');
+        return 0;
+      }
+
+      for (const m of plan.moves) {
+        process.stdout.write(`  ${applying ? 'moving' : 'would move'}  ${m.from}\n`);
+        process.stdout.write(`              -> ${m.to}\n              ${m.why}\n\n`);
+      }
+      for (const m of plan.manual) {
+        process.stdout.write(`  yours to do  ${m.what}\n`);
+        process.stdout.write(`               ${m.command}\n               ${m.why}\n\n`);
+      }
+
+      if (!applying) {
+        process.stdout.write('nothing changed. Re-run with --apply to make the moves above.\n');
+        return 0;
+      }
+
+      const result = await applyUpgrade(files, plan);
+      if (result.stamped) process.stdout.write("recorded this vault's engram version\n");
+      if (result.leftBehind.length > 0) {
+        process.stdout.write(
+          `\ncopied, not deleted — engram does not remove files. Once you have checked\n` +
+            `the new locations, remove the old ones:\n\n` +
+            `  git rm -r ${result.leftBehind.map((p) => p.replace(/^\//, '')).join(' ')}\n`,
+        );
+      }
+      await reindex(files, clock);
+      return 0;
     }
     case 'skill': {
       const [sub, name] = rest;

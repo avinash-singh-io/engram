@@ -16,6 +16,7 @@
 import type { FileStore } from '../core/ports.js';
 import { parseFrontmatter } from '../format/registry.js';
 import { guardrailNames, type GuardrailConfig } from './guardrails.js';
+import { VERSION } from '../version.js';
 
 /** What an agent may do here — **you** edit this, so it is visible. */
 export const GUARDRAILS_PATH = '/engram/guardrails.md';
@@ -182,4 +183,47 @@ export async function loadStructureId(files: FileStore): Promise<string> {
   } catch {
     return 'default';
   }
+}
+
+export interface VaultConfig {
+  structure: string;
+  /**
+   * The engram version that created this vault.
+   *
+   * Note *files* carry their own `okf_version` and are read by a matching codec,
+   * so they are safe across upgrades by construction. Config files are not, and a
+   * vault restored from an old backup onto a much newer engram had no way to say
+   * what wrote it — turning a format gap into a mystery instead of a diagnosis.
+   *
+   * Records creation, not the last write: it is a provenance stamp, and a value
+   * that silently advanced on every command would answer no question at all.
+   */
+  createdWith?: string;
+}
+
+/** Read the whole vault config, tolerating absence and corruption. */
+export async function loadVaultConfig(files: FileStore): Promise<VaultConfig> {
+  const raw = await files.read(CONFIG_PATH);
+  if (raw === null) return { structure: 'default' };
+  try {
+    const parsed = JSON.parse(raw) as Partial<VaultConfig> | null;
+    const structure = typeof parsed?.structure === 'string' ? parsed.structure : 'default';
+    return typeof parsed?.createdWith === 'string'
+      ? { structure, createdWith: parsed.createdWith }
+      : { structure };
+  } catch {
+    return { structure: 'default' };
+  }
+}
+
+/**
+ * Serialize the config, preserving `createdWith` when one already exists.
+ *
+ * A structure change must not rewrite the provenance stamp — the question it
+ * answers is "what wrote this vault originally", and answering it with "whatever
+ * last touched it" would make it useless.
+ */
+export function vaultConfig(structure: string, existing?: VaultConfig): string {
+  const createdWith = existing?.createdWith ?? VERSION;
+  return `${JSON.stringify({ structure, createdWith }, null, 2)}\n`;
 }
