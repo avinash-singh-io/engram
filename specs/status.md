@@ -2,7 +2,7 @@
 
 > **Last Updated**: 2026-08-23
 > **Current Phase**: **Phase 18 complete, released as v0.15.0.** engram reads the frontmatter Obsidian actually writes, and a line it cannot read never costs a note its identity (BUG-011). **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.14.0** on npm. **v0.15.0 is tagged and publishing; NOT yet confirmed on the registry.** Do not record it as released until `npm view @avinash-singh-io/engram dist-tags` says so — BUG-002's lesson.
+> **Latest Release**: **v0.15.0** — frontmatter fidelity, fixing BUG-011. **Verified against the registry and the published artifact**, not the workflow log: `npm view @avinash-singh-io/engram dist-tags` returns `{ latest: '0.15.0' }`, and the published tarball was installed into a clean directory and run against the reporter's file — `engram doctor` reports `nodes: 2  edges: 1` with no parse failure, and `engram upgrade` tells a 0.14 vault the Obsidian workaround can stop (2026-08-23). That distinction is the whole lesson of BUG-002.
 > **Health**: Good — 883 tests, four smoke checks green, one of which reads a corpus of frontmatter taken verbatim from a real Obsidian vault. The P0 that cost notes their identity is fixed.
 
 ## Summary
