@@ -150,7 +150,7 @@
     },
     "phase-17-portable-skills": {
       "name": "Portable skills",
-      "status": "in-progress",
+      "status": "complete",
       "directory": "phase-17-portable-skills",
       "topics": [
         "skills",
