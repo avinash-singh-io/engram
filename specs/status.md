@@ -2,7 +2,7 @@
 
 > **Last Updated**: 2026-08-23
 > **Current Phase**: **Phase 18 complete, released as v0.15.0.** engram reads the frontmatter Obsidian actually writes, and a line it cannot read never costs a note its identity (BUG-011). **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.15.0** — frontmatter fidelity, fixing BUG-011. **Verified against the registry and the published artifact**, not the workflow log: `npm view @avinash-singh-io/engram dist-tags` returns `{ latest: '0.15.0' }`, and the published tarball was installed into a clean directory and run against the reporter's file — `engram doctor` reports `nodes: 2  edges: 1` with no parse failure, and `engram upgrade` tells a 0.14 vault the Obsidian workaround can stop (2026-08-23). That distinction is the whole lesson of BUG-002.
+> **Latest Release**: **v0.15.1** — backlog sweep. **Verified against the registry API and the published artifact.** Note: `npm view` served a stale `0.15.0` for several minutes after publish while `https://registry.npmjs.org/@avinash-singh-io%2Fengram` already reported `latest: 0.15.1`, and `npm install` needed `--prefer-online`. The registry is the authority; a stale local cache is not evidence either way, in either direction. The published binary was installed clean and all three fixes exercised (2026-08-23).
 > **Health**: Good — 897 tests, four smoke checks green. No open P0. One open P1 (TD-008), which needs an ADR and is phase-sized.
 
 ## Summary
