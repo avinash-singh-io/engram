@@ -60,7 +60,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| 17 — Portable skills | `phase-17-portable-skills` | In Progress | Groups 0–5 done (wiring); verification next |
+| 17 — Portable skills | `phase-17-portable-skills` | In Progress | All 6 groups verified; awaiting merge + release |
 
 ## Upcoming Phases — the v2 line
 

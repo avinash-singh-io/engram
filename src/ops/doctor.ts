@@ -21,7 +21,7 @@ import { CONFIG_PATH } from '../policy/config.js';
 import { linkSettingWarnings, OBSIDIAN_APP_JSON, readLinkSettings } from './obsidian-settings.js';
 import { needsUpgrade, planUpgrade, versionSkew } from './upgrade.js';
 import { auditSkills } from '../surface/render-skills.js';
-import { discoverSkills } from '../policy/skills.js';
+import { discoverSkills, SKILLS_DIR } from '../policy/skills.js';
 import { walk, type WalkFinding } from './walk.js';
 import { readNode } from '../format/registry.js';
 
@@ -107,6 +107,17 @@ export async function doctor(
         `[skill-unrendered] ${audit.unrendered.length} skill file(s) are missing from ` +
           `agent directories, so those skills cannot be invoked. Run \`engram reindex\`. ` +
           `First: ${audit.unrendered[0]}`,
+      );
+    }
+    if (audit.edited.length > 0) {
+      // The one warning that has to name the source file. "Do not edit" without an
+      // alternative just gets worked around, and this is the moment someone finds out
+      // their change is about to disappear.
+      warnings.push(
+        `[skill-edited] ${audit.edited.length} rendered skill file(s) have been changed ` +
+          `by hand and will be overwritten by the next \`engram reindex\`. Rendered ` +
+          `skills are derived state (ADR-0029) — to keep a change, put it in ` +
+          `${SKILLS_DIR}/<name>/SKILL.md instead: ${audit.edited.join(', ')}`,
       );
     }
     if (audit.foreign.length > 0) {

@@ -42,8 +42,8 @@
 - [x] T5.4 `doctor` checks
 
 ## Group 6 — Verification
-- [ ] T6.1 `scripts/smoke-skills.mjs` in `npm run check`
-- [ ] T6.2 Idempotence invariant with skills rendered
-- [ ] T6.3 Revert-and-fail both checks
-- [ ] T6.4 `docs/using-engram.md`
-- [ ] T6.5 Manual session verification, recorded either way
+- [x] T6.1 `scripts/smoke-skills.mjs` in `npm run check`
+- [x] T6.2 Idempotence invariant with skills rendered
+- [x] T6.3 Revert-and-fail both checks
+- [x] T6.4 `docs/using-engram.md`
+- [x] T6.5 Manual session verification, recorded either way

@@ -161,6 +161,36 @@ describe('doctor reports what a person can act on', () => {
     expect(r.warnings.filter((w) => w.includes('[skill-not-ours]'))).toHaveLength(1);
   });
 
+  it('warns that a hand-edited render is about to be lost, and names the source', async () => {
+    // Acceptance criterion 5. There is no lock on these files and there should not
+    // be — they are plain files on your disk — so the only honest protection is
+    // telling you before the edit disappears, and saying where it belongs instead.
+    const files = memoryFileStore();
+    await init(files, clock);
+    const path = '/.claude/skills/engram/skills/format/SKILL.md';
+    await files.write(path, `${(await files.read(path))!}\n\nMY OWN NOTES\n`);
+
+    const r = await doctor(files, noObsidian);
+    const hits = r.warnings.filter((w) => w.includes('[skill-edited]'));
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toContain(path);
+    expect(hits[0]).toContain('/engram/skills/<name>/SKILL.md');
+  });
+
+  it("does not call an older version's render a hand edit", async () => {
+    // A copy written by an earlier engram differs too, for a reason that has nothing
+    // to do with editing. Reporting it as one would be wrong, and the sort of
+    // warning people learn to scroll past.
+    const files = memoryFileStore();
+    await init(files, clock);
+    const path = '/.claude/skills/engram/skills/format/SKILL.md';
+    const older = (await files.read(path))!.replace(/engram-managed: .*/, 'engram-managed: 0.0.1');
+    await files.write(path, older);
+
+    const r = await doctor(files, noObsidian);
+    expect(r.warnings.filter((w) => w.includes('[skill-edited]'))).toEqual([]);
+  });
+
   it('a freshly initialised vault reports no skill problems at all', async () => {
     const files = memoryFileStore();
     await init(files, clock);

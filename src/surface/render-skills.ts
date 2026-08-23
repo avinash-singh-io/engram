@@ -100,6 +100,25 @@ function sourceOf(skill: Skill): string {
 }
 
 /**
+ * The content of one rendered skill.
+ *
+ * **One definition.** The writer and the read-only audit both call it, so `doctor`
+ * cannot develop its own opinion of what a rendered skill should look like and start
+ * reporting differences that are its own. This project has been bitten twice by two
+ * places describing the same thing.
+ */
+function renderOne(target: SkillTarget, skill: Skill, managed: boolean, version: string): string {
+  return serializeSkill(skill, {
+    name: renderedName(target, skill.name, managed),
+    managed: version,
+    source: sourceOf(skill),
+    // Only engram's own operation skills carry the hint. A skill you wrote that
+    // happens to share a name is yours, and engram does not restrict it.
+    ...(managed && getOperation(skill.name) !== undefined ? { allowedTools: OPERATION_TOOLS } : {}),
+  });
+}
+
+/**
  * Write every skill into every agent that has a verified directory.
  *
  * An agent with no `skills` target gets nothing, which is the honest outcome: engram
@@ -142,19 +161,7 @@ export async function renderSkills(
         continue;
       }
 
-      await files.write(
-        path,
-        serializeSkill(skill, {
-          name: renderedName(target, skill.name, managed),
-          managed: version,
-          source: sourceOf(skill),
-          // Only engram's own operation skills carry the hint. A skill you wrote that
-          // happens to share a name is yours, and engram does not restrict it.
-          ...(managed && getOperation(skill.name) !== undefined
-            ? { allowedTools: OPERATION_TOOLS }
-            : {}),
-        }),
-      );
+      await files.write(path, renderOne(target, skill, managed, version));
       written.push(path);
     }
 
@@ -218,6 +225,14 @@ export function spliceIgnore(existing: string, lines: string[]): string {
 export interface SkillAudit {
   /** Engram-managed renders no current skill maps to. Usually an overridden built-in. */
   stale: string[];
+  /**
+   * Rendered by **this** engram, and since changed by hand.
+   *
+   * Worth saying because the change is about to be lost and nothing else would
+   * mention it. Distinguished from a copy written by an older engram — that differs
+   * too, but it needs a reindex rather than a warning about editing.
+   */
+  edited: string[];
   /** A skill in the source that has not been rendered anywhere. */
   unrendered: string[];
   /** A file where engram's render should be, that engram did not write and will not touch. */
@@ -236,16 +251,24 @@ export async function auditSkills(
   files: FileStore,
   skills: Skill[],
   agents: AgentDescriptor[] = AGENTS,
+  version = VERSION,
 ): Promise<SkillAudit> {
-  const expected = new Map<string, boolean>();
+  // Holds the content engram *would* write, so the audit can tell "missing" from
+  // "changed by hand" without a second definition of how a skill is rendered.
+  const expected = new Map<string, string>();
   for (const agent of skillTargets(agents)) {
     for (const skill of skills) {
-      expected.set(skillPath(agent.skills, skill.name, skill.origin === 'built-in'), true);
+      const managed = skill.origin === 'built-in';
+      expected.set(
+        skillPath(agent.skills, skill.name, managed),
+        renderOne(agent.skills, skill, managed, version),
+      );
     }
   }
 
   const stale: string[] = [];
   const foreign: string[] = [];
+  const edited: string[] = [];
   const present = new Set<string>();
 
   for (const path of await files.list()) {
@@ -256,8 +279,17 @@ export async function auditSkills(
     if (managed !== null) present.add(path);
     if (managed !== null && !expected.has(path)) stale.push(path);
     if (managed === null && expected.has(path)) foreign.push(path);
+    // Only when the marker says *this* version wrote it. A copy from an older engram
+    // differs for a reason that has nothing to do with editing, and reporting it as
+    // a hand edit would be both wrong and the sort of warning people learn to ignore.
+    if (managed === version && raw !== expected.get(path)) edited.push(path);
   }
 
   const unrendered = [...expected.keys()].filter((p) => !present.has(p) && !foreign.includes(p));
-  return { stale: stale.sort(), unrendered: unrendered.sort(), foreign: foreign.sort() };
+  return {
+    stale: stale.sort(),
+    unrendered: unrendered.sort(),
+    foreign: foreign.sort(),
+    edited: edited.sort(),
+  };
 }

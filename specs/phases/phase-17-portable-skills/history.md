@@ -347,3 +347,35 @@ only worth reading if it is actionable, and "your skills are not rendered" is no
 a folder that is not a vault.
 
 ---
+### [DECISION] 2026-08-23 — Doctor detects a hand-edited render, and names the source
+Topics: doctor, skills, derived-state
+Affects-phases: none
+Affects-specs: none
+Detail: Acceptance criterion 5 was not satisfied by the Group 5 checks — nothing
+noticed a rendered skill that had been edited, so the change would simply vanish at
+the next reindex with no warning. `auditSkills` now holds the content engram *would*
+write and compares, which required extracting `renderOne` so the writer and the
+read-only audit share one definition of a rendered skill; two places describing the
+same thing is how this project produced BUG-008 twice. A copy written by an **older**
+engram differs too, and is deliberately not reported as an edit — that needs a
+reindex, not a warning about editing, and a warning that is sometimes wrong is one
+people learn to scroll past. This is the honest form of "you cannot edit this":
+there is no lock, so the protection is being told before the edit disappears, and
+being told where it belongs instead.
+
+---
+
+### [NOTE] 2026-08-23 — Group 6: the checks were verified by breaking the code
+Topics: testing, verification
+Affects-phases: none
+Affects-specs: none
+Detail: Each new check was confirmed to fail when the thing it guards is removed,
+rather than assumed to work because it passes. Deleting the walk exclusion produced
+"30 nodes then 33" — BUG-008's exact signature — and failed six unit tests. Reverting
+root discovery failed both new CLI smoke assertions. Moving skills inside
+`.claude-plugin/` failed the plugin-shape assertions. `smoke-skills.mjs` also runs
+`claude plugin validate` against the rendered plugin whenever `claude` is on the PATH,
+so the artifact is checked by the host's own validator rather than by engram's opinion
+of what a valid plugin looks like.
+
+---
