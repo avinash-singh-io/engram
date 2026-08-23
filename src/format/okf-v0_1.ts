@@ -35,7 +35,7 @@ export const OKF_V0_1: Codec = {
     });
     // v0.1 has no closed relations at all — its links are untyped and live in
     // the body, so a read produces a node and no edges by construction.
-    return { node, edges: [], warnings: [] };
+    return { node, edges: [], warnings: [], styles: {} };
   },
 
   write(node: Node, edges: Edge[]) {

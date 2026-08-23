@@ -222,3 +222,21 @@ deliberately keep their readable items instead, because there the items are
 independent of one another; the asymmetry is commented where it lives.
 
 ---
+### [DECISION] 2026-08-23 — Groups 3 and 4: style survives, and guardrails fail closed
+Topics: frontmatter, round-trip, guardrails, security
+Affects-phases: none
+Affects-specs: none
+Detail: Sequence style is recorded on read and given back on write, so a note edited
+in Obsidian stays block and a note engram creates stays flow. `link` passes the styles
+it read; `format` passes none, which is the new-note default. Byte-identical over two
+cycles, asserted — that is the churn loop closed rather than argued.
+
+Group 4 makes the recovery asymmetry explicit rather than emergent. Notes and the
+queue **recover**; `guardrails.md` **fails closed** to defaults on any key error;
+skills **reject**. The guardrail case is the one that matters: a half-read guardrail
+file fails in the *permissive* direction — a `proposeOnly:` that did not parse defers
+nothing, a `pathScope:` that did not parse scopes nothing — so the file is not applied
+at all rather than applied partially. Nine tests name the three policies so the
+inconsistency is deliberate and findable. 869 tests pass.
+
+---

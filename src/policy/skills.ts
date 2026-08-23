@@ -85,6 +85,20 @@ export function parseSkill(
   const parsed = parseFrontmatter(raw);
   const fm = parsed.frontmatter;
 
+  // Skills **reject**, they do not recover (ADR-0047 §4). A half-loaded skill is a
+  // capability the agent believes it has and does not — worse than an absent one,
+  // because the agent proceeds. Unchanged in intent from Phase 15; stated explicitly
+  // now that per-key recovery exists everywhere else.
+  if (parsed.keyErrors.length > 0) {
+    const first = parsed.keyErrors[0]!;
+    return {
+      error: {
+        name: str(fm?.name) ?? '(unnamed)',
+        reason: `line ${first.line} (${first.key}): ${first.reason}`,
+      },
+    };
+  }
+
   if (!parsed.hasFrontmatter || fm === null) {
     return {
       error: {

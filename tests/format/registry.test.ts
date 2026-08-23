@@ -145,6 +145,7 @@ describe('open/closed — adding a version is adding a file (ADR-0032)', () => {
         node: makeNode({ id: 'stub', path, stamp: stamp(), body: parsed.body }),
         edges: [],
         warnings: [],
+        styles: {},
       }),
       write: () => ({ content: 'stub', warnings: [] }),
     };

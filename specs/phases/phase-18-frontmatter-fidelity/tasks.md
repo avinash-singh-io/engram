@@ -22,18 +22,18 @@
 - [x] T2.4 A test per `SUBSET` construct; a warning test per exclusion
 
 ## Group 3 — Preserve arrival style
-- [/] T3.1 Codecs emit the style that arrived
-- [ ] T3.2 Flow stays the default for new notes
-- [ ] T3.3 Round-trip byte-identical, both styles
+- [x] T3.1 Codecs emit the style that arrived
+- [x] T3.2 Flow stays the default for new notes
+- [x] T3.3 Round-trip byte-identical, both styles
 
 ## Group 4 — Per-consumer policy
-- [ ] T4.1 Notes + queue recover
-- [ ] T4.2 `guardrails.md` fails closed
-- [ ] T4.3 Skills reject, unchanged
-- [ ] T4.4 A named policy test per consumer
+- [x] T4.1 Notes + queue recover
+- [x] T4.2 `guardrails.md` fails closed
+- [x] T4.3 Skills reject, unchanged
+- [x] T4.4 A named policy test per consumer
 
 ## Group 5 — Name the remedy
-- [ ] T5.1 `doctor` says what to do
+- [/] T5.1 `doctor` says what to do
 - [ ] T5.2 Detective: path-as-identity *caused by* a parse failure
 - [ ] T5.3 `upgrade` reports, does not rewrite
 

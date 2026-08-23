@@ -49,6 +49,11 @@ export interface ReadResult {
   edges: Edge[];
   /** Lossy warnings — codec-level, never a reason to fail a read. */
   warnings: string[];
+  /**
+   * How each sequence key was written in the source, so a later write can give back
+   * the same style rather than imposing engram's (ADR-0047 §5).
+   */
+  styles: Record<string, SequenceStyle>;
 }
 
 /** One serialization of the model. One file per spec version, additive. */
@@ -56,7 +61,11 @@ export interface Codec {
   /** The `okf_version` this codec speaks. */
   version: string;
   read(parsed: ParsedFrontmatter, path: string): ReadResult;
-  write(node: Node, edges: Edge[]): { content: string; warnings: string[] };
+  write(
+    node: Node,
+    edges: Edge[],
+    styles?: Record<string, SequenceStyle>,
+  ): { content: string; warnings: string[] };
 }
 
 const CODECS = new Map<string, Codec>();
@@ -548,6 +557,7 @@ export function readNode(raw: string, path: string): ReadResult {
   const parsed = parseFrontmatter(raw);
   const codec = CODECS.get(detectVersion(parsed.frontmatter))!;
   const result = codec.read(parsed, path);
+  result.styles = parsed.styles;
   if (parsed.yamlError !== undefined) {
     result.warnings.push(`frontmatter did not parse: ${parsed.yamlError}`);
   }
@@ -570,10 +580,19 @@ export function writeNode(
   node: Node,
   edges: Edge[],
   version: string = CURRENT_VERSION,
+  /**
+   * Sequence styles from the read this write is replacing, when there was one.
+   *
+   * Omit for a note engram is creating: flow stays the default. Pass the styles a
+   * read produced and the file keeps the shape its author left it in — without
+   * which engram rewrites block to flow and Obsidian re-normalises on the next
+   * property edit, the two tools undoing each other forever (ADR-0047 §5).
+   */
+  styles?: Record<string, SequenceStyle>,
 ): { content: string; warnings: string[] } {
   const codec = CODECS.get(version);
   if (codec === undefined) {
     throw new Error(`no codec for okf_version ${version} — known: ${knownVersions().join(', ')}`);
   }
-  return codec.write(node, edges);
+  return codec.write(node, edges, styles);
 }
