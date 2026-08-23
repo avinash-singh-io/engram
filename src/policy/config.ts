@@ -17,7 +17,11 @@ import type { FileStore } from '../core/ports.js';
 import { parseFrontmatter } from '../format/registry.js';
 import { guardrailNames, type GuardrailConfig } from './guardrails.js';
 
-export const GUARDRAILS_PATH = '/.engram/guardrails.md';
+/** What an agent may do here — **you** edit this, so it is visible. */
+export const GUARDRAILS_PATH = '/engram/guardrails.md';
+
+/** Pre-v0.12 location. Still read, so an existing vault keeps working. */
+export const LEGACY_GUARDRAILS_PATH = '/.engram/guardrails.md';
 export const CONFIG_PATH = '/.engram/config.json';
 
 /** Rules in force when a vault declares nothing. Every rule on, none scoped. */
@@ -43,7 +47,9 @@ const asList = (v: unknown): string[] | undefined =>
  * new release looks for a file it has never had.
  */
 export async function loadGuardrails(files: FileStore): Promise<LoadedGuardrails> {
-  const raw = await files.read(GUARDRAILS_PATH);
+  // The visible location wins; the hidden one is read so a vault written by an
+  // earlier version keeps its rules rather than silently reverting to defaults.
+  const raw = (await files.read(GUARDRAILS_PATH)) ?? (await files.read(LEGACY_GUARDRAILS_PATH));
   if (raw === null) return { config: DEFAULTS, warnings: [] };
 
   const parsed = parseFrontmatter(raw);

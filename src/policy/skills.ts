@@ -19,7 +19,17 @@ import {
   type SkillError,
 } from './skill-schema.js';
 
-export const SKILLS_DIR = '/.engram/skills';
+/**
+ * Where **your** skills live — visible, so you can write them in Obsidian.
+ *
+ * Engram's own two skills are not here and never will be: they ship inside engram
+ * and are invocable but not editable, which is the correct treatment for something
+ * the tool provides. This directory is for the ones you author.
+ */
+export const SKILLS_DIR = '/engram/skills';
+
+/** Pre-v0.12 location. Still read, so an existing vault keeps working. */
+export const LEGACY_SKILLS_DIR = '/.engram/skills';
 
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const list = (v: unknown): string[] =>
@@ -156,7 +166,8 @@ export async function discoverSkills(
   }
 
   for (const path of (await files.list()).sort()) {
-    if (!path.startsWith(`${SKILLS_DIR}/`) || !path.endsWith('.md')) continue;
+    const inSkills = path.startsWith(`${SKILLS_DIR}/`) || path.startsWith(`${LEGACY_SKILLS_DIR}/`);
+    if (!inSkills || !path.endsWith('.md')) continue;
     const raw = await files.read(path);
     if (raw === null) continue;
     const result = parseSkill(raw, 'vault');
@@ -223,3 +234,52 @@ export const BUILT_IN_SKILLS: Record<string, string> = {
     '4. Emit one digest node citing every node it mentions. Cite, do not restate.',
   ].join('\n'),
 };
+
+/**
+ * A worked example, written into a new vault so skills are discoverable at all.
+ *
+ * Before this the directory did not exist until someone happened to run
+ * `engram skill new`, so most people would never learn skills existed. It is
+ * deliberately a *complete, working* skill rather than a stub with placeholders:
+ * the fastest way to understand the format is to read one that means something.
+ */
+export function exampleSkill(): string {
+  return [
+    '---',
+    'name: example-literature-review',
+    'description: Read several sources on one question and emit one synthesis citing them all.',
+    'uses: [capture, format, link]',
+    'emits: { type: Synthesis, relations: [sources] }',
+    'guardrails: [require-sources]',
+    '---',
+    '',
+    '# This file is an example — edit it, rename it, or delete it',
+    '',
+    'A skill is **instructions an agent follows**. Engram never runs one; it checks',
+    'the frontmatter and hands the rest to whichever agent you are working with.',
+    'That is what bounds the damage a careless or downloaded skill can do — it can',
+    'only sequence operations that already exist.',
+    '',
+    'Two lines above are checked mechanically:',
+    '',
+    '- `uses:` may name only real operations. Name one engram does not have and this',
+    '  skill is **rejected at load**, with the offending name.',
+    '- `guardrails:` may only **tighten** — rules union, path scopes intersect, rate',
+    '  limits take the minimum. A skill can hand itself less freedom, never more.',
+    '',
+    'Everything below is prose engram never interprets. Write it for the agent.',
+    '',
+    '# When to use',
+    '',
+    'Several sources on one question, and you want the shape of the argument rather',
+    'than a summary of each.',
+    '',
+    '# Steps',
+    '',
+    '1. Summarise each source into its own node first, so each can be cited.',
+    '2. Separate what recurs, what conflicts, and what only one source claims.',
+    '3. Emit ONE node with `sources:` listing every input that contributed.',
+    '4. Never assert a claim no source supports. If you infer, say so in the body.',
+    '',
+  ].join('\n');
+}

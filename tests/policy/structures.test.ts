@@ -3,7 +3,8 @@ import { init } from '../../src/ops/init.js';
 import { reindex } from '../../src/ops/reindex.js';
 import { getStructure, guideFor, STRUCTURES, structureIds } from '../../src/policy/structures.js';
 import { generateAgentsMd } from '../../src/surface/agents-md.js';
-import { DEFAULTS } from '../../src/policy/config.js';
+import { DEFAULTS, loadGuardrails } from '../../src/policy/config.js';
+import { discoverSkills } from '../../src/policy/skills.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
 
 const clock = fixedClock('2026-08-22T09:00:00.000Z');
@@ -271,5 +272,79 @@ describe('--scaffold: directories in a vault that already has notes', () => {
   it('is a no-op for custom, which declares no directories', async () => {
     const { created } = await init(existing(), clock, 'custom', { scaffold: true });
     expect(created.filter((p) => p.endsWith('/.gitkeep'))).toEqual(['/raw/.gitkeep']);
+  });
+});
+
+/**
+ * Obsidian refuses to show anything starting with a dot, and engram had put its
+ * entire authoring surface behind that: you were told to edit `guardrails.md` and
+ * write skills, in a folder your editor would not open.
+ *
+ * The split is by **who authors the file**, not by what it does. Engram's own two
+ * skills stay inside engram — invocable, not editable, which is right for
+ * something the tool provides. Yours are visible.
+ */
+describe('the files you author are visible; the files engram owns are not', () => {
+  it('puts your skills and guardrails where Obsidian can open them', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+
+    for (const p of await files.list()) {
+      if (p.includes('guardrails.md') || p.includes('/skills/')) {
+        expect(p.startsWith('/engram/')).toBe(true);
+      }
+    }
+  });
+
+  it("keeps engram's own state hidden", async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+    expect(await files.read('/.engram/config.json')).toContain('structure');
+  });
+
+  it('ships a worked example, so skills are discoverable at all', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+
+    const example = await files.read('/engram/skills/example-literature-review.md');
+    expect(example).toContain('uses: [capture, format, link]');
+    expect(example).toMatch(/edit it, rename it, or delete it/);
+  });
+
+  it('and that example is itself a valid skill', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+
+    const { skills, errors } = await discoverSkills(files);
+    expect(errors).toEqual([]);
+    expect(skills.map((s) => s.name)).toContain('example-literature-review');
+  });
+
+  /** The recurring bug: a generated file read back as knowledge. */
+  it('never counts anything under engram/ as a note', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+    expect((await reindex(files, clock)).counts.nodes).toBe(0);
+  });
+
+  it('still reads a vault written by an earlier version', async () => {
+    const files = memoryFileStore({
+      '/.engram/guardrails.md': ['---', 'enabled: [no-delete]', '---', ''].join('\n'),
+      '/.engram/skills/mine.md': [
+        '---',
+        'name: mine',
+        'description: Older vault.',
+        'uses: [format]',
+        '---',
+        '',
+        '# Steps',
+      ].join('\n'),
+    });
+
+    const { config } = await loadGuardrails(files);
+    expect(config.enabled).toEqual(['no-delete']);
+
+    const { skills } = await discoverSkills(files);
+    expect(skills.map((s) => s.name)).toContain('mine');
   });
 });

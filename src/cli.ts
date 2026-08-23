@@ -19,6 +19,8 @@ import { link } from './ops/link.js';
 import { reindex } from './ops/reindex.js';
 import { discoverSkills, SKILLS_DIR } from './policy/skills.js';
 import { serveHttp, serveStdio } from './surface/mcp-transport.js';
+import { choose, confirm, interactive } from './surface/prompt.js';
+import { STRUCTURES } from './policy/structures.js';
 import { filesystemDetector, nodeFileStore, systemClock } from './substrate/index.js';
 
 const USAGE = `engram — a notes system where the organizing work is done by an agent
@@ -133,6 +135,17 @@ function scaffoldSkill(name: string): string {
   ].join('\n');
 }
 
+/**
+ * Does this vault already hold notes? Used only to decide whether asking about
+ * directories is worth the human's time.
+ */
+async function isPopulated(files: ReturnType<typeof nodeFileStore>): Promise<boolean> {
+  for (const p of await files.list()) {
+    if (p.endsWith('.md') && !p.startsWith('/.') && !p.startsWith('/engram/')) return true;
+  }
+  return false;
+}
+
 /** Reads stdin when it is piped; returns '' for an interactive terminal. */
 async function readStdin(): Promise<string> {
   if (process.stdin.isTTY) return '';
@@ -152,14 +165,33 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   switch (command) {
     case 'init': {
       try {
-        const { created, skipped, reindexed, notes } = await init(
-          files,
-          clock,
-          // undefined when absent, so init can tell "not asked" from "asked for
-          // default" — passing a default made `--structure para` a silent no-op.
-          flagOrUndef(argv, 'structure'),
-          { scaffold: argv.includes('--scaffold') },
-        );
+        // undefined when absent, so init can tell "not asked" from "asked for
+        // default" — passing a default made `--structure para` a silent no-op.
+        let structure = flagOrUndef(argv, 'structure');
+        let scaffold = argv.includes('--scaffold');
+
+        // Guided setup for a human at a terminal. A flag always wins, and a
+        // non-interactive caller never reaches this — see surface/prompt.ts.
+        if (structure === undefined && interactive()) {
+          structure = await choose(
+            'How should this vault be organised?',
+            STRUCTURES.map((st) => ({ id: st.id, label: st.label, hint: st.suits })),
+            'default',
+          );
+        }
+        if (!scaffold && interactive()) {
+          const def = STRUCTURES.find((st) => st.id === structure);
+          const dirs = def?.containers.map((c) => c.name).join(', ') ?? '';
+          if (dirs !== '' && (await isPopulated(files))) {
+            scaffold = await confirm(
+              `\nThis vault already has notes. Create ${dirs} anyway? Nothing is moved`,
+            );
+          }
+        }
+
+        const { created, skipped, reindexed, notes } = await init(files, clock, structure, {
+          scaffold,
+        });
         for (const p of created) process.stdout.write(`created ${p}\n`);
         for (const p of skipped) process.stderr.write(`exists, left alone: ${p}\n`);
         process.stdout.write(`regenerated ${reindexed.length} derived file(s)\n`);

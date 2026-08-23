@@ -1,7 +1,7 @@
 {
   "id": "engram",
   "name": "Engram",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "minAppVersion": "1.4.0",
   "description": "Review and approve what an agent proposes to your vault, and format notes into validated nodes.",
   "author": "Avinash Kumar Singh",

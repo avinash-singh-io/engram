@@ -52,6 +52,21 @@ export const RAW_DIR = '/raw';
 /** The marker that makes a directory a vault root (ADR-0030). */
 export const ROOT_MARKER = '.engram';
 
+/**
+ * The **visible** half of engram's footprint: the files you are expected to edit.
+ *
+ * `.engram/` holds what engram owns and writes — the structure declaration and the
+ * approval queue. This holds what *you* author: guardrails and your own skills.
+ *
+ * The split exists because Obsidian refuses to show anything starting with a dot,
+ * and engram had put the entire authoring surface behind that. A tool whose pitch
+ * is plain files you own cannot hide the files you are told to write.
+ *
+ * Excluded from the walk like `.engram/` is, so a skill never becomes a knowledge
+ * node.
+ */
+export const ENGRAM_DIR = '/engram';
+
 /** Directories the walker never descends into. */
 export const IGNORED_DIRS: readonly string[] = ['node_modules', '.git', '.obsidian'];
 

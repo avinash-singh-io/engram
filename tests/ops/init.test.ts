@@ -37,7 +37,7 @@ describe('adopting a vault that already has notes', () => {
   it('still writes what every vault needs', async () => {
     const { created } = await init(existing(), fixedClock(AT));
     expect(created).toContain('/.engram/config.json');
-    expect(created).toContain('/.engram/guardrails.md');
+    expect(created).toContain('/engram/guardrails.md');
     expect(created).toContain('/.gitignore');
   });
 

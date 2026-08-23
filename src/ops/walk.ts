@@ -15,7 +15,7 @@
  */
 
 import { ROOT_MARKER } from '../core/paths.js';
-import { isDerived, isReservedFile } from '../core/paths.js';
+import { ENGRAM_DIR, isDerived, isReservedFile } from '../core/paths.js';
 import { isContractFile } from '../surface/adapters.js';
 import type { FileStore } from '../core/ports.js';
 
@@ -70,6 +70,9 @@ export async function walk(files: FileStore): Promise<WalkResult> {
   for (const p of all) {
     if (nested.some((root) => p.startsWith(root))) continue;
     if (p.includes(`/${ROOT_MARKER}/`) || p.startsWith(`/${ROOT_MARKER}/`)) continue;
+    // engram/ is visible so you can edit your skills and guardrails in Obsidian,
+    // but it is engram's area, not your notes.
+    if (p.startsWith(`${ENGRAM_DIR}/`)) continue;
     if (!p.endsWith('.md')) continue;
     if (isDerived(p)) continue;
     if (isReservedFile(p)) continue;
