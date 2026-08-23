@@ -1,7 +1,7 @@
 # Project Status
 
 > **Last Updated**: 2026-08-23
-> **Current Phase**: **Phase 17 complete, released as v0.14.0.** Engram's operations and skills are invocable as slash commands in any agent implementing the Agent Skills standard, with no MCP server. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Current Phase**: **Phase 18 — Frontmatter fidelity** (in progress, targeting v0.15.0). Fixes BUG-011 (P0): Obsidian's Properties panel rewrites frontmatter into a form engram rejects, discarding the note's identity. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
 > **Latest Release**: **v0.14.0** — portable skills. **Verified against the registry, not the workflow log**: `npm view @avinash-singh-io/engram dist-tags` returns `{ latest: '0.14.0' }`, and the published tarball was installed into a clean directory, used to scaffold a vault, and its rendered plugin loaded in a real Claude Code session listing `/engram:capture` … `/engram:reindex` (2026-08-23). That distinction is the whole lesson of BUG-002, which looked resolved for ten days while five tagged versions had never shipped.
 > **Health**: Good — 771 tests, three smoke checks green (one of which runs the host's own plugin validator), and the adoption bugs that made engram unusable outside a fresh vault are fixed.
 
@@ -61,7 +61,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 17 released as v0.14.0)_ | | | |
+| 18 — Frontmatter fidelity | `phase-18-frontmatter-fidelity` | In Progress | Group 0 of 6 |
 
 ## Upcoming Phases — the v2 line
 
@@ -94,7 +94,7 @@ productivity suite, and is deliberately kept out of the core. See
 
 | ID | Type | Description |
 |----|------|-------------|
-| _(none)_ | | **BUG-002 resolved 2026-08-22** — v0.11.0 is on npm, verified against the registry and by installing the published tarball. |
+| BUG-011 | Bug | **Obsidian's Properties panel silently costs a note its identity.** A block sequence fails to parse, the whole frontmatter is discarded, and the note falls back to path-as-identity (ADR-0021) — so moving it breaks its relations. Reported from real use on v0.14.0; present since Phase 8. **Being fixed in Phase 18.** |
 
 ## Next Actions
 

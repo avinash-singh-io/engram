@@ -168,7 +168,7 @@
     },
     "phase-18-frontmatter-fidelity": {
       "name": "Frontmatter fidelity",
-      "status": "planned",
+      "status": "in-progress",
       "directory": "phase-18-frontmatter-fidelity",
       "topics": [
         "frontmatter",

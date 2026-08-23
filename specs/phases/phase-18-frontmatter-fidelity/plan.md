@@ -10,10 +10,15 @@ Read as a **stable reference** during implementation. Gaps are logged as
 
 | Spec | Why |
 |---|---|
-| [ADR-0020](../../decisions/0020-flat-frontmatter.md) | Why frontmatter is flat, which is why a subset was defensible at all |
+| [ADR-0020](../../decisions/0020-adopt-okf-v02.md) | The format whose fields this parses, and its rule against inventing time or provenance — which is exactly what the current failure does when it substitutes `unknown` and the epoch |
 | [ADR-0021](../../decisions/0021-identity-slug-path-aliases.md) | Slug is identity, path is address. Decision 2 exists to protect this |
-| [ADR-0026](../../decisions/0026-capture-never-rejects.md) | Why warn-and-continue is the consistent answer |
-| [ADR-0032](../../decisions/0032-codec-registry-and-ports.md) | The codec registry the recovery must not bypass |
+| [ADR-0022](../../decisions/0022-relations-in-frontmatter.md) | Why relations live in frontmatter as lists at all — the construct Obsidian rewrites |
+| [ADR-0026](../../decisions/0026-validation-gates-promotion.md) | "Validation gates promotion, never capture" — why warn-and-continue is the consistent answer |
+| [ADR-0032](../../decisions/0032-internal-model-versioned-codecs.md) | The codec registry the recovery must not bypass, and the reason a wrong `detectVersion` is a correctness bug rather than a cosmetic one |
+
+**Note.** `registry.ts` asserts "OKF frontmatter is flat by design (ADR-0020)" and
+ADR-0020 says no such thing. No ADR states the flatness the parser was built around —
+which is the same gap this phase closes for the subset. ADR-0047 states both.
 
 Widening the subset is *additive*. Per-key recovery and the guardrails fail-closed
 rule are *decisional* — ADR-0047 lands first, as T0.1.
