@@ -22,9 +22,15 @@ import { discoverSkills, SKILLS_DIR } from './policy/skills.js';
 import { serveHttp, serveStdio } from './surface/mcp-transport.js';
 import { choose, confirm, interactive } from './surface/prompt.js';
 import { STRUCTURES } from './policy/structures.js';
-import { filesystemDetector, nodeFileStore, systemClock } from './substrate/index.js';
+import {
+  filesystemDetector,
+  nodeFileStore,
+  noVaultMessage,
+  resolveVaultRoot,
+  systemClock,
+} from './substrate/index.js';
 
-const USAGE = `engram — a notes system where the organizing work is done by an agent
+export const USAGE_TEXT = `engram — a notes system where the organizing work is done by an agent
 
 usage:
   engram init                    scaffold a vault; non-destructive
@@ -39,7 +45,8 @@ usage:
   engram mcp                     MCP server over stdio (no socket, nothing listens)
 
 options:
-  --vault <dir>       vault root (default: cwd)
+  --vault <dir>       vault root. Default: the nearest directory at or above
+                      the cwd containing .engram/ (ADR-0046)
   --by <who>          who is asserting (default: $USER)
   --structure <name>  init only: default | para | zettelkasten | custom
                       custom creates only raw/ and leaves the shape to you
@@ -148,6 +155,33 @@ async function isPopulated(files: ReturnType<typeof nodeFileStore>): Promise<boo
   return false;
 }
 
+/**
+ * Every command, and whether it needs a vault that already exists.
+ *
+ * One list rather than a condition spelled out at each site. It decides two things
+ * that were previously implicit and disagreed with each other: what counts as an
+ * unknown command, and which commands may run outside a vault. A test asserts every
+ * key here is actually handled by the switch, so the registry cannot drift from it.
+ */
+const COMMANDS: Record<string, { vault: boolean }> = {
+  // Creating a vault is the one case where not having one is the point.
+  init: { vault: false },
+  capture: { vault: true },
+  format: { vault: true },
+  link: { vault: true },
+  reindex: { vault: true },
+  doctor: { vault: true },
+  queue: { vault: true },
+  upgrade: { vault: true },
+  skill: { vault: true },
+  mcp: { vault: true },
+};
+
+const HELP = new Set(['help', '--help', '-h']);
+
+/** Command names, for tests and for anything that needs to enumerate them. */
+export const commandNames = (): string[] => Object.keys(COMMANDS);
+
 /** Reads stdin when it is piped; returns '' for an interactive terminal. */
 async function readStdin(): Promise<string> {
   if (process.stdin.isTTY) return '';
@@ -157,9 +191,32 @@ async function readStdin(): Promise<string> {
 }
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
-  const root = flag(argv, 'vault', process.cwd());
   const by = flag(argv, 'by', process.env.USER ?? 'unknown');
   const [command, ...rest] = stripFlags(argv);
+
+  // An unknown command is reported as one. Checking the vault first would answer
+  // `engram frobnicate` with "no vault here", which is true and not the point.
+  if (command !== undefined && !HELP.has(command) && COMMANDS[command] === undefined) {
+    process.stderr.write(`unknown command: ${command}\n\n${USAGE_TEXT}`);
+    return 2;
+  }
+
+  // ADR-0046. Running from a subdirectory used to create a second vault inside the
+  // first and report a path relative to a root the user did not think they were in.
+  // Only `init` may proceed without a vault, because the absence of one is the point
+  // rather than an error.
+  const needsVault = command !== undefined && (COMMANDS[command]?.vault ?? false);
+  const resolved = resolveVaultRoot(process.cwd(), flagOrUndef(argv, 'vault'), !needsVault);
+  if (resolved.missing) {
+    process.stderr.write(noVaultMessage(process.cwd()));
+    return 1;
+  }
+  const root = resolved.root;
+  // Discovery that is invisible is indistinguishable from magic, and you need to be
+  // able to see which vault you just wrote to.
+  if (resolved.how === 'found' && root !== process.cwd()) {
+    process.stderr.write(`engram: vault root ${root}\n`);
+  }
 
   const files = nodeFileStore(root);
   const clock = systemClock();
@@ -461,11 +518,12 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     }
     case undefined:
     case 'help':
+    case '-h':
     case '--help':
-      process.stdout.write(USAGE);
+      process.stdout.write(USAGE_TEXT);
       return 0;
     default:
-      process.stderr.write(`unknown command: ${command}\n\n${USAGE}`);
+      process.stderr.write(`unknown command: ${command}\n\n${USAGE_TEXT}`);
       return 2;
   }
 }

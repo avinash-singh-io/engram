@@ -30,10 +30,10 @@
 - [x] T3.6 `reindex` calls `renderSkills`
 
 ## Group 4 — Root discovery
-- [ ] T4.1 ADR-0046
-- [ ] T4.2 `findVaultRoot` with a `.git` stop
-- [ ] T4.3 CLI resolves and reports the root
-- [ ] T4.4 No root → error naming `engram init`
+- [x] T4.1 ADR-0046
+- [x] T4.2 `findVaultRoot` with a `.git` stop
+- [x] T4.3 CLI resolves and reports the root
+- [x] T4.4 No root → error naming `engram init`
 
 ## Group 5 — Wiring
 - [ ] T5.1 `create-skill`

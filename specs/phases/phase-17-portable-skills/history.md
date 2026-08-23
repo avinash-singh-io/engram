@@ -274,3 +274,44 @@ from a single source. `walk` excludes rendered skills via `isSkillPath`, derived
 the registry — the third occurrence of BUG-008's shape, prevented rather than fixed.
 
 ---
+### [DECISION] 2026-08-23 — ADR-0046: discovery walks up; the boundary rule is unchanged
+Topics: cli, vault-root, boundaries
+Affects-phases: none
+Affects-specs: specs/decisions/0030-boundaries-are-repos.md
+Detail: Reproduced against the built binary before writing anything: `engram capture`
+from `concepts/` created `concepts/raw/`, filed the note there, and reported
+`/raw/...` — a path relative to a root the user did not believe they were in.
+ADR-0030 conflated **boundary** (how far a vault extends, its actual subject) with
+**discovery** (which root you are in, which it never argued for). ADR-0046 amends the
+discovery half only: walk up for `.engram/`, nearest wins, stop at a `.git` with no
+vault in it. Verified fixed against the built binary, plus the git-boundary refusal
+and that `init` still works where there is no vault.
+
+---
+
+### [DISCOVERY] 2026-08-23 — "No vault here" preempted "unknown command"
+Topics: cli, error-reporting
+Affects-phases: none
+Affects-specs: none
+Detail: Requiring a vault before dispatch made `engram frobnicate` answer "no vault
+here" and exit 1 instead of naming the unknown command and exiting 2 — true, and not
+the point. Caught by an existing e2e test. Fixed by giving the CLI a **command
+registry**: one list that decides both what an unknown command is and which commands
+may run outside a vault. Those two facts were previously implicit at separate sites
+and disagreed with each other, which is how the regression was possible at all.
+
+---
+
+### [NOTE] 2026-08-23 — What a registry test can and cannot assert
+Topics: testing, cli
+Affects-phases: none
+Affects-specs: none
+Detail: The natural test — run every registered command and assert none falls through
+to the switch's default — hangs: `capture` and `format` read stdin when given no
+argument, and `mcp` is a server that never returns. Rather than contrive arguments
+for each and quietly test something weaker than it appears to, the test asserts that
+every registered name appears in the usage text, and says in a comment exactly what
+it does not cover and where that coverage lives instead. A test whose name overstates
+what it checks is worse than a smaller honest one.
+
+---
