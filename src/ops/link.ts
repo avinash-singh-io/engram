@@ -33,13 +33,16 @@ export async function link(
   deps: LinkDeps,
 ): Promise<LinkResult> {
   const raw = (await deps.files.read(fromPath)) ?? '';
-  const { node, edges, warnings } = readNode(raw, fromPath);
+  const { node, edges, warnings, styles } = readNode(raw, fromPath);
 
   const stamp = { by: deps.by, at: deps.clock.now(), until: null };
   const edge = makeEdge({ from: node.id, to, kind, stamp });
 
   const all = [...edges, edge];
-  const { content, warnings: writeWarnings } = writeNode(node, all);
+  // Styles from the read, so a file written in block style stays in block style.
+  // Without this `link` silently reformats a note the user edited in Obsidian, and
+  // Obsidian reformats it back (ADR-0047 §5).
+  const { content, warnings: writeWarnings } = writeNode(node, all, undefined, styles);
   const change: Change = { path: fromPath, node, edges: all, content };
 
   const verdict = validate(change);

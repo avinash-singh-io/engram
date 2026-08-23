@@ -22,5 +22,11 @@ human-filterable in Obsidian and agent-parseable.
 - **Lost:** wikilink auto-rename, `![[embeds]]`, and (older Obsidian) full backlinks.
 - **Kept:** graph view, Properties, search.
 
+> **Properties are safe to edit** as of v0.15.0. Obsidian rewrites inline sequences
+> into block form when you use the panel; engram reads both and writes back whichever
+> one your file already uses. Before v0.15.0 that rewrite made the note unreadable and
+> cost it its `id` (BUG-011) — if you kept a rule against touching the panel, it no
+> longer applies.
+
 Indexes (`index.md`) and `log.md` are tool-generated — never hand-edit them; run
 `engram reindex` instead.

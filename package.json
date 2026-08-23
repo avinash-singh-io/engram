@@ -1,6 +1,6 @@
 {
   "name": "@avinash-singh-io/engram",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "OKF-native knowledge base that agents and humans read and write together \u2014 durable memory, sibling to momentum.",
   "type": "module",
   "license": "MIT",
@@ -51,11 +51,12 @@
     "lint": "eslint src tests plugin",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build && npm run smoke:cli && npm run smoke:plugin && npm run smoke:skills",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build && npm run smoke:cli && npm run smoke:plugin && npm run smoke:skills && npm run smoke:obsidian",
     "prepublishOnly": "npm run check",
     "smoke:plugin": "node scripts/smoke-plugin.mjs",
     "smoke:cli": "node scripts/smoke-cli.mjs",
-    "smoke:skills": "node scripts/smoke-skills.mjs"
+    "smoke:skills": "node scripts/smoke-skills.mjs",
+    "smoke:obsidian": "node scripts/smoke-obsidian.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

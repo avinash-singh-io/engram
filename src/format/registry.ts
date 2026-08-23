@@ -8,6 +8,7 @@
  */
 
 import type { Edge, Node } from '../core/model.js';
+import type { KeyError, SequenceStyle } from './subset.js';
 import { OKF_V0_1 } from './okf-v0_1.js';
 import { OKF_V0_2 } from './okf-v0_2.js';
 
@@ -18,8 +19,28 @@ export interface ParsedFrontmatter {
   frontmatter: Record<string, unknown> | null;
   /** Everything after the block. */
   body: string;
-  /** Set when a block was present but its YAML did not parse. */
+  /**
+   * Set only when the block was **wholly** unreadable — an unterminated block, or
+   * nothing parsed at all. A document with some readable keys reports those keys and
+   * lists the rest in `keyErrors` (ADR-0047 §2).
+   */
   yamlError?: string;
+  /**
+   * Keys that could not be read, each named.
+   *
+   * The unit of failure is the key. Before ADR-0047 a single unreadable line
+   * discarded the whole mapping, so a formatting change Obsidian makes on its own
+   * cost a note its `id` and dropped it to path-as-identity (BUG-011).
+   */
+  keyErrors: KeyError[];
+  /**
+   * How each sequence key was written, so a write can give back the same style.
+   *
+   * Without this engram rewrites block to flow and Obsidian re-normalises on the
+   * next property edit — the two tools undoing each other forever in what is usually
+   * also a git repository.
+   */
+  styles: Record<string, SequenceStyle>;
 }
 
 /** What a read produced, plus anything the codec could not faithfully represent. */
@@ -28,6 +49,11 @@ export interface ReadResult {
   edges: Edge[];
   /** Lossy warnings — codec-level, never a reason to fail a read. */
   warnings: string[];
+  /**
+   * How each sequence key was written in the source, so a later write can give back
+   * the same style rather than imposing engram's (ADR-0047 §5).
+   */
+  styles: Record<string, SequenceStyle>;
 }
 
 /** One serialization of the model. One file per spec version, additive. */
@@ -35,7 +61,11 @@ export interface Codec {
   /** The `okf_version` this codec speaks. */
   version: string;
   read(parsed: ParsedFrontmatter, path: string): ReadResult;
-  write(node: Node, edges: Edge[]): { content: string; warnings: string[] };
+  write(
+    node: Node,
+    edges: Edge[],
+    styles?: Record<string, SequenceStyle>,
+  ): { content: string; warnings: string[] };
 }
 
 const CODECS = new Map<string, Codec>();
@@ -59,6 +89,12 @@ export const DEFAULT_VERSION = OKF_V0_1.version;
 export const CURRENT_VERSION = OKF_V0_2.version;
 
 const BOM = '﻿';
+interface YamlResult {
+  map: Record<string, unknown>;
+  keyErrors: KeyError[];
+  styles: Record<string, SequenceStyle>;
+}
+
 const DELIM = /^---[ \t]*$/;
 
 /**
@@ -76,7 +112,13 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
   const lines = text.split('\n');
 
   if (lines[0] === undefined || !DELIM.test(lines[0])) {
-    return { hasFrontmatter: false, frontmatter: null, body: withoutTrailingNewline(text) };
+    return {
+      hasFrontmatter: false,
+      frontmatter: null,
+      body: withoutTrailingNewline(text),
+      keyErrors: [],
+      styles: {},
+    };
   }
 
   const close = lines.findIndex((l, i) => i > 0 && DELIM.test(l));
@@ -87,81 +129,337 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
       frontmatter: null,
       body: '',
       yamlError: 'unterminated frontmatter block',
+      keyErrors: [],
+      styles: {},
     };
   }
 
   const yaml = lines.slice(1, close).join('\n');
   const body = withoutTrailingNewline(lines.slice(close + 1).join('\n'));
 
-  try {
-    const parsed = parseSimpleYaml(yaml);
-    return { hasFrontmatter: true, frontmatter: parsed, body };
-  } catch (e) {
+  const { map, keyErrors, styles } = parseSimpleYaml(yaml);
+
+  // A null mapping now means **wholly** unreadable — nothing parsed at all. A
+  // document with even one readable key returns that key, because the alternative
+  // is what BUG-011 was: one bad line costing a note its identity.
+  if (Object.keys(map).length === 0 && keyErrors.length > 0) {
     return {
       hasFrontmatter: true,
       frontmatter: null,
       body,
-      yamlError: e instanceof Error ? e.message : String(e),
+      yamlError: keyErrors.map((k) => k.reason).join('; '),
+      keyErrors,
+      styles,
     };
   }
+
+  return { hasFrontmatter: true, frontmatter: map, body, keyErrors, styles };
 }
 
 /**
- * A deliberately small YAML subset: scalars, inline lists, and inline maps.
+ * A deliberately small YAML subset — stated in `subset.ts`, not implied here.
  *
- * OKF frontmatter is flat by design (ADR-0020), so a full YAML engine would be a
- * dependency carrying far more surface than the format uses. Anything outside
- * the subset raises, and `parseFrontmatter` turns that into a `yamlError` rather
- * than letting it escape.
+ * **Never throws, and never fails a whole document for one bad line** (ADR-0047 §2).
+ * A key it cannot read is omitted and recorded in `keyErrors`; every other key on
+ * every other line is returned exactly as if the bad line were not there.
+ *
+ * That asymmetry is the whole point. Before this, one unreadable line returned
+ * `null` for the entire mapping, both codecs opened with `parsed.frontmatter ?? {}`,
+ * and a note lost its `id` — falling back to path-as-identity, so moving the file
+ * broke every relation pointing at it (BUG-011). The trigger was Obsidian rewriting
+ * `part-of: [a]` into a block sequence when its owner edited an unrelated property.
+ * Losing identity must never be the default response to a formatting variation.
  */
-function parseSimpleYaml(yaml: string): Record<string, unknown> {
+function parseSimpleYaml(yaml: string): YamlResult {
   const out: Record<string, unknown> = {};
+  const keyErrors: KeyError[] = [];
+  const styles: Record<string, SequenceStyle> = {};
   const lines = yaml.split('\n');
   const meaningful = (l: string): boolean => l.trim() !== '' && !l.trimStart().startsWith('#');
 
-  /** The nested map currently open, or null when the last key was a scalar. */
+  /** The nested map currently open, and the key that opened it. */
   let nested: Record<string, unknown> | null = null;
+  let nestedKey: string | null = null;
+  /** The indent of the open nested block, so a deeper one can be refused. */
+  let nestedIndent = -1;
+  /** True between the two halves of a complex key. */
+  let complexKeyOpen = false;
+  /** Keys whose nested block had a failure, so an empty husk is not left behind. */
+  const spoiled = new Set<string>();
+
+  const fail = (key: string, i: number, reason: string): void => {
+    keyErrors.push({ key, line: i + 1, reason });
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!;
     if (!meaningful(line)) continue;
 
+    const indented = /^\s/.test(line);
     const at = line.indexOf(':');
-    if (at === -1) throw new Error(`not a key: value pair: ${line}`);
+
+    // A complex key (`? [a, b]` / `: c`) spans two lines. Reporting only the first
+    // left the second to parse as a key of `''`, putting a garbage entry in the
+    // mapping — a silent wrong answer beside a loud one.
+    if (/^\?(\s|$)/.test(line.trim())) {
+      fail(line.trim(), i, 'engram does not read a YAML complex key; this entry was skipped');
+      complexKeyOpen = true;
+      continue;
+    }
+    if (complexKeyOpen && /^:(\s|$)/.test(line.trim())) {
+      complexKeyOpen = false;
+      continue;
+    }
+    complexKeyOpen = false;
+
+    if (at === -1) {
+      // Attribute it to the block it belongs to when there is one, so the warning
+      // names a key the reader recognises rather than a fragment of a line.
+      const owner = indented && nestedKey !== null ? nestedKey : line.trim();
+      if (indented && nestedKey !== null) spoiled.add(nestedKey);
+      fail(owner, i, `not a key: value pair: ${line.trim()}`);
+      continue;
+    }
+
     const key = line.slice(0, at).trim();
     const value = line.slice(at + 1).trim();
 
-    if (/^\s/.test(line)) {
-      // An indented pair used to be flattened into the top level, so
-      // `metadata:` followed by indented keys silently produced top-level keys
-      // and a null `metadata`. Skills need one level of nesting — the Agent
-      // Skills standard puts every tool-specific field under `metadata` — and
-      // reading it wrong is worse than refusing it.
-      if (nested === null) throw new Error(`indented key with no parent: ${line.trim()}`);
-      nested[key] = parseScalar(value);
+    if (indented) {
+      if (nested === null) {
+        fail(key, i, `indented key with no parent: ${line.trim()}`);
+        continue;
+      }
+      // Deeper than the block that is open means a second level of nesting. It used
+      // to be **flattened into the first**, producing a plausible and wrong mapping
+      // — the same silent-hoist the Phase 17 look-ahead was added to stop, one level
+      // further down. A wrong answer nobody is told about is the worst outcome here.
+      if (indentOf(line) > nestedIndent) {
+        spoiled.add(nestedKey!);
+        fail(
+          nestedKey ?? key,
+          i,
+          `engram reads one level of nesting; \`${key}\` is deeper and was skipped`,
+        );
+        continue;
+      }
+      const scalar = scalarOrError(value);
+      if (typeof scalar === 'string') {
+        spoiled.add(nestedKey!);
+        fail(nestedKey ?? key, i, scalar);
+        continue;
+      }
+      nested[key] = scalar.value;
       continue;
     }
 
     if (value !== '') {
       nested = null;
-      out[key] = parseScalar(value);
+      nestedKey = null;
+
+      // `key: |` and `key: >` open a multi-line scalar, so the value is on the lines
+      // that follow rather than this one.
+      if (/^[|>][-+]?\d*$/.test(value)) {
+        const blk = readBlockScalar(lines, i + 1, value, indentOf(line));
+        out[key] = blk.text;
+        i = blk.next - 1;
+        continue;
+      }
+
+      const excluded = excludedConstruct(value);
+      if (excluded !== null) {
+        fail(key, i, `engram does not read a YAML ${excluded}; this key was skipped`);
+        continue;
+      }
+
+      const scalar = scalarOrError(value);
+      if (typeof scalar === 'string') {
+        fail(key, i, scalar);
+        continue;
+      }
+      out[key] = scalar.value;
+      if (value.startsWith('[')) styles[key] = 'flow';
       continue;
     }
 
     // `key:` with nothing after it is either an empty scalar or the head of a
     // nested block, and only the next meaningful line can say which. Looking
-    // ahead keeps `aliases:` reading as null exactly as it always has —
-    // this extension is a strict superset for any flat document.
+    // ahead keeps `aliases:` reading as null exactly as it always has.
     const next = lines.slice(i + 1).find(meaningful);
+
+    // Sequence is checked **first**. Before ADR-0047 this branch saw an indented
+    // next line and committed to a nested map, so the sequence item under it then
+    // failed the key:value check — that is the precise shape of BUG-011, and it is
+    // why the check order matters rather than being incidental.
+    if (next !== undefined && isSequenceItem(next)) {
+      const seq = readBlockSequence(lines, i + 1, meaningful);
+      nested = null;
+      nestedKey = null;
+      for (const bad of seq.errors) fail(key, bad.line - 1, bad.reason);
+      if (seq.items.length > 0 || seq.errors.length === 0) {
+        out[key] = seq.items;
+        styles[key] = 'block';
+      }
+      i = seq.next - 1;
+      continue;
+    }
+
     if (next !== undefined && /^\s/.test(next)) {
       nested = {};
+      nestedKey = key;
+      nestedIndent = indentOf(next);
       out[key] = nested;
     } else {
       nested = null;
+      nestedKey = null;
       out[key] = null;
     }
   }
-  return out;
+
+  // A nested block that failed is dropped whole, not left partially filled.
+  //
+  // `a: {}` reads as "declared and empty", and `a: { b: null }` — where `b` had
+  // content engram could not read — reads as "b is empty". Both are quieter lies
+  // than "could not be read", because they look complete and warn about nothing
+  // downstream. The `keyError` says what happened; the mapping must not contradict
+  // it. Sequences are different and keep their readable items, because there the
+  // items are independent of each other.
+  for (const key of spoiled) delete out[key];
+
+  return { map: out, keyErrors, styles };
+}
+
+/**
+ * The YAML constructs engram does not implement, recognised so they can be **named**
+ * rather than silently misread (ADR-0047 §1, `EXCLUDED`).
+ *
+ * An anchor read as the literal string `"&anchor value"` is worse than a refusal: it
+ * parses, so nothing warns, and the value is quietly wrong. Naming them costs one
+ * regex and converts a silent corruption into a message.
+ */
+function excludedConstruct(v: string): string | null {
+  if (v.startsWith('&')) return 'anchor';
+  if (v.startsWith('*')) return 'alias';
+  if (v.startsWith('!')) return 'tag';
+  return null;
+}
+
+/** A line that opens or continues a block sequence: `- a`, or a bare `-`. */
+function isSequenceItem(line: string): boolean {
+  return /^-(\s|$)/.test(line.trim());
+}
+
+/** How far a line is indented, in characters. Tabs count as one, as YAML forbids them. */
+function indentOf(line: string): number {
+  return line.length - line.trimStart().length;
+}
+
+interface BlockSequence {
+  items: unknown[];
+  errors: { line: number; reason: string }[];
+  /** Index of the first line after the sequence. */
+  next: number;
+}
+
+/**
+ * Read a block sequence starting at `from`.
+ *
+ * Accepts both the indented form Obsidian writes and the unindented form YAML also
+ * permits, because a vault contains files written by more than one tool and refusing
+ * either is how BUG-011 happened.
+ */
+function readBlockSequence(
+  lines: string[],
+  from: number,
+  meaningful: (l: string) => boolean,
+): BlockSequence {
+  const items: unknown[] = [];
+  const errors: { line: number; reason: string }[] = [];
+  let i = from;
+
+  for (; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (!meaningful(line)) continue;
+    if (!isSequenceItem(line)) break;
+
+    const raw = line.trim().replace(/^-\s*/, '');
+    if (raw === '') {
+      // `-` with nothing after it is a null item, not an error.
+      items.push(null);
+      continue;
+    }
+    const scalar = scalarOrError(raw);
+    if (typeof scalar === 'string') errors.push({ line: i + 1, reason: scalar });
+    else items.push(scalar.value);
+  }
+
+  return { items, errors, next: i };
+}
+
+interface BlockScalar {
+  text: string;
+  next: number;
+}
+
+/**
+ * Read a `|` or `>` block scalar.
+ *
+ * Deliberately partial, and ADR-0047 says so: engram clips trailing newlines in every
+ * case, so `|` and `|-` agree. OKF has no field where a trailing blank line carries
+ * meaning, and pretending to implement chomping precisely would be a worse promise
+ * than a stated simplification.
+ *
+ * Blank lines and `#` are **content** inside a block scalar, never comments — which
+ * is why this does its own scanning rather than reusing the caller's `meaningful`.
+ */
+function readBlockScalar(
+  lines: string[],
+  from: number,
+  header: string,
+  keyIndent: number,
+): BlockScalar {
+  const folded = header.startsWith('>');
+  const collected: string[] = [];
+  let i = from;
+
+  for (; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (line.trim() === '') {
+      collected.push('');
+      continue;
+    }
+    if (indentOf(line) <= keyIndent) break;
+    collected.push(line);
+  }
+
+  while (collected.length > 0 && collected[collected.length - 1] === '') collected.pop();
+
+  const indents = collected.filter((l) => l.trim() !== '').map(indentOf);
+  const strip = indents.length === 0 ? 0 : Math.min(...indents);
+  const dedented = collected.map((l) => (l.trim() === '' ? '' : l.slice(strip)));
+
+  return { text: folded ? foldLines(dedented) : dedented.join('\n'), next: i };
+}
+
+/** Folded style joins on spaces; a blank line is a real paragraph break. */
+function foldLines(lines: string[]): string {
+  const paragraphs: string[][] = [[]];
+  for (const l of lines) {
+    if (l === '') paragraphs.push([]);
+    else paragraphs[paragraphs.length - 1]!.push(l);
+  }
+  return paragraphs
+    .filter((p) => p.length > 0)
+    .map((p) => p.join(' '))
+    .join('\n\n');
+}
+
+/** `parseScalar`, with its throws turned into a reason string. */
+function scalarOrError(v: string): { value: unknown } | string {
+  try {
+    return { value: parseScalar(v) };
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
 }
 
 function parseScalar(v: string): unknown {
@@ -259,8 +557,15 @@ export function readNode(raw: string, path: string): ReadResult {
   const parsed = parseFrontmatter(raw);
   const codec = CODECS.get(detectVersion(parsed.frontmatter))!;
   const result = codec.read(parsed, path);
+  result.styles = parsed.styles;
   if (parsed.yamlError !== undefined) {
     result.warnings.push(`frontmatter did not parse: ${parsed.yamlError}`);
+  }
+  // One warning per key, naming it. A single summary line was what made BUG-011 read
+  // as a formatting nit: it said the frontmatter "did not parse" without saying which
+  // key was lost or that identity had just been traded for a path.
+  for (const e of parsed.keyErrors) {
+    result.warnings.push(`frontmatter line ${e.line}, key \`${e.key}\`: ${e.reason}`);
   }
   return result;
 }
@@ -275,10 +580,19 @@ export function writeNode(
   node: Node,
   edges: Edge[],
   version: string = CURRENT_VERSION,
+  /**
+   * Sequence styles from the read this write is replacing, when there was one.
+   *
+   * Omit for a note engram is creating: flow stays the default. Pass the styles a
+   * read produced and the file keeps the shape its author left it in — without
+   * which engram rewrites block to flow and Obsidian re-normalises on the next
+   * property edit, the two tools undoing each other forever (ADR-0047 §5).
+   */
+  styles?: Record<string, SequenceStyle>,
 ): { content: string; warnings: string[] } {
   const codec = CODECS.get(version);
   if (codec === undefined) {
     throw new Error(`no codec for okf_version ${version} — known: ${knownVersions().join(', ')}`);
   }
-  return codec.write(node, edges);
+  return codec.write(node, edges, styles);
 }

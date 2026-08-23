@@ -23,7 +23,8 @@ import { needsUpgrade, planUpgrade, versionSkew } from './upgrade.js';
 import { auditSkills } from '../surface/render-skills.js';
 import { discoverSkills, SKILLS_DIR } from '../policy/skills.js';
 import { walk, type WalkFinding } from './walk.js';
-import { readNode } from '../format/registry.js';
+import { parseFrontmatter, readNode } from '../format/registry.js';
+import { subsetNames } from '../format/subset.js';
 
 export interface DoctorReport {
   /** Nothing here fails the command — ADR-0021 is explicit these are not errors. */
@@ -68,6 +69,40 @@ export async function doctor(
     nodes.push(result.node);
     edges.push(...result.edges);
     for (const w of result.warnings) warnings.push(`[read] ${path}: ${w}`);
+
+    // The remedy, not just the symptom. BUG-011's original message said the
+    // frontmatter "did not parse" and stopped there — it named no key, said nothing
+    // about what engram *does* read, and did not mention that identity had just been
+    // traded for a path. A health check that reports a problem without a next action
+    // is only half a check.
+    const parsed = parseFrontmatter(raw);
+    for (const e of parsed.keyErrors) {
+      warnings.push(
+        `[frontmatter] ${path} line ${e.line}: ${e.reason}. ` +
+          `engram reads ${subsetNames().length} YAML constructs including block and flow ` +
+          `sequences — see STRUCTURE.md, or rewrite this key in a form it lists.`,
+      );
+    }
+
+    // Identity lost **because of** a parse failure, which is a different problem from
+    // a note that never had an `id` — and a much worse one. ADR-0021: the slug is the
+    // identity and the path is only an address, so a note reduced to path-as-identity
+    // breaks every relation pointing at it the moment it moves.
+    const lostId = parsed.yamlError !== undefined || parsed.keyErrors.some((e) => e.key === 'id');
+    if (result.node.id === path && lostId) {
+      // A **warning**, not a failure. ADR-0021 is explicit that a missing slug is
+      // "a warning and a fallback, never an error", and a doctor that exits 1 because
+      // one file in a vault has an odd property is a doctor people stop running.
+      //
+      // It is worded to carry its own severity instead. Raising it to a failure would
+      // be a real argument — this is data integrity, not tidiness — but it amends
+      // ADR-0021 and belongs in an ADR rather than in a health check.
+      warnings.push(
+        `[identity-lost] ${path} has no readable \`id\`, so it is identified by its path. ` +
+          `This is not cosmetic: moving or renaming it will break every relation ` +
+          `pointing at it (ADR-0021). Fix the frontmatter above, then re-run.`,
+      );
+    }
   }
 
   for (const f of inspect(nodes, edges)) warnings.push(say(f));

@@ -211,6 +211,62 @@ Two properties worth knowing, both from
 
 `proposeOnly` ships **empty**, so nothing is held until you ask for it.
 
+## Editing frontmatter — including in Obsidian
+
+**Obsidian's Properties panel is safe.** Edit properties there, edit the file in a
+text editor, or let engram write it — all three round-trip.
+
+That was not always true. Until v0.15.0, editing any property in Obsidian's panel
+rewrote `part-of: [finance]` into
+
+```yaml
+part-of:
+  - finance
+```
+
+which engram could not read — and it discarded the *whole* frontmatter when it hit
+that line, including `id`. The note then fell back to path-as-identity, so moving it
+broke every relation pointing at it. If you wrote yourself a rule like *"do not edit
+properties in Obsidian"*, **it no longer applies. Delete it.**
+
+Nothing needs migrating. Those files were always valid YAML; engram simply could not
+read them, so they work untouched. `engram upgrade` will say so and change nothing.
+
+### What engram reads
+
+Both sequence styles, and **whichever one your file already uses is what engram writes
+back** — it will not reformat your notes, and it will not fight Obsidian over style.
+
+```yaml
+part-of: [a, b]        # flow — what engram writes for a new note
+part-of:               # block — what Obsidian writes
+  - a
+  - b
+```
+
+Plus: quoted and unquoted scalars (including ones containing colons), booleans, nulls,
+dates, flow maps, one level of nested mapping, `|` and `>` block scalars, comments.
+The full list is `SUBSET` in `src/format/subset.ts`, and every entry in it has a test.
+
+Not read, and **named in the warning** rather than silently misparsed: anchors (`&x`),
+aliases (`*x`), tags (`!!type`), complex keys (`? [a, b]`), and nesting deeper than one
+level.
+
+### If something is unreadable
+
+You lose **that key**, never the file. `id`, `author`, `timestamp` and every other
+readable relation survive, and `engram doctor` names the line:
+
+```
+[frontmatter] /3-resources/finance/glossary.md line 6: engram does not read a
+  YAML anchor; this key was skipped. engram reads 24 YAML constructs including
+  block and flow sequences — see STRUCTURE.md, or rewrite this key in a form it lists.
+```
+
+The one exception is `engram/guardrails.md`, which **fails closed**: if any line in it
+is unreadable, engram applies its defaults — every rule on — rather than a
+half-understood config that might permit more than you wrote. It says so loudly.
+
 ## 5. Check on it
 
 ```bash

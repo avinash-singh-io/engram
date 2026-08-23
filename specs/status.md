@@ -1,9 +1,9 @@
 # Project Status
 
 > **Last Updated**: 2026-08-23
-> **Current Phase**: **Phase 17 complete, released as v0.14.0.** Engram's operations and skills are invocable as slash commands in any agent implementing the Agent Skills standard, with no MCP server. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
-> **Latest Release**: **v0.14.0** — portable skills. **Verified against the registry, not the workflow log**: `npm view @avinash-singh-io/engram dist-tags` returns `{ latest: '0.14.0' }`, and the published tarball was installed into a clean directory, used to scaffold a vault, and its rendered plugin loaded in a real Claude Code session listing `/engram:capture` … `/engram:reindex` (2026-08-23). That distinction is the whole lesson of BUG-002, which looked resolved for ten days while five tagged versions had never shipped.
-> **Health**: Good — 771 tests, three smoke checks green (one of which runs the host's own plugin validator), and the adoption bugs that made engram unusable outside a fresh vault are fixed.
+> **Current Phase**: **Phase 18 complete, released as v0.15.0.** engram reads the frontmatter Obsidian actually writes, and a line it cannot read never costs a note its identity (BUG-011). **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Latest Release**: **v0.14.0** on npm. **v0.15.0 is tagged and publishing; NOT yet confirmed on the registry.** Do not record it as released until `npm view @avinash-singh-io/engram dist-tags` says so — BUG-002's lesson.
+> **Health**: Good — 883 tests, four smoke checks green, one of which reads a corpus of frontmatter taken verbatim from a real Obsidian vault. The P0 that cost notes their identity is fixed.
 
 ## Summary
 
@@ -39,6 +39,7 @@ is rewritten clean-room rather than patched.
 | 15 | Surfaces — skills, MCP, adapters | Complete | v0.10.0 |
 | 14 | Approval queue, guardrail config, structures | Complete | v0.11.0 |
 | 17 | Portable skills | Complete | v0.14.0 |
+| 18 | Frontmatter fidelity | Complete | v0.15.0 |
 
 ## Ad-hoc / Patch Releases
 
@@ -61,7 +62,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 17 released as v0.14.0)_ | | | |
+| _(none — Phase 18 released as v0.15.0)_ | | | |
 
 ## Upcoming Phases — the v2 line
 
@@ -94,7 +95,7 @@ productivity suite, and is deliberately kept out of the core. See
 
 | ID | Type | Description |
 |----|------|-------------|
-| _(none)_ | | **BUG-002 resolved 2026-08-22** — v0.11.0 is on npm, verified against the registry and by installing the published tarball. |
+| _(none)_ | | **BUG-011 resolved in Phase 18 (v0.15.0)** — engram reads the block sequences Obsidian writes, and a line it cannot read costs that key only, never the note's identity. |
 
 ## Next Actions
 

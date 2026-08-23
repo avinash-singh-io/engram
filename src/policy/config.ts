@@ -63,6 +63,25 @@ export async function loadGuardrails(files: FileStore): Promise<LoadedGuardrails
     return { config: DEFAULTS, warnings };
   }
 
+  // **Fail closed** (ADR-0047 §4). Everywhere else in engram an unreadable key costs
+  // you that key and nothing more — which is the whole point of ADR-0047 §2, and is
+  // wrong here. This file says what an agent may do. A partially read one could
+  // silently grant *more* freedom than its author wrote: a `proposeOnly:` list that
+  // failed to parse stops deferring anything, and a `pathScope:` that failed stops
+  // scoping anything. Both fail in the permissive direction, silently.
+  //
+  // So a guardrail file that is not fully understood is not used at all. Defaults
+  // are every rule on, which is the safe direction, and the warning names the key.
+  if (parsed.keyErrors.length > 0) {
+    const detail = parsed.keyErrors.map((e) => `line ${e.line} (${e.key}): ${e.reason}`).join('; ');
+    warnings.push(
+      `${GUARDRAILS_PATH}: ${detail} — this file was NOT applied. Guardrails fail closed, ` +
+        `so every rule is on until it parses. Elsewhere engram keeps what it can read; ` +
+        `here a half-read file could permit more than you wrote.`,
+    );
+    return { config: DEFAULTS, warnings };
+  }
+
   const fm = parsed.frontmatter;
   const known = new Set(guardrailNames());
 

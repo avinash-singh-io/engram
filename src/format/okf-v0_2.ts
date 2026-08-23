@@ -6,6 +6,7 @@
  */
 import { makeEdge, makeNode, type Edge, type Node } from '../core/model.js';
 import { relationKinds } from '../core/relations.js';
+import type { SequenceStyle } from './subset.js';
 import {
   withTrailingNewline,
   type Codec,
@@ -27,6 +28,20 @@ const list = (v: unknown): string[] =>
  * codec too, not only of the gate and the graph.
  */
 const relationKeys = (): string[] => relationKinds();
+
+/**
+ * Emit a sequence in the style it arrived in (ADR-0047 §5).
+ *
+ * Flow is the default and stays the default for a note engram creates — this only
+ * gives back what a file already had. Rewriting someone's block sequences to flow
+ * causes git churn in a directory that is usually also a repository, and Obsidian
+ * simply rewrites them back on the next property edit, so the two tools would sit
+ * there undoing each other.
+ */
+function sequence(key: string, values: string[], styles?: Record<string, SequenceStyle>): string[] {
+  if (styles?.[key] !== 'block') return [`${key}: [${values.join(', ')}]`];
+  return [`${key}:`, ...values.map((v) => `  - ${v}`)];
+}
 
 export const OKF_V0_2: Codec = {
   version: '0.2',
@@ -58,10 +73,10 @@ export const OKF_V0_2: Codec = {
       const targets = typeof raw === 'string' ? [raw] : list(raw);
       for (const to of targets) edges.push(makeEdge({ from: node.id, to, kind, stamp }));
     }
-    return { node, edges, warnings };
+    return { node, edges, warnings, styles: {} };
   },
 
-  write(node: Node, edges: Edge[]) {
+  write(node: Node, edges: Edge[], styles?: Record<string, SequenceStyle>) {
     const warnings: string[] = [];
     const lines = [
       '---',
@@ -71,11 +86,11 @@ export const OKF_V0_2: Codec = {
       `author: ${node.stamp.by}`,
     ];
     if (node.stamp.until !== null) lines.push(`stale_after: ${node.stamp.until}`);
-    if (node.aliases.length > 0) lines.push(`aliases: [${node.aliases.join(', ')}]`);
+    if (node.aliases.length > 0) lines.push(...sequence('aliases', node.aliases, styles));
 
     for (const kind of relationKeys()) {
       const targets = edges.filter((e) => e.kind === kind).map((e) => e.to);
-      if (targets.length > 0) lines.push(`${kind}: [${targets.join(', ')}]`);
+      if (targets.length > 0) lines.push(...sequence(kind, targets, styles));
     }
     const known = new Set(relationKeys());
     const unknown = edges.filter((e) => !known.has(e.kind));
