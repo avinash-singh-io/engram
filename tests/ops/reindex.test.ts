@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { init } from '../../src/ops/init.js';
 import { structureIds } from '../../src/policy/structures.js';
-import { isSkillPath } from '../../src/surface/adapters.js';
+import { isCommandPath, isSkillPath } from '../../src/surface/adapters.js';
 import { reindex } from '../../src/ops/reindex.js';
 import { BEGIN, END } from '../../src/surface/adapters.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
@@ -87,10 +87,13 @@ describe('reindex reports what the walker found', () => {
 
   it('an empty vault reindexes without error', async () => {
     const { written, counts, skills } = await reindex(memoryFileStore(), clock);
-    // The derived files, exactly. Rendered skills are asserted separately because
-    // their number is a property of the registry, and pinning it here would make
-    // adding an operation fail a test about reindexing an empty vault.
-    expect(written.filter((p) => !isSkillPath(p) && p !== '/.gitignore')).toEqual([
+    // The derived files, exactly. Rendered skills and commands are asserted
+    // separately because their number is a property of the registry, and pinning
+    // it here would make adding an operation fail a test about reindexing an
+    // empty vault.
+    expect(
+      written.filter((p) => !isSkillPath(p) && !isCommandPath(p) && p !== '/.gitignore'),
+    ).toEqual([
       '/index.md',
       '/views/superseded.md',
       '/views/recent.md',

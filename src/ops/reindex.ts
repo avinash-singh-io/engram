@@ -14,9 +14,11 @@ import { readNode } from '../format/registry.js';
 import { generateAgentsMd } from '../surface/agents-md.js';
 import { writeContracts, type AdapterResult } from '../surface/adapters.js';
 import {
+  renderCommands,
   renderSkills,
   skillIgnoreLines,
   spliceIgnore,
+  type CommandRenderResult,
   type SkillRenderResult,
 } from '../surface/render-skills.js';
 import { discoverSkills } from '../policy/skills.js';
@@ -28,6 +30,8 @@ export interface ReindexResult {
   contracts: AdapterResult;
   /** Which skills were rendered, left alone, or orphaned. */
   skills: SkillRenderResult;
+  /** Which commands were rendered, left alone, or orphaned. */
+  commands: CommandRenderResult;
   written: string[];
   counts: { nodes: number; edges: number };
   findings: WalkFinding[];
@@ -80,6 +84,11 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
   const skills = await renderSkills(files, discovered.skills);
   written.push(...skills.written);
 
+  // Commands are the user-invoked twin of the operation skills — same registry,
+  // same regeneration rules, rendered wherever an agent reads `/`-commands from.
+  const commands = await renderCommands(files);
+  written.push(...commands.written);
+
   // Derived state is never committed (ADR-0029). The block is delimited so engram
   // owns what is between the markers and nothing else — `.claude/` also holds
   // settings and commands that are the user's.
@@ -94,6 +103,7 @@ export async function reindex(files: FileStore, clock: Clock): Promise<ReindexRe
     written,
     contracts,
     skills,
+    commands,
     counts: { nodes: nodes.length, edges: edges.length },
     findings: walked.findings,
     warnings,

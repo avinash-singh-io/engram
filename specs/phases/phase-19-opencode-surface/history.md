@@ -65,3 +65,15 @@ workspace default lacked balance) confirmed skill discovery from
 the registry with skills + commands targets and no contract copy; walker excludes
 `.opencode/commands/` via the new registry-derived `isCommandPath`. 908 tests
 green.
+
+### [NOTE] 2026-08-24 — Group 1 complete: commands render beside skills
+Topics: opencode, commands, rendering, smoke
+Affects-phases: phase-19-opencode-surface
+Affects-specs: none
+Detail: renderCommands mirrors renderSkills (skip/stale/marker rules) with one
+generator per file type; reindex calls it and ReindexResult carries `commands`;
+auditSkills expected-map covers both types so doctor inherits command auditing;
+gitignore gains the managed `engram-*.md` glob. Deviation from plan: the v1-era
+tests/fixtures/ directory did not survive the clean-room rewrite, so the golden
+tree is pinned by tests/surface/render-commands.test.ts plus the built-binary
+smoke instead. Smoke: 17 checks against dist/cli.js, all green; suite 920.

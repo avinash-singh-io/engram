@@ -13,7 +13,7 @@ import {
   skillIgnoreLines,
   spliceIgnore,
 } from '../../src/surface/render-skills.js';
-import { isSkillPath } from '../../src/surface/adapters.js';
+import { isCommandPath, isSkillPath } from '../../src/surface/adapters.js';
 import { fixedClock, memoryFileStore } from '../../src/substrate/index.js';
 
 const clock = fixedClock('2026-08-23T09:00:00.000Z');
@@ -271,7 +271,12 @@ describe('the managed gitignore block', () => {
     expect(lines).toContain('/.claude/skills/engram/');
     expect(lines).toContain('/.claude/skills/mine/');
     expect(lines).toContain('/.gemini/skills/engram-format/');
-    for (const l of lines) expect(isSkillPath(`${l}x/SKILL.md`)).toBe(true);
+    // Every line covers exactly what engram renders — skill directories as skill
+    // paths, managed command globs as command paths, and nothing else besides.
+    for (const l of lines) {
+      expect(isSkillPath(`${l}x/SKILL.md`) || isCommandPath(l.replace(/\*$/, ''))).toBe(true);
+    }
+    expect(lines).toContain('/.opencode/commands/engram-*.md');
   });
 });
 
