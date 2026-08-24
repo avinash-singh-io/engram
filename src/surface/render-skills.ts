@@ -29,7 +29,12 @@
 
 import type { FileStore } from '../core/ports.js';
 import { yamlScalar } from '../format/registry.js';
-import { getOperation, OPERATION_TOOLS, operations, type OperationDef } from '../policy/operations.js';
+import {
+  getOperation,
+  OPERATION_TOOLS,
+  operations,
+  type OperationDef,
+} from '../policy/operations.js';
 import { managedBy, serializeSkill, SKILLS_DIR } from '../policy/skills.js';
 import { META, SKILL_FILE, type Skill } from '../policy/skill-schema.js';
 import { VERSION } from '../version.js';

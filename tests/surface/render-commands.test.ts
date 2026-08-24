@@ -96,11 +96,7 @@ describe('a rendered command is never mistaken for a note', () => {
   it('reindex stays idempotent with commands present, byte for byte', async () => {
     const files = await vault();
     const snapshot = async () =>
-      Promise.all(
-        (await files.list())
-          .sort()
-          .map(async (p) => [p, await files.read(p)] as const),
-      );
+      Promise.all((await files.list()).sort().map(async (p) => [p, await files.read(p)] as const));
     const before = await snapshot();
     await reindex(files, clock);
     expect(await snapshot()).toEqual(before);
@@ -127,9 +123,7 @@ describe('the audit sees commands too', () => {
   it('reports every unrendered command on a fresh vault', async () => {
     const files = memoryFileStore();
     const audit = await auditSkills(files, []);
-    expect(audit.unrendered.filter((p) => p.startsWith(DIR))).toHaveLength(
-      operations().length,
-    );
+    expect(audit.unrendered.filter((p) => p.startsWith(DIR))).toHaveLength(operations().length);
   });
 });
 

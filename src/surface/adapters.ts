@@ -171,7 +171,7 @@ export const AGENTS: AgentDescriptor[] = [
       verified:
         'Gemini CLI documentation, 2026-08-23: the workspace tier is ' +
         '`.gemini/skills/`, shared through version control. No plugin concept, ' +
-        "so engram prefixes its own.",
+        'so engram prefixes its own.',
       caveats: [
         'Gemini CLI also reads `.agents/skills/`, which takes precedence over ' +
           '`.gemini/skills/`. Engram writes only the agent-specific path, so a ' +
@@ -186,15 +186,15 @@ export const AGENTS: AgentDescriptor[] = [
       dir: '/.opencode/skills',
       plugin: null,
       verified:
-        'OpenCode 1.18.21, 2026-08-24 — pending full manual session (phase-19 ' +
-        'G4): headless discovery confirmed in evidence/t0-discovery-probe.md, ' +
-        'where `.opencode/skills/probe/SKILL.md` was listed and loadable.',
+        'OpenCode 1.18.21, 2026-08-24: a real session listed engram-init through ' +
+        'engram-doctor from .opencode/skills/ beside an unprefixed user skill, with ' +
+        'rules injected from AGENTS.md. See phase-19 evidence/live-session.md',
       caveats: [
         'Skills are agent-invoked here — the native skill tool, no slash form. ' +
           'For explicit invocation engram also renders commands to ' +
           '`.opencode/commands/` (`/engram-capture`, …).',
         'Setting OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1 disables the Claude- ' +
-          "compatible fallback paths — which is exactly why engram renders this " +
+          'compatible fallback paths — which is exactly why engram renders this ' +
           'native copy instead of relying on `.claude/skills/`.',
         'Skills load from the directory opencode starts in (walked up to the git ' +
           'worktree root). Start your session at the vault root.',
@@ -203,9 +203,10 @@ export const AGENTS: AgentDescriptor[] = [
     commands: {
       dir: '/.opencode/commands',
       verified:
-        'OpenCode 1.18.21 documentation, 2026-08-24; file mechanics grounded in ' +
-        'evidence/t0-discovery-probe.md — TUI execution itself is confirmed by ' +
-        'hand at phase-19 G4 (headless run cannot execute commands).',
+        'OpenCode 1.18.21 documentation, 2026-08-24; rendered files smoke-checked ' +
+        'against the built binary and their mechanics grounded in phase-19 ' +
+        'evidence/t0-discovery-probe.md. TUI execution of /engram-* awaits one ' +
+        'owner confirmation (headless run cannot execute commands).',
       caveats: [],
     },
   },

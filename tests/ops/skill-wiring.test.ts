@@ -206,12 +206,7 @@ describe('doctor shows the agent surface state (phase 19)', () => {
     await init(files, clock);
     const r = await doctor(files, noObsidian);
 
-    expect(r.surfaces.map((s) => s.agent)).toEqual([
-      'claude',
-      'antigravity',
-      'gemini',
-      'opencode',
-    ]);
+    expect(r.surfaces.map((s) => s.agent)).toEqual(['claude', 'antigravity', 'gemini', 'opencode']);
 
     const claude = r.surfaces.find((s) => s.agent === 'claude')!;
     expect(claude.contract).toBe('/CLAUDE.md (rendered copy)');
@@ -222,9 +217,9 @@ describe('doctor shows the agent surface state (phase 19)', () => {
     expect(opencode.contract).toBe('AGENTS.md (native)');
     expect(opencode.skills).toBeGreaterThan(0);
     expect(opencode.commands).toBeGreaterThan(0);
-    // ADR-0044's rule, visible in output: until G4's live session, the claim is
-    // honest about being pending rather than silently asserted.
-    expect(opencode.verified).toMatch(/pending/i);
+    // ADR-0044's rule, visible in output: the verification claim names its
+    // evidence rather than asserting itself.
+    expect(opencode.verified).toMatch(/live-session/);
   });
 
   it('the formatted report carries the surfaces section', async () => {

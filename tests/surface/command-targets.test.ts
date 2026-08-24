@@ -22,10 +22,9 @@ describe('command targets', () => {
     // The ADR-0044 rule, mechanically: no plausible path from documentation
     // without evidence beside the claim.
     for (const agent of commandTargets()) {
-      expect(
-        agent.commands.verified.length,
-        `${agent.name} has no verification`,
-      ).toBeGreaterThan(30);
+      expect(agent.commands.verified.length, `${agent.name} has no verification`).toBeGreaterThan(
+        30,
+      );
     }
   });
 
@@ -93,7 +92,7 @@ describe('the opencode descriptor', () => {
     expect(opencode?.commands?.dir).toBe('/.opencode/commands');
   });
 
-  it("gets no contract copy — it reads AGENTS.md natively", () => {
+  it('gets no contract copy — it reads AGENTS.md natively', () => {
     // Decision 3: a second contract file for opencode would be a file that
     // exists only to be maintained, exactly the codex precedent.
     expect(opencode?.contractFile).toBeUndefined();

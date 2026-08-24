@@ -89,3 +89,16 @@ kind so commands carry their own remedy ([command-edited]/[command-unrendered]/
 [command-stale]; [skill-not-ours] generalized to [not-ours]); a new
 [surface-unrendered] names any agent whose verified targets hold zero renders —
 FEAT-009's failure made loud. Suite 924.
+
+### [NOTE] 2026-08-24 — Group 3+4 complete: docs rewritten, verification earned
+Topics: opencode, verification, evidence
+Affects-phases: phase-19-opencode-surface
+Affects-specs: docs/adapters.md, docs/using-engram.md
+Detail: adapters.md now describes the real seam (two render-target types,
+registry-derived exclusions) and carries the probe-then-evidence checklist;
+using-engram.md gained the opencode row and lost two stale claims (pointer
+wording pre-dating ADR-0017, codex in the MCP list). `npm run check` green end
+to end incl. smoke:opencode; a real opencode session listed all six engram-* skills
+beside unprefixed user skills with rules from AGENTS.md (evidence/live-session.md);
+descriptor verified: fields cite it. TUI slash-command execution remains one
+manual owner confirmation — headless run cannot execute commands.

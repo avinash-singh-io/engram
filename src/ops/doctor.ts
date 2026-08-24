@@ -276,8 +276,9 @@ export async function doctor(
         const countUnder = (dir?: string, suffix?: string) =>
           dir === undefined
             ? 0
-            : [...allPaths].filter((p) => p.startsWith(`${dir}/`) && (suffix === undefined || p.endsWith(suffix)))
-                .length;
+            : [...allPaths].filter(
+                (p) => p.startsWith(`${dir}/`) && (suffix === undefined || p.endsWith(suffix)),
+              ).length;
         return {
           agent: agent.name,
           contract:
@@ -286,8 +287,7 @@ export async function doctor(
               : `${agent.contractFile} (rendered copy)`,
           skills: countUnder(agent.skills?.dir, '/SKILL.md'),
           commands: countUnder(agent.commands?.dir, '.md'),
-          verified:
-            agent.skills?.verified ?? agent.commands?.verified ?? 'no targets',
+          verified: agent.skills?.verified ?? agent.commands?.verified ?? 'no targets',
         };
       }),
     );
@@ -382,9 +382,7 @@ export function formatReport(r: DoctorReport): string {
     // The verification claim is quoted in full: truncating "OpenCode 1.18.21,
     // 2026-08-24 — pending…" at a sentence boundary lands after "OpenCode 1",
     // and a report that mangles its own evidence teaches people to ignore it.
-    lines.push(
-      `  ${s.agent}: contract ${s.contract}; skills ${s.skills}; commands ${s.commands}`,
-    );
+    lines.push(`  ${s.agent}: contract ${s.contract}; skills ${s.skills}; commands ${s.commands}`);
     lines.push(`    verified: ${s.verified}`);
   }
 
