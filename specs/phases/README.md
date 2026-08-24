@@ -15,6 +15,7 @@
 | 15 | Surfaces — skills, MCP, adapters | Complete (v0.10.0) | `phase-15-surfaces/` |
 | 17 | Portable skills | Complete (v0.14.0) | `phase-17-portable-skills/` |
 | 18 | Frontmatter fidelity | Complete (v0.15.0) | `phase-18-frontmatter-fidelity/` |
+| 19 | opencode surface & agent generalization | In Progress | `phase-19-opencode-surface/` |
 
 ## Phase Structure
 

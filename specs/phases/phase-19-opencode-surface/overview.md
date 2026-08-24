@@ -1,3 +1,9 @@
+---
+type: Phase
+status: in-progress
+tags: [adapters, opencode, skills, commands, doctor]
+---
+
 # Phase 19 — opencode surface & agent generalization
 
 > **Status**: planned

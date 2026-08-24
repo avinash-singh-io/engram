@@ -1,7 +1,7 @@
 # Project Status
 
-> **Last Updated**: 2026-08-23
-> **Current Phase**: **Phase 18 complete, released as v0.15.0.** engram reads the frontmatter Obsidian actually writes, and a line it cannot read never costs a note its identity (BUG-011). **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
+> **Last Updated**: 2026-08-24
+> **Current Phase**: **Phase 19 in progress** — opencode surface & agent generalization (branch `phase-19-opencode-surface`). Phase 18 released as v0.15.0. **Gate 2 remains unadjudicated** — 48 edges await blind judgement, and Phase 11 is gated on that verdict.
 > **Latest Release**: **v0.15.1** — backlog sweep. **Verified against the registry API and the published artifact.** Note: `npm view` served a stale `0.15.0` for several minutes after publish while `https://registry.npmjs.org/@avinash-singh-io%2Fengram` already reported `latest: 0.15.1`, and `npm install` needed `--prefer-online`. The registry is the authority; a stale local cache is not evidence either way, in either direction. The published binary was installed clean and all three fixes exercised (2026-08-23).
 > **Health**: Good — 897 tests, four smoke checks green. No open P0. One open P1 (TD-008), which needs an ADR and is phase-sized.
 
@@ -63,7 +63,7 @@ is rewritten clean-room rather than patched.
 
 | Phase | Branch | Status | Progress |
 |-------|--------|--------|----------|
-| _(none — Phase 18 released as v0.15.0)_ | | | |
+| 19 — opencode surface & agent generalization | `phase-19-opencode-surface` | in progress | G0 probe + model |
 
 ## Upcoming Phases — the v2 line
 

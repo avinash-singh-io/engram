@@ -1,5 +1,11 @@
 # Phase 19 — Implementation plan
 
+**Reference Specs** (`specs/architecture/`, stable during work per Rule 10):
+[v2-overview.md](../../architecture/v2-overview.md) §6 (skills — instructions,
+never code) and §11 (surfaces); ADR-0011, ADR-0017, ADR-0044, ADR-0045, ADR-0046
+in `specs/decisions/`. No release-plan.md exists; target release v0.16.0 per
+overview.
+
 ```
 # Sequential: Group 0 → (Groups 1 + 2 in parallel) → Group 3 → Group 4
 ```
