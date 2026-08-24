@@ -5,7 +5,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { main } from '../../src/cli.js';
-import { doctor } from '../../src/ops/doctor.js';
+import { doctor, formatReport } from '../../src/ops/doctor.js';
+import { CONFIG_PATH } from '../../src/policy/config.js';
 import { init } from '../../src/ops/init.js';
 import { reindex } from '../../src/ops/reindex.js';
 import { DEFAULTS } from '../../src/policy/config.js';
@@ -158,7 +159,7 @@ describe('doctor reports what a person can act on', () => {
       '---\nname: format\ndescription: someone else\n---\n\ntheirs',
     );
     const r = await doctor(files, noObsidian);
-    expect(r.warnings.filter((w) => w.includes('[skill-not-ours]'))).toHaveLength(1);
+    expect(r.warnings.filter((w) => w.includes('[not-ours]'))).toHaveLength(1);
   });
 
   it('warns that a hand-edited render is about to be lost, and names the source', async () => {
@@ -196,6 +197,69 @@ describe('doctor reports what a person can act on', () => {
     await init(files, clock);
     const r = await doctor(files, noObsidian);
     expect(r.warnings.filter((w) => w.includes('[skill'))).toEqual([]);
+  });
+});
+
+describe('doctor shows the agent surface state (phase 19)', () => {
+  it('lists every registered agent with contract strategy, counts, verification', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+    const r = await doctor(files, noObsidian);
+
+    expect(r.surfaces.map((s) => s.agent)).toEqual([
+      'claude',
+      'antigravity',
+      'gemini',
+      'opencode',
+    ]);
+
+    const claude = r.surfaces.find((s) => s.agent === 'claude')!;
+    expect(claude.contract).toBe('/CLAUDE.md (rendered copy)');
+    expect(claude.skills).toBeGreaterThan(0);
+    expect(claude.commands).toBe(0);
+
+    const opencode = r.surfaces.find((s) => s.agent === 'opencode')!;
+    expect(opencode.contract).toBe('AGENTS.md (native)');
+    expect(opencode.skills).toBeGreaterThan(0);
+    expect(opencode.commands).toBeGreaterThan(0);
+    // ADR-0044's rule, visible in output: until G4's live session, the claim is
+    // honest about being pending rather than silently asserted.
+    expect(opencode.verified).toMatch(/pending/i);
+  });
+
+  it('the formatted report carries the surfaces section', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+    const out = formatReport(await doctor(files, noObsidian));
+    expect(out).toContain('agent surfaces (4 registered)');
+    expect(out).toContain('opencode: contract AGENTS.md (native)');
+  });
+
+  it('a hand-edited command is reported with the command remedy, not the skill one', async () => {
+    const files = memoryFileStore();
+    await init(files, clock);
+    const path = '/.opencode/commands/engram-format.md';
+    await files.write(path, `${(await files.read(path))!}\n\nMY OWN NOTES\n`);
+
+    const r = await doctor(files, noObsidian);
+    const hits = r.warnings.filter((w) => w.includes('[command-edited]'));
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toContain(path);
+    expect(hits[0]).toContain('no user-editable source');
+    expect(r.warnings.filter((w) => w.includes('[skill-edited]'))).toEqual([]);
+  });
+
+  it('an agent whose targets hold nothing renders a surface-unrendered warning', async () => {
+    // The FileStore port cannot delete, so "never rendered" is simulated at the
+    // unit boundary: a vault that is initialised (so the skill checks run) but
+    // whose reindex has never populated the render targets.
+    const files = memoryFileStore({ [CONFIG_PATH]: '{}' });
+    const r = await doctor(files, noObsidian);
+
+    const hits = r.warnings.filter((w) => w.includes('[surface-unrendered]'));
+    for (const agent of ['claude', 'gemini', 'opencode']) {
+      expect(hits.join(' '), agent).toContain(`\`${agent}\``);
+    }
   });
 });
 

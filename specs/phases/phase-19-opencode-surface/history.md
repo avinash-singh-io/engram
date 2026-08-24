@@ -77,3 +77,15 @@ gitignore gains the managed `engram-*.md` glob. Deviation from plan: the v1-era
 tests/fixtures/ directory did not survive the clean-room rewrite, so the golden
 tree is pinned by tests/surface/render-commands.test.ts plus the built-binary
 smoke instead. Smoke: 17 checks against dist/cli.js, all green; suite 920.
+
+### [NOTE] 2026-08-24 — Group 2 complete: doctor makes the surface visible
+Topics: doctor, opencode, audit
+Affects-phases: phase-19-opencode-surface
+Affects-specs: none
+Detail: DoctorReport gains a surfaces section (one row per registered agent:
+contract strategy, rendered skill/command counts, verification claim quoted in
+full — truncation landed mid-version and was dropped). Audit warnings split by
+kind so commands carry their own remedy ([command-edited]/[command-unrendered]/
+[command-stale]; [skill-not-ours] generalized to [not-ours]); a new
+[surface-unrendered] names any agent whose verified targets hold zero renders —
+FEAT-009's failure made loud. Suite 924.

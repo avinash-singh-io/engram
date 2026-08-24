@@ -22,6 +22,7 @@ import { linkSettingWarnings, OBSIDIAN_APP_JSON, readLinkSettings } from './obsi
 import { needsUpgrade, planUpgrade, versionSkew } from './upgrade.js';
 import { auditSkills } from '../surface/render-skills.js';
 import { discoverSkills, SKILLS_DIR } from '../policy/skills.js';
+import { AGENTS, isCommandPath, skillTargets, commandTargets } from '../surface/adapters.js';
 import { walk, type WalkFinding } from './walk.js';
 import { extractMarkdownLinks } from '../format/links.js';
 import { parseFrontmatter, readNode } from '../format/registry.js';
@@ -43,6 +44,19 @@ export interface DoctorReport {
    */
   guardrails: { rule: string; prevents: string; hits: string[] }[];
   counts: { nodes: number; edges: number };
+  /**
+   * One row per registered agent — what engram renders for it and whether the
+   * paths were verified. Phase 19's premise was a surface that silently did not
+   * exist for one host; this section is what makes such a gap visible instead of
+   * something a person finds out by opening a session.
+   */
+  surfaces: {
+    agent: string;
+    contract: string;
+    skills: number;
+    commands: number;
+    verified: string;
+  }[];
 }
 
 /** Rules in force when a vault declares none. */
@@ -57,6 +71,7 @@ export async function doctor(
 ): Promise<DoctorReport> {
   const warnings: string[] = [];
   const failures: string[] = [];
+  const surfaces: DoctorReport['surfaces'] = [];
 
   const walked = await walk(files);
   for (const f of walked.findings) warnings.push(say(f));
@@ -164,47 +179,118 @@ export async function doctor(
     for (const e of discovered.errors) warnings.push(`[skill] ${e.name}: ${e.reason}`);
 
     const audit = await auditSkills(files, discovered.skills);
-    // One line per condition, not per file. Twenty-seven warnings saying the same
-    // thing is the same as no warning: nobody reads past the third.
-    if (audit.unrendered.length > 0) {
-      warnings.push(
-        `[skill-unrendered] ${audit.unrendered.length} skill file(s) are missing from ` +
-          `agent directories, so those skills cannot be invoked. Run \`engram reindex\`. ` +
-          `First: ${audit.unrendered[0]}`,
-      );
+    // Skills and commands share the audit but not their remedies: a skill's edit
+    // belongs in `engram/skills/`, a command has no user-editable source at all.
+    // One line per condition *per kind*, still never per file.
+    const byKind = (paths: string[]) => ({
+      skills: paths.filter((p) => !isCommandPath(p)),
+      commands: paths.filter((p) => isCommandPath(p)),
+    });
+    {
+      const k = byKind(audit.unrendered);
+      if (k.skills.length > 0) {
+        warnings.push(
+          `[skill-unrendered] ${k.skills.length} rendered skill file(s) are missing from ` +
+            `agent directories, so those skills cannot be invoked. Run \`engram reindex\`. ` +
+            `First: ${k.skills[0]}`,
+        );
+      }
+      if (k.commands.length > 0) {
+        warnings.push(
+          `[command-unrendered] ${k.commands.length} rendered command file(s) are missing ` +
+            `from agent directories, so /engram-* cannot be run there. Run ` +
+            `\`engram reindex\`. First: ${k.commands[0]}`,
+        );
+      }
     }
-    if (audit.edited.length > 0) {
+    {
+      const k = byKind(audit.edited);
       // The one warning that has to name the source file. "Do not edit" without an
       // alternative just gets worked around, and this is the moment someone finds out
       // their change is about to disappear.
-      warnings.push(
-        `[skill-edited] ${audit.edited.length} rendered skill file(s) have been changed ` +
-          `by hand and will be overwritten by the next \`engram reindex\`. Rendered ` +
-          `skills are derived state (ADR-0029) — to keep a change, put it in ` +
-          `${SKILLS_DIR}/<name>/SKILL.md instead: ${audit.edited.join(', ')}`,
-      );
+      if (k.skills.length > 0) {
+        warnings.push(
+          `[skill-edited] ${k.skills.length} rendered skill file(s) have been changed ` +
+            `by hand and will be overwritten by the next \`engram reindex\`. Rendered ` +
+            `skills are derived state (ADR-0029) — to keep a change, put it in ` +
+            `${SKILLS_DIR}/<name>/SKILL.md instead: ${k.skills.join(', ')}`,
+        );
+      }
+      if (k.commands.length > 0) {
+        warnings.push(
+          `[command-edited] ${k.commands.length} rendered command file(s) have been changed ` +
+            `by hand and will be overwritten by the next \`engram reindex\`. Commands are ` +
+            `generated from the operation registry and have no user-editable source — ` +
+            `regenerate rather than edit (ADR-0029): ${k.commands.join(', ')}`,
+        );
+      }
     }
     if (audit.foreign.length > 0) {
       warnings.push(
-        `[skill-not-ours] ${audit.foreign.length} file(s) where engram would render a ` +
-          `skill have no provenance marker, so engram will never overwrite them — and ` +
-          `is therefore not rendering its own skill of that name. If you meant to take ` +
-          `them over, this is working as intended: ${audit.foreign.join(', ')}`,
+        `[not-ours] ${audit.foreign.length} file(s) where engram would render have no ` +
+          `provenance marker, so engram will never overwrite them — and is therefore ` +
+          `not rendering its own of that name. If you meant to take them over, this is ` +
+          `working as intended: ${audit.foreign.join(', ')}`,
       );
     }
-    if (audit.stale.length > 0) {
-      // Every path is listed rather than counted, because each one needs removing
-      // individually. Engram will not do it: the FileStore port has four methods and
-      // removal is deliberately not one — the same stance as `upgrade`, which copies
-      // and then names what it left behind. A leftover only ever returned in a result
-      // object and never printed is the same as not having detected it.
-      warnings.push(
-        `[skill-stale] ${audit.stale.length} file(s) written by engram no longer ` +
-          `correspond to any skill — usually a built-in you have since overridden, ` +
-          `which keeps working until removed. Engram will not delete them for you: ` +
-          audit.stale.join(', '),
-      );
+    {
+      const k = byKind(audit.stale);
+      for (const [kind, paths] of [
+        ['skill', k.skills],
+        ['command', k.commands],
+      ] as const) {
+        if (paths.length === 0) continue;
+        // Every path is listed rather than counted, because each one needs removing
+        // individually. Engram will not do it: the FileStore port has four methods and
+        // removal is deliberately not one — the same stance as `upgrade`, which copies
+        // and then names what it left behind. A leftover only ever returned in a result
+        // object and never printed is the same as not having detected it.
+        warnings.push(
+          `[${kind}-stale] ${paths.length} file(s) written by engram no longer correspond ` +
+            `to any ${kind} — usually one you have since overridden, which keeps working ` +
+            `until removed. Engram will not delete them for you: ${paths.join(', ')}`,
+        );
+      }
     }
+
+    // An agent whose verified targets hold zero renders has no surface at all —
+    // FEAT-009's failure in its plainest form. Named per agent, with the fix.
+    const allPaths = new Set(await files.list());
+    const agentsWithTargets = [...skillTargets(), ...commandTargets()];
+    for (const agent of new Map(agentsWithTargets.map((a) => [a.name, a])).values()) {
+      const dirs = [agent.skills?.dir, agent.commands?.dir].filter((d) => d !== undefined);
+      const any = dirs.some((d) => [...allPaths].some((p) => p.startsWith(`${d!}/`)));
+      if (!any) {
+        warnings.push(
+          `[surface-unrendered] nothing is rendered for \`${agent.name}\` (${dirs.join(', ')}), ` +
+            `so it has no skills or commands there. Run \`engram reindex\`.`,
+        );
+      }
+    }
+
+    // The visibility section itself: one row per registered agent, whether or not
+    // anything is wrong — the gap Phase 19 closed was invisible precisely because
+    // absence produces no warning anywhere else.
+    surfaces.push(
+      ...AGENTS.map((agent) => {
+        const countUnder = (dir?: string, suffix?: string) =>
+          dir === undefined
+            ? 0
+            : [...allPaths].filter((p) => p.startsWith(`${dir}/`) && (suffix === undefined || p.endsWith(suffix)))
+                .length;
+        return {
+          agent: agent.name,
+          contract:
+            agent.contractFile === undefined
+              ? 'AGENTS.md (native)'
+              : `${agent.contractFile} (rendered copy)`,
+          skills: countUnder(agent.skills?.dir, '/SKILL.md'),
+          commands: countUnder(agent.commands?.dir, '.md'),
+          verified:
+            agent.skills?.verified ?? agent.commands?.verified ?? 'no targets',
+        };
+      }),
+    );
   }
 
   // A vault older than the engram reading it. Note files are safe by construction —
@@ -256,6 +342,7 @@ export async function doctor(
     detectives,
     guardrails,
     counts: { nodes: nodes.length, edges: edges.length },
+    surfaces,
   };
 }
 
@@ -287,6 +374,18 @@ export function formatReport(r: DoctorReport): string {
     lines.push(`  ${g.rule}: prevents ${g.prevents}`);
     for (const h of g.hits) lines.push(`    • ${h}`);
     if (g.hits.length === 0) lines.push(`    clean`);
+  }
+
+  lines.push(``, `agent surfaces (${r.surfaces.length} registered)`);
+  lines.push(`  what engram renders where, and whether the paths were verified`);
+  for (const s of r.surfaces) {
+    // The verification claim is quoted in full: truncating "OpenCode 1.18.21,
+    // 2026-08-24 — pending…" at a sentence boundary lands after "OpenCode 1",
+    // and a report that mangles its own evidence teaches people to ignore it.
+    lines.push(
+      `  ${s.agent}: contract ${s.contract}; skills ${s.skills}; commands ${s.commands}`,
+    );
+    lines.push(`    verified: ${s.verified}`);
   }
 
   if (r.failures.length === 0 && r.warnings.length === 0) lines.push(``, `no problems found`);
