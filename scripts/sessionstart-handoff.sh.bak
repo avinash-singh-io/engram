@@ -34,29 +34,38 @@ set -eu
 # considers "the reachable ecosystem" is what the SessionStart banner
 # announces.
 
-# ── Ecosystem discovery (Phase 31c G3, ADR-0018 R5) ────────────────────────
-# Delegates to the ONE implementation in core/ecosystem/lib/index.js via the
-# vendored runtime, instead of re-walking the tree in bash. Any future change to
-# discovery rules is then made once, not once per language — which is how the
-# seven-implementation split accumulated in the first place.
-#
-# Fail-open in every branch: no node, no runtime, no ecosystem → the caller
-# simply gets nothing and carries on. A hook must never break a commit or a
-# session start.
-momentum_discover() {
-  command -v node >/dev/null 2>&1 || return 1
-  _d=$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")
-  for _c in "$_d/../.momentum/runtime/discover.js" \
-            "$_d/../../.momentum/runtime/discover.js" \
-            "$_d/../../runtime/discover.js"; do
-    [ -f "$_c" ] || continue
-    node "$_c" "${1:-$PWD}" 2>/dev/null && return 0
-    return 1
+find_ecosystem_root() {
+  local current="$PWD"
+  local depth=0
+  local max_depth="${MOMENTUM_MAX_PARENT_WALK:-5}"
+  case "$max_depth" in
+    ''|*[!0-9]*) max_depth=5 ;;
+  esac
+  while [ $depth -le $max_depth ]; do
+    # Same-directory check (caller might already be in ecosystem root)
+    if [ -f "$current/ecosystem.json" ]; then
+      echo "$current"
+      return 0
+    fi
+    # Sibling check
+    local parent
+    parent=$(dirname "$current")
+    if [ "$parent" = "$current" ]; then return 1; fi
+    for sibling in "$parent"/*; do
+      if [ -d "$sibling" ] && [ -f "$sibling/ecosystem.json" ]; then
+        echo "$sibling"
+        return 0
+      fi
+    done
+    current="$parent"
+    depth=$((depth + 1))
   done
   return 1
 }
 
-ECO_ROOT="$(momentum_discover "$PWD" 2>/dev/null | cut -f1 || true)"
+# Best-effort: silent on any failure so a broken ecosystem.json never
+# blocks the session.
+ECO_ROOT="$(find_ecosystem_root 2>/dev/null || true)"
 
 if [ -n "${ECO_ROOT:-}" ] && [ -f "$ECO_ROOT/ecosystem.json" ]; then
   # Extract name + member count. Prefer python3 for JSON parsing; fall
@@ -96,38 +105,6 @@ PY
       active=$(tr -d '\n' < "$ECO_ROOT/.state/active-initiative" 2>/dev/null | head -c 200)
       if [ -n "$active" ]; then
         printf '▸ Active initiative: %s\n' "$active" >&2
-      fi
-    fi
-
-    # Fleet line (Phase 31b, ENH-067) — one line naming how many members carry
-    # open P0/P1, active phases, and lanes. Rule 1 orients you in THIS repo;
-    # this is the fleet equivalent, and it is why a session no longer has to
-    # discover a sibling's open bug by tripping over it.
-    #
-    # Best-effort and silent on any failure: no node, no momentum checkout, a
-    # corrupt manifest — all skip. The banner has a <100ms budget, so this is
-    # one short-lived node process doing file reads only (core/ecosystem/lib/
-    # orient.js makes no git calls by construction).
-    if command -v node >/dev/null 2>&1; then
-      # orient.js is installed next to this script (bin/momentum.js ships it),
-      # with the in-repo source path as a fallback for momentum's own checkout.
-      _sdir=$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")
-      for _cand in \
-        "$_sdir/orient.js" \
-        "$_sdir/../core/ecosystem/lib/orient.js"; do
-        if [ -f "$_cand" ]; then
-          fleet=$(MOMENTUM_ECO_ROOT="$ECO_ROOT" MOMENTUM_ORIENT="$_cand" node -e '
-            try {
-              const o = require(process.env.MOMENTUM_ORIENT);
-              const line = o.fleetLine(o.orientFleet(process.env.MOMENTUM_ECO_ROOT));
-              if (line) process.stdout.write(line);
-            } catch (_e) { /* silent */ }
-          ' 2>/dev/null || true)
-          break
-        fi
-      done
-      if [ -n "${fleet:-}" ]; then
-        printf '▸ Fleet: %s\n' "$fleet" >&2
       fi
     fi
   fi

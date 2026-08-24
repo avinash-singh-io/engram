@@ -16,7 +16,7 @@
 
 import { ROOT_MARKER } from '../core/paths.js';
 import { ENGRAM_DIR, isDerived, isReservedFile } from '../core/paths.js';
-import { isContractFile, isSkillPath } from '../surface/adapters.js';
+import { isCommandPath, isContractFile, isSkillPath } from '../surface/adapters.js';
 import type { FileStore } from '../core/ports.js';
 
 export interface WalkFinding {
@@ -84,6 +84,9 @@ export async function walk(files: FileStore): Promise<WalkResult> {
     // second STRUCTURE.md the same day, and a SKILL.md in an agent's directory is
     // indistinguishable from a note to a walker that only checks the extension.
     if (isSkillPath(p)) continue;
+    // Rendered commands are the fourth instance of the shape, closed at birth with
+    // the opencode descriptor rather than after a first escape.
+    if (isCommandPath(p)) continue;
     paths.push(p);
   }
 

@@ -29,9 +29,14 @@ import { SKILL_FILE } from '../policy/skill-schema.js';
 export interface AgentDescriptor {
   /** How the agent is referred to. */
   name: string;
-  /** The file this agent reads, relative to the vault root. */
-  contractFile: string;
-  /** Why it needs its own copy — agents that read AGENTS.md natively do not. */
+  /**
+   * The file this agent reads, relative to the vault root — omitted when the
+   * agent reads the canonical `AGENTS.md` natively and needs no copy of its own
+   * (codex-shaped). An absent `contractFile` means `writeContracts` renders
+   * nothing for this agent; the shared file already carries the contract.
+   */
+  contractFile?: string;
+  /** Why this agent does or does not need its own copy of the contract. */
   why: string;
   /**
    * Where this agent reads **project-scoped** skills, when engram has verified it.
@@ -43,6 +48,34 @@ export interface AgentDescriptor {
    * and strictly better than writing files into a directory nobody reads.
    */
   skills?: SkillTarget;
+  /**
+   * Where this agent reads **user-invoked commands**, when engram has verified it.
+   *
+   * Skills are the agent-invoked surface everywhere; some hosts also have a
+   * user-invoked one (`/name`). Same ADR-0044 rule as skills: a directory gets
+   * listed here only once someone has watched a command load from it.
+   */
+  commands?: CommandTarget;
+}
+
+/**
+ * A directory an agent reads **commands** from, and what engram writes there.
+ *
+ * Commands are always managed-prefixed (`engram-<operation>.md`) because engram
+ * has no user-authored command source today — unlike skills, there is no
+ * `engram/skills/` equivalent to render from, so every file here is generated
+ * from the operation registry alone.
+ */
+export interface CommandTarget {
+  /** Vault-relative directory. Project-scoped — never a home directory (ADR-0044). */
+  dir: string;
+  /**
+   * How this was verified, and when — same evidence-beside-claim rule as
+   * `SkillTarget.verified`.
+   */
+  verified: string;
+  /** Host constraints the human needs to know. Rendered into the contract. */
+  caveats: string[];
 }
 
 /**
@@ -138,12 +171,42 @@ export const AGENTS: AgentDescriptor[] = [
       verified:
         'Gemini CLI documentation, 2026-08-23: the workspace tier is ' +
         '`.gemini/skills/`, shared through version control. No plugin concept, ' +
-        'so engram prefixes its own.',
+        "so engram prefixes its own.",
       caveats: [
         'Gemini CLI also reads `.agents/skills/`, which takes precedence over ' +
           '`.gemini/skills/`. Engram writes only the agent-specific path, so a ' +
           "skill you put in `.agents/skills/` wins over engram's copy.",
       ],
+    },
+  },
+  {
+    name: 'opencode',
+    why: 'OpenCode reads the project-root AGENTS.md natively — no separate copy',
+    skills: {
+      dir: '/.opencode/skills',
+      plugin: null,
+      verified:
+        'OpenCode 1.18.21, 2026-08-24 — pending full manual session (phase-19 ' +
+        'G4): headless discovery confirmed in evidence/t0-discovery-probe.md, ' +
+        'where `.opencode/skills/probe/SKILL.md` was listed and loadable.',
+      caveats: [
+        'Skills are agent-invoked here — the native skill tool, no slash form. ' +
+          'For explicit invocation engram also renders commands to ' +
+          '`.opencode/commands/` (`/engram-capture`, …).',
+        'Setting OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1 disables the Claude- ' +
+          "compatible fallback paths — which is exactly why engram renders this " +
+          'native copy instead of relying on `.claude/skills/`.',
+        'Skills load from the directory opencode starts in (walked up to the git ' +
+          'worktree root). Start your session at the vault root.',
+      ],
+    },
+    commands: {
+      dir: '/.opencode/commands',
+      verified:
+        'OpenCode 1.18.21 documentation, 2026-08-24; file mechanics grounded in ' +
+        'evidence/t0-discovery-probe.md — TUI execution itself is confirmed by ' +
+        'hand at phase-19 G4 (headless run cannot execute commands).',
+      caveats: [],
     },
   },
 ];
@@ -155,6 +218,27 @@ export function skillTargets(agents: AgentDescriptor[] = AGENTS): (AgentDescript
   return agents.filter(
     (a): a is AgentDescriptor & { skills: SkillTarget } => a.skills !== undefined,
   );
+}
+
+/** Every agent engram renders commands for. Derived, same rule as `skillTargets`. */
+export function commandTargets(agents: AgentDescriptor[] = AGENTS): (AgentDescriptor & {
+  commands: CommandTarget;
+})[] {
+  return agents.filter(
+    (a): a is AgentDescriptor & { commands: CommandTarget } => a.commands !== undefined,
+  );
+}
+
+/**
+ * Where one rendered command lives.
+ *
+ * Always managed-prefixed — commands have no user-authored source today, so
+ * there is no unprefixed case and no `managed` flag to get wrong. The prefix
+ * also keeps `/engram-capture` from ever colliding with a built-in or with the
+ * user's own command names (opencode lets custom commands override built-ins).
+ */
+export function commandPath(target: CommandTarget, name: string): string {
+  return `${target.dir}/engram-${name}.md`;
 }
 
 /**
@@ -187,6 +271,16 @@ export function skillPath(target: SkillTarget, name: string, managed: boolean): 
  */
 export function isSkillPath(path: string, agents: AgentDescriptor[] = AGENTS): boolean {
   return skillTargets(agents).some((a) => path.startsWith(`${a.skills.dir}/`));
+}
+
+/**
+ * Is this path inside any agent's commands directory?
+ *
+ * Same registry derivation as `isSkillPath`, same reason: a rendered command file
+ * read back by the walker would be BUG-008's shape a fourth time over.
+ */
+export function isCommandPath(path: string, agents: AgentDescriptor[] = AGENTS): boolean {
+  return commandTargets(agents).some((a) => path.startsWith(`${a.commands.dir}/`));
 }
 
 /**
@@ -273,13 +367,17 @@ export async function writeContracts(
   const written: string[] = [];
   const merged: string[] = [];
 
-  for (const agent of agents) {
-    const existing = await files.read(agent.contractFile);
+  // Agents without a contractFile read the canonical AGENTS.md natively — the
+  // contract is already there, and a second copy would be a file that exists
+  // only to be maintained.
+  for (const agent of agents.filter((a) => a.contractFile !== undefined)) {
+    const target = agent.contractFile!;
+    const existing = await files.read(target);
     const hadOwnContent =
       existing !== null && existing.trim() !== '' && !existing.trimStart().startsWith(BEGIN);
 
-    await files.write(agent.contractFile, spliceContract(existing, contract));
-    (hadOwnContent ? merged : written).push(agent.contractFile);
+    await files.write(target, spliceContract(existing, contract));
+    (hadOwnContent ? merged : written).push(target);
   }
 
   return { written: written.sort(), merged: merged.sort() };

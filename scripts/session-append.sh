@@ -34,71 +34,34 @@ if [ -z "$EVENT_KIND" ] || [ -z "$EVENT_SUMMARY" ]; then
   exit 0
 fi
 
-# ── Resolve ecosystem root (bounded walk-up, looking for siblings) ──────────
-# The ecosystem is a SIBLING of member repos. From a member repo we walk
-# up one level and look at each sibling for ecosystem.json.
-
-find_ecosystem_root() {
-  local start="$PWD"
-  local current="$start"
-  local depth=0
-  local max_depth="${MOMENTUM_MAX_PARENT_WALK:-5}"
-  # Guard against non-numeric / negative env value.
-  case "$max_depth" in
-    ''|*[!0-9]*) max_depth=5 ;;
-  esac
-  while [ $depth -le $max_depth ]; do
-    # Same-directory check (caller might already be in ecosystem root)
-    if [ -f "$current/ecosystem.json" ]; then
-      echo "$current"
-      return 0
-    fi
-    # Sibling check
-    local parent
-    parent=$(dirname "$current")
-    if [ "$parent" = "$current" ]; then return 1; fi
-    for sibling in "$parent"/*; do
-      if [ -d "$sibling" ] && [ -f "$sibling/ecosystem.json" ]; then
-        echo "$sibling"
-        return 0
-      fi
-    done
-    current="$parent"
-    depth=$((depth + 1))
+# ── Ecosystem discovery (Phase 31c G3, ADR-0018 R5) ────────────────────────
+# Delegates to the ONE implementation in core/ecosystem/lib/index.js via the
+# vendored runtime, instead of re-walking the tree in bash. Any future change to
+# discovery rules is then made once, not once per language — which is how the
+# seven-implementation split accumulated in the first place.
+#
+# Fail-open in every branch: no node, no runtime, no ecosystem → the caller
+# simply gets nothing and carries on. A hook must never break a commit or a
+# session start.
+momentum_discover() {
+  command -v node >/dev/null 2>&1 || return 1
+  _d=$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")
+  for _c in "$_d/../.momentum/runtime/discover.js" \
+            "$_d/../../.momentum/runtime/discover.js" \
+            "$_d/../../runtime/discover.js"; do
+    [ -f "$_c" ] || continue
+    node "$_c" "${1:-$PWD}" 2>/dev/null && return 0
+    return 1
   done
   return 1
 }
 
-ROOT=$(find_ecosystem_root 2>/dev/null) || exit 0
-[ -z "$ROOT" ] && exit 0
+_disc=$(momentum_discover "$PWD") || exit 0
+ROOT=$(printf '%s' "$_disc" | cut -f1)
+MEMBER_ID=$(printf '%s' "$_disc" | cut -f2)
+[ -n "$ROOT" ] || exit 0
 [ -f "$ROOT/ecosystem.json" ] || exit 0
-
-# ── Resolve member id by matching $PWD against manifest.members[].path ─────
-
-resolve_member_id() {
-  python3 - "$ROOT" "$PWD" <<'PY' 2>/dev/null || echo ""
-import sys, json, os
-root, pwd = sys.argv[1], os.path.realpath(sys.argv[2])
-try:
-    with open(os.path.join(root, "ecosystem.json")) as f:
-        m = json.load(f)
-except Exception:
-    sys.exit(0)
-for member in m.get("members", []):
-    abs_path = os.path.realpath(os.path.join(root, member.get("path", "")))
-    # Match pwd that is == abs_path or any descendant
-    try:
-        rel = os.path.relpath(pwd, abs_path)
-    except ValueError:
-        continue
-    if rel == "." or (not rel.startswith("..") and not os.path.isabs(rel)):
-        print(member.get("id", ""))
-        sys.exit(0)
-PY
-}
-
-MEMBER_ID=$(resolve_member_id)
-[ -z "$MEMBER_ID" ] && exit 0
+[ -n "$MEMBER_ID" ] || exit 0
 
 # ── Write the line ─────────────────────────────────────────────────────────
 

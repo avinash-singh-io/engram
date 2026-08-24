@@ -52,3 +52,16 @@ Affects-phases: none
 Affects-specs: none
 Detail: Pre-phase bug scan found no P0s and one P1 (TD-008, needs an ADR,
 phase-sized). Deferred by owner for this phase; unchanged from status.md.
+
+### [NOTE] 2026-08-24 — Group 0 complete: probe confirmed the docs; model landed clean
+Topics: opencode, adapters, commands, probe
+Affects-phases: phase-19-opencode-surface
+Affects-specs: none
+Detail: Live probe (headless opencode 1.18.21, free-tier model after the
+workspace default lacked balance) confirmed skill discovery from
+`.opencode/skills/`, root AGENTS.md injection, and unknown-frontmatter tolerance;
+`/command` execution is TUI-only and deferred to the G4 manual session
+(evidence/t0-discovery-probe.md). `contractFile` became optional; opencode joined
+the registry with skills + commands targets and no contract copy; walker excludes
+`.opencode/commands/` via the new registry-derived `isCommandPath`. 908 tests
+green.

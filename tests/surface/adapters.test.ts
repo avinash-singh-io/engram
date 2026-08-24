@@ -32,11 +32,15 @@ const CLAIMS = [
  * the contract; these assert the opposite, because the opposite is correct.
  */
 describe('every agent file carries the contract in full', () => {
-  it.each(AGENTS)('$name gets the real contract, not a reference to it', async (agent) => {
+  // Agents without a contractFile (opencode) read the canonical AGENTS.md
+  // natively — there is no per-agent file to assert on, by design.
+  const CONTRACTED = AGENTS.filter((a) => a.contractFile !== undefined);
+
+  it.each(CONTRACTED)('$name gets the real contract, not a reference to it', async (agent) => {
     const files = memoryFileStore();
     await writeContracts(files, contract());
 
-    const written = (await files.read(agent.contractFile)) ?? '';
+    const written = (await files.read(agent.contractFile!)) ?? '';
     for (const claim of CLAIMS) expect(written).toContain(claim);
     for (const rule of guardrailNames()) expect(written).toContain(rule);
   });
@@ -59,8 +63,8 @@ describe('every agent file carries the contract in full', () => {
     await writeContracts(files, contract());
 
     const regions = await Promise.all(
-      AGENTS.map(async (a) => {
-        const raw = (await files.read(a.contractFile)) ?? '';
+      AGENTS.filter((a) => a.contractFile !== undefined).map(async (a) => {
+        const raw = (await files.read(a.contractFile!)) ?? '';
         return raw.slice(raw.indexOf(BEGIN), raw.indexOf(END));
       }),
     );
@@ -111,6 +115,22 @@ describe('a file the user already wrote keeps everything they wrote', () => {
 
     expect(result.merged).toEqual(['/CLAUDE.md']);
     expect(result.written).toEqual(['/.antigravity/AGENTS.md', '/GEMINI.md']);
+  });
+
+  /**
+   * opencode reads the canonical AGENTS.md natively (phase-19 decision 3), so it
+   * carries no contractFile — and writeContracts must not wrap the shared file in
+   * markers a second writer would then have to maintain.
+   */
+  it('renders nothing for an agent without a contractFile', async () => {
+    const files = memoryFileStore();
+    await writeContracts(files, contract());
+
+    expect(await files.read('/AGENTS.md')).toBeNull();
+    for (const path of await files.list()) {
+      expect(path).not.toBe('/AGENTS.md');
+      expect(path.startsWith('/.opencode/')).toBe(false);
+    }
   });
 
   /** Re-running must not stack blocks — this is what makes reindex idempotent. */
