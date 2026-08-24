@@ -21,3 +21,9 @@ build/
 
 # gate2 corpus and judgements — contains vault content, never committed
 .gate2/
+
+# momentum runtime state — machine-local, never meaningful in history
+.momentum/runtime/
+.momentum/config-cache.json
+.momentum/history-reminder-stamp
+*.bak
