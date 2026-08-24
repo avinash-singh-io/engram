@@ -1,0 +1,54 @@
+# Phase 19 — History
+
+### [DISCOVERY] 2026-08-24 — opencode sessions see no engram surfaces
+Topics: adapters, opencode, skills
+Affects-phases: phase-19-opencode-surface
+Affects-specs: docs/adapters.md#the-model
+Detail: Owner observed skills absent in real opencode sessions. Root cause
+confirmed against opencode's published docs (2026-08-24): discovery reads
+`<skills-dir>/*/SKILL.md` one level deep, while engram's built-ins render two
+levels down inside Claude's plugin layout with `:` namespacing. The clean-room v2
+registry also has no opencode entry, so nothing native is rendered; codex is
+absent from it too.
+
+---
+### [SCOPE_CHANGE] 2026-08-24 — Phase 19 scoped: opencode surface + process generalization
+Topics: adapters, opencode, generalization, doctor
+Affects-phases: phase-19-opencode-surface
+Affects-specs: none
+Detail: Interview settled scope from the owner's two asks. In: an opencode
+descriptor covering skills AND slash commands; docs/adapters.md rewritten for the
+v2 seam; doctor reporting per-agent render state; live verification per ADR-0044
+before `verified:` is claimed. Out: `.agents/skills/` universal target, MCP
+wiring doc, codex re-entry, home-directory scopes. Plan grounded against live
+opencode skills/commands/rules docs rather than assumption.
+
+---
+### [DECISION] 2026-08-24 — Commands become a second descriptor render-target type
+Topics: adapters, commands, single-source
+Affects-phases: phase-19-opencode-surface
+Affects-specs: docs/adapters.md#adding-a-new-agent
+Detail: AgentDescriptor gains an optional CommandTarget rendered from the
+operation registry beside skills — owner-requested explicit `/engram-*`
+invocations without hand-written duplication (skills are agent-invoked only in
+opencode; commands are its user-invoked surface). Provenance/regeneration
+semantics mirror skills exactly; `$ARGUMENTS` passes invocation text through.
+
+---
+### [DECISION] 2026-08-24 — No separate opencode contract file
+Topics: adapters, contract, agents-md
+Affects-phases: phase-19-opencode-surface
+Affects-specs: none
+Detail: opencode reads project AGENTS.md natively and treats CLAUDE.md as a
+fallback used only when AGENTS.md is absent — engram's dual render conflicts with
+nothing, and ADR-0017's full-render means file references not parsing is
+irrelevant. Claim grounded in the rules docs 2026-08-24 and still proven live in
+G0 before being relied on.
+
+---
+### [NOTE] 2026-08-24 — TD-008 remains the one open P1
+Topics: backlog
+Affects-phases: none
+Affects-specs: none
+Detail: Pre-phase bug scan found no P0s and one P1 (TD-008, needs an ADR,
+phase-sized). Deferred by owner for this phase; unchanged from status.md.
