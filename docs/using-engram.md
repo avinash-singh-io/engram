@@ -59,7 +59,7 @@ hold. It adds only:
 | `.engram/config.json` | Which structure this vault declares |
 | `.engram/guardrails.md` | **What an agent may do here.** Edit this |
 | `AGENTS.md` | The generated contract every agent reads |
-| `CLAUDE.md`, `GEMINI.md`, `.antigravity/AGENTS.md` | One-line pointers to `AGENTS.md` |
+| `CLAUDE.md`, `GEMINI.md`, `.antigravity/AGENTS.md` | The contract rendered in full for each agent that needs its own file (ADR-0017) |
 | `index.md`, `views/` | Derived. Gitignored; rebuilt by `engram reindex` |
 
 **If you already have a `CLAUDE.md`**, engram leaves it alone — it may carry
@@ -90,9 +90,18 @@ Then, in a session started **at the vault root**:
 |---|---|---|
 | Claude Code | `/engram:capture`, `/engram:format`, … | `/your-skill-name` |
 | Gemini CLI, Antigravity | `/engram-capture`, `/engram-format`, … | `/your-skill-name` |
+| OpenCode | skill tool: `capture`, `format`, … · commands: `/engram-capture`, … | `/<your-skill-name>` via the skill tool |
 
 **If it carries engram's mark, engram wrote it. If it does not, you did.** Only the
 separator differs — `:` where the host provides a namespace, `-` where it does not.
+
+OpenCode separates its two surfaces: skills are **agent-invoked** through the
+native skill tool (ask for `format` and the agent loads it), while `.opencode/commands/`
+is the explicit, user-invoked form — type `/engram-capture some thought` and the
+thought rides in as `$ARGUMENTS`. opencode also reads the vault's root `AGENTS.md`
+as its rules file, so the contract needs no separate copy; if both `AGENTS.md` and
+`CLAUDE.md` exist, `AGENTS.md` wins. Setting `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`
+changes nothing engram renders — the native copies are written for it directly.
 
 Two things about Claude Code specifically, both of which are its rules rather than
 engram's, and neither of which engram can work around:
@@ -117,10 +126,12 @@ committed with your vault** — and renders it immediately. Edit it there and ru
 `engram reindex`. Or just ask an agent: `/engram:create-skill`.
 
 Everything under an agent's own directory (`.claude/skills/`, `.gemini/skills/`,
-`.antigravity/skills/`) is **generated**. Editing a file there does nothing lasting:
+`.antigravity/skills/`, `.opencode/skills/`, `.opencode/commands/`) is
+**generated**. Editing a file there does nothing lasting:
 the next `engram reindex` overwrites it. There is no lock on those files and there
 should not be — they are plain files on your disk — but the edit you want to keep
-belongs in `engram/skills/`.
+belongs in `engram/skills/`. Commands cannot be edited at all: they are generated
+from engram's operation registry, with no vault-local source.
 
 To replace one of engram's own skills, create one with the same name in
 `engram/skills/`. Engram then stops rendering its own, and yours takes the plain
@@ -168,12 +179,12 @@ contract, and gets these tools:
 
 There is deliberately **no tool that approves or rejects** — see §4.
 
-#### Gemini CLI, Antigravity, Codex
+#### Gemini CLI, Antigravity, OpenCode
 
-Same server, each client's own config location. `init` writes `GEMINI.md` and
-`.antigravity/AGENTS.md` pointers; Codex and anything following the `AGENTS.md`
-convention needs no pointer because it already reads the contract. Adding another
-agent is [one descriptor](../src/surface/adapters.ts), no code.
+Same server, each client's own config location. `reindex` renders the contract in
+full into `GEMINI.md` and `.antigravity/AGENTS.md`; OpenCode needs no copy because
+it already reads `AGENTS.md`. Adding another agent is [one descriptor plus
+evidence](adapters.md), no code.
 
 #### Any agent with a shell
 
